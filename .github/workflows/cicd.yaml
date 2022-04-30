@@ -40,6 +40,6 @@ jobs:
           script_stop: true
           script: |
             bash compose_stop.sh
-            cd PPoong && git pull
+            cd backend && git pull
             cd ..
             bash run.sh
