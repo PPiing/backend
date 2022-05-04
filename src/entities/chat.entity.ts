@@ -4,7 +4,7 @@ import {
   Column, Entity, OneToMany, PrimaryGeneratedColumn,
 } from 'typeorm';
 // eslint-disable-next-line import/no-cycle
-import Message from './Message.entity';
+import Message from './message.entity';
 
 @Entity()
 export default class Chat extends BaseEntity {
