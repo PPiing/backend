@@ -4,6 +4,7 @@ import {
 } from 'typeorm';
 // eslint-disable-next-line import/no-cycle
 import Chat from './chat.entity';
+// eslint-disable-next-line import/no-cycle
 import User from './user.entity';
 
 @Entity()
