@@ -15,6 +15,6 @@ export default class Rank {
     userSeq: number; // 유저 시퀀스
 
   @OneToOne(() => User, (user) => user.userSeq)
-  @JoinColumn({ name: "userSeq", referencedColumnName: "userSeq" })
+  @JoinColumn({ name: 'userSeq', referencedColumnName: 'userSeq' })
     user: User; // 유저 엔티티
 }

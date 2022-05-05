@@ -16,10 +16,10 @@ export default class Profile {
     rankSeq: number; // 랭크 시퀀스
 
   @OneToOne(() => Rank, (rank) => rank.rankSeq)
-  @JoinColumn({ name: "rankSeq", referencedColumnName: "rankSeq" })
+  @JoinColumn({ name: 'rankSeq', referencedColumnName: 'rankSeq' })
     rank: Rank; // 랭크 엔티티
 
   @OneToOne(() => User, (user) => user.userSeq)
-  @JoinColumn({ name: "userSeq", referencedColumnName: "userSeq" })
+  @JoinColumn({ name: 'userSeq', referencedColumnName: 'userSeq' })
     user: User; // 유저 엔티티
 }
