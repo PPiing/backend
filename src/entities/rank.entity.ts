@@ -1,17 +1,15 @@
 import {
-  Column, Entity, OneToOne, PrimaryGeneratedColumn,
+  Column, Entity, PrimaryGeneratedColumn,
 } from 'typeorm';
-// eslint-disable-next-line import/no-cycle
-import UserEntity from './users.entity';
 
 @Entity()
-export default class RankEntity {
+export default class Rank {
   @PrimaryGeneratedColumn()
-    rankSeq: number;
+    rankSeq: number; // 랭크 시퀀스
+
+  @Column({ nullable: true })
+    rankScore: number; // 랭크 점수
 
   @Column()
-    rankScore: number;
-
-  @OneToOne(() => UserEntity, (user) => user.rankSeq)
-    userSeq: UserEntity;
+    userSeq: number; // 유저 시퀀스
 }
