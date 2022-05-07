@@ -3,6 +3,7 @@ import {
   BaseEntity,
   Column, Entity, OneToMany, PrimaryGeneratedColumn,
 } from 'typeorm';
+import ChatParticipant from './chat-participant.entity';
 // eslint-disable-next-line import/no-cycle
 import Message from './message.entity';
 
@@ -25,4 +26,7 @@ export default class Chat extends BaseEntity {
 
   @OneToMany(() => Message, (message) => message.chatSeq)
     msgSeq: number;
+
+  @OneToMany(() => ChatParticipant, (chatParticipant) => chatParticipant.chatSeq)
+    partcSeq: ChatParticipant[];
 }
