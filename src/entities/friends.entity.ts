@@ -1,23 +1,23 @@
 import {
-	Column, Entity, ManyToOne, PrimaryGeneratedColumn,
-  } from 'typeorm';
-  // eslint-disable-next-line import/no-cycle
-  import User from './users.entity';
+  Column, Entity, ManyToOne, PrimaryGeneratedColumn,
+} from 'typeorm';
+// eslint-disable-next-line import/no-cycle
+import User from './users.entity';
 
-  @Entity()
-  export default class AlarmEntity {
-	@PrimaryGeneratedColumn()
-	  friendSeq: number;
+@Entity()
+export default class FriendsEntity {
+  @PrimaryGeneratedColumn()
+    friendSeq: number;
 
-	@Column()
+  @Column()
 	  isBlocked: boolean;
 
-	@Column()
+  @Column()
 	  status: string;
 
-	@ManyToOne(() => User, (user) => user.userSeq)
+  @ManyToOne(() => User, (user) => user.userSeq)
 	  followerSeq: number;
 
-	@ManyToOne(() => User, (user) => user.userSeq)
+  @ManyToOne(() => User, (user) => user.userSeq)
 	  followeeSeq: number;
-  }
+}
