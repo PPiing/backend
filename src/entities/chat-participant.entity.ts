@@ -1,10 +1,9 @@
 import PartcAuth from 'src/enums/partc-auth.enum';
 import {
-  BaseEntity, Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn,
+  BaseEntity, Column, CreateDateColumn,
+  DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
-// eslint-disable-next-line import/no-cycle
 import Chat from './chat.entity';
-// eslint-disable-next-line import/no-cycle
 import User from './user.entity';
 
 @Entity()
