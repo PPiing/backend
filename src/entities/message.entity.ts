@@ -17,8 +17,10 @@ export default class Message extends BaseEntity {
     createdAt: Date;
 
   @ManyToOne(() => Chat, (chat) => chat.msgSeq)
+  @JoinColumn({ name: 'chatSeq' })
     chatSeq: number;
 
   @ManyToOne(() => ChatParticipant, (chatParticipant) => chatParticipant.partcSeq)
+  @JoinColumn({ name: 'partcSeq' })
     partctSeq: number;
 }

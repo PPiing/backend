@@ -27,8 +27,10 @@ export default class ChatParticipant extends BaseEntity {
     deletedAt: Date;
 
   @ManyToOne(() => Chat, (chat) => chat.chatSeq)
+  @JoinColumn({ name: 'chatSeq' })
     chatSeq: number;
 
   @ManyToOne(() => User, (user) => user.userSeq)
+  @JoinColumn({ name: 'partcSeq' })
     userSeq: number;
 }
