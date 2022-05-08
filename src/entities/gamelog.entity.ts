@@ -3,7 +3,7 @@ import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } f
 import User from './user.entity';
 
 @Entity()
-export default class GameLog{
+export default class GameLog {
   @PrimaryGeneratedColumn()
     gameSeq: number;
 
