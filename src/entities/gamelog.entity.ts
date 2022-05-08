@@ -4,39 +4,39 @@ import User from './user.entity';
 
 @Entity()
 export default class GameLog{
-    @PrimaryGeneratedColumn()
-        gameSeq: number;
+  @PrimaryGeneratedColumn()
+    gameSeq: number;
 
-    @Column()
-        roomId: number;
+  @Column()
+    roomId: number;
 
-    @Column()
-        isLadder: Boolean;
+  @Column()
+    isLadder: Boolean;
 
-    @Column()
-        option1: number;
+  @Column()
+    option1: number;
 
-    @Column()
-        option2: number;
+  @Column()
+    option2: number;
 
-    @Column()
-        option3: number;
+  @Column()
+    option3: number;
 
-    @CreateDateColumn({default: new Date()})
-        createdAt: Date;
+  @CreateDateColumn({default: new Date()})
+    createdAt: Date;
 
-    @CreateDateColumn()
-        finishedAt: Date;
+  @CreateDateColumn()
+    finishedAt: Date;
 
-    @Column()
-        winnerScore: number;
+  @Column()
+    winnerScore: number;
 
-    @Column()
-        loserScore: number;
+  @Column()
+    loserScore: number;
 
-    @ManyToOne(() => User, (winner) => winner.userSeq)
-        winnerSeq: number;
+  @ManyToOne(() => User, (winner) => winner.userSeq)
+    winnerSeq: number;
 
-    @ManyToOne(() => User, (loser) => loser.userSeq)
-        loserSeq: number;
+  @ManyToOne(() => User, (loser) => loser.userSeq)
+    loserSeq: number;
 }
