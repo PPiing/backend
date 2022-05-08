@@ -1,5 +1,6 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-
+import {
+  Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn,
+} from 'typeorm';
 import User from './user.entity';
 
 @Entity()
@@ -11,7 +12,7 @@ export default class GameLog {
     roomId: number;
 
   @Column()
-    isLadder: Boolean;
+    isLadder: boolean;
 
   @Column()
     option1: number;
@@ -22,7 +23,7 @@ export default class GameLog {
   @Column()
     option3: number;
 
-  @CreateDateColumn({default: new Date()})
+  @CreateDateColumn({ default: new Date() })
     createdAt: Date;
 
   @CreateDateColumn()

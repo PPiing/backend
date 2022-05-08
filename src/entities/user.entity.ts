@@ -11,5 +11,4 @@ export default class UserEntity {
 
   @OneToMany(() => GameLog, (gamelog) => gamelog.loserSeq)
     losergameSeq: GameLog[];
-
-  }
+}
