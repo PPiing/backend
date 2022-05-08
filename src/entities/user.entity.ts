@@ -1,4 +1,5 @@
 import { Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+// eslint-disable-next-line import/no-cycle
 import GameLog from './gamelog.entity';
 
 @Entity()
