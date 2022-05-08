@@ -15,6 +15,7 @@ export default class UserEntity {
   //플레이어1(본인), 플레이어2(상대), 점수비교해서 큰쪽으로 승패유무를 결정해야하나
   //근데 그게 실제 구현이 되나
   @OneToMany(() => GameLog, (gamelog) => gamelog.winnerSeq)
+    winnergameSeq: GameLog[];
   @OneToMany(() => GameLog, (gamelog) => gamelog.loserSeq)
-    gameSeq: GameLog[];
+    losergameSeq: GameLog[];
   }
