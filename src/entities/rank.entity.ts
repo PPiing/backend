@@ -1,8 +1,8 @@
 import {
   Column, Entity, OneToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
-// eslint-disable-next-line import/no-cycle
-import UserEntity from './users.entity';
+
+import UserEntity from './user.entity';
 
 @Entity()
 export default class RankEntity {
