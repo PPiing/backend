@@ -11,6 +11,12 @@ export default class ChatParticipant extends BaseEntity {
   @PrimaryGeneratedColumn()
     partcSeq: number;
 
+  @Column()
+    userSeq: number;
+
+  @Column()
+    chatSeq: number;
+
   @Column({ default: PartcAuth.NONE })
     partcAuth: PartcAuth;
 
@@ -28,9 +34,9 @@ export default class ChatParticipant extends BaseEntity {
 
   @ManyToOne(() => Chat, (chat) => chat.chatSeq)
   @JoinColumn({ name: 'chatSeq' })
-    chatSeq: number;
+    chat: Chat;
 
   @ManyToOne(() => User, (user) => user.userSeq)
-  @JoinColumn({ name: 'partcSeq' })
-    userSeq: number;
+  @JoinColumn({ name: 'userSeq' })
+    user: User;
 }

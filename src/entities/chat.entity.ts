@@ -4,7 +4,6 @@ import {
   Column, Entity, OneToMany, PrimaryGeneratedColumn,
 } from 'typeorm';
 import ChatParticipant from './chat-participant.entity';
-// eslint-disable-next-line import/no-cycle
 import Message from './message.entity';
 
 @Entity()

@@ -4,7 +4,7 @@ import {
 import User from './user.entity';
 
 @Entity()
-export default class AlarmEntity {
+export default class Alarm {
   @PrimaryGeneratedColumn()
     alsrmSeq: number;
 

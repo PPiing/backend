@@ -4,7 +4,7 @@ import {
 import User from './user.entity';
 
 @Entity()
-export default class FriendsEntity {
+export default class Friends {
   @PrimaryGeneratedColumn()
     friendSeq: number;
 
