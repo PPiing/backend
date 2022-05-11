@@ -7,6 +7,10 @@ jobs:
     steps:
       - name: 체크아웃
         uses: actions/checkout@v2
+      - name: Node.js 16.x Version
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
       - name: 종속 모듈들 캐싱
         uses: actions/cache@v2
         with:
