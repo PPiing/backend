@@ -1,6 +1,7 @@
 import {
-  Entity, Column, PrimaryGeneratedColumn,
+  Entity, Column, PrimaryGeneratedColumn, OneToMany,
 } from 'typeorm';
+import ProfileAchiv from './profile-achiv.entity';
 
 @Entity()
 export default class Achiv {
@@ -18,4 +19,7 @@ export default class Achiv {
 
   @Column({ nullable: true })
     totalScore: string; // 목표달성점수
+
+  @OneToMany(() => ProfileAchiv, (profileAchiv) => profileAchiv.achiv)
+    profileAchiv: ProfileAchiv[]; // 프로필 업적 엔티티
 }
