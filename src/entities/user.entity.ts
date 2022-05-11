@@ -1,18 +1,33 @@
-import { Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import ChatParticipant from './chat-participant.entity';
-import GameLog from './gamelog.entity';
+import {
+  Entity, Column, PrimaryGeneratedColumn, CreateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export default class User {
   @PrimaryGeneratedColumn()
-    userSeq: number;
+    userSeq: number; // 유저 시퀀스
 
-  @OneToMany(() => ChatParticipant, (chatParticipant) => chatParticipant.userSeq)
-    partcSeq: ChatParticipant[];
-  
-  @OneToMany(() => GameLog, (gamelog) => gamelog.winnerSeq)
-    winnergameSeq: GameLog[];
+  @Column()
+    userId: number; // 42 ID
 
-  @OneToMany(() => GameLog, (gamelog) => gamelog.loserSeq)
-    losergameSeq: GameLog[];
+  @Column()
+    nickName: string; // 닉네임
+
+  @Column()
+    email: string; // 이메일
+
+  @Column()
+    secAuthStatuc: boolean; // 이차인증 여부
+
+  @Column({ nullable: true })
+    avatarImgUri: string; // 프로필 이미지 URI
+
+  @Column()
+    status: boolean; // 접속 여부
+
+  @Column()
+    deleteStatus: boolean; // 삭제 여부
+
+  @CreateDateColumn()
+    createdAt: Date; // 생성일
 }
