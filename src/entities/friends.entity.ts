@@ -1,8 +1,7 @@
 import {
   Column, Entity, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
-// eslint-disable-next-line import/no-cycle
-import User from './users.entity';
+import User from './user.entity';
 
 @Entity()
 export default class FriendsEntity {
@@ -10,14 +9,14 @@ export default class FriendsEntity {
     friendSeq: number;
 
   @Column()
-	  isBlocked: boolean;
+    isBlocked: boolean;
 
   @Column()
-	  status: string;
+    status: string;
 
   @ManyToOne(() => User, (user) => user.userSeq)
-	  followerSeq: number;
+    followerSeq: number;
 
   @ManyToOne(() => User, (user) => user.userSeq)
-	  followeeSeq: number;
+    followeeSeq: number;
 }
