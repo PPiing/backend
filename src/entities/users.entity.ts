@@ -6,19 +6,19 @@ import Alarm from './alarm.entity';
 import Friends from './friends.entity';
 
 @Entity()
-export default class UserEntity {
+export default class User {
   @PrimaryColumn()
     userSeq: number;
 
   @OneToMany(() => Alarm, (alarm) => alarm.receiverSeq)
-    alarmSeq: Alarm[];
+    receiver: Alarm[];
 
   @OneToMany(() => Alarm, (alarm) => alarm.senderSeq)
-    alarmSeq2: Alarm[];
+    sender: Alarm[];
 
   @OneToMany(() => Friends, (friends) => friends.followeeSeq)
-    friendsSeq: Friends[];
+    followee: Friends[];
 
   @OneToMany(() => Friends, (friends) => friends.followerSeq)
-    friendsSeq2: Friends[];
+    follower: Friends[];
 }
