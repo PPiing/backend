@@ -1,5 +1,5 @@
 import {
-  Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn,
+  Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn,
 } from 'typeorm';
 // eslint-disable-next-line import/no-cycle
 import User from './user.entity';
@@ -27,7 +27,7 @@ export default class GameLog {
   @CreateDateColumn({ default: new Date() })
     createdAt: Date;
 
-  @CreateDateColumn()
+  @UpdateDateColumn()
     finishedAt: Date;
 
   @Column()
@@ -36,9 +36,11 @@ export default class GameLog {
   @Column()
     loserScore: number;
 
-  @ManyToOne(() => User, (winner) => winner.userSeq)
+  @ManyToOne(() => User, (winner) => winner.winnergameSeq)
+  @JoinColumn({ name: 'winnerSeq' })
     winnerSeq: number;
 
-  @ManyToOne(() => User, (loser) => loser.userSeq)
+  @ManyToOne(() => User, (loser) => loser.losergameSeq)
+  @JoinColumn({ name: 'loserSeq' })
     loserSeq: number;
 }

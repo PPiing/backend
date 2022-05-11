@@ -1,5 +1,5 @@
 import {
-  Column, Entity, ManyToOne, PrimaryGeneratedColumn,
+  Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
 import User from './user.entity';
 
@@ -24,8 +24,10 @@ export default class AlarmEntity {
     createdAt: Date;
 
   @ManyToOne(() => User, (user) => user.userSeq)
+  @JoinColumn({ name: 'receiverSeq' })
     receiverSeq: number;
 
   @ManyToOne(() => User, (user) => user.userSeq)
+  @JoinColumn({ name: 'senderSeq' })
     senderSeq: number;
 }

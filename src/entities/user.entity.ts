@@ -52,4 +52,7 @@ export default class User {
 
   @OneToMany(() => GameLog, (gamelog) => gamelog.winnerSeq)
     winnergameSeq: GameLog[];
+
+  @OneToMany(() => GameLog, (gamelog) => gamelog.loserSeq)
+    losergameSeq: GameLog[];
 }

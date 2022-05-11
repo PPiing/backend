@@ -1,5 +1,5 @@
 import {
-  Column, Entity, ManyToOne, PrimaryGeneratedColumn,
+  Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
 import User from './user.entity';
 
@@ -15,8 +15,10 @@ export default class FriendsEntity {
     status: string;
 
   @ManyToOne(() => User, (user) => user.userSeq)
+  @JoinColumn({ name: 'followerSeq' })
     followerSeq: number;
 
   @ManyToOne(() => User, (user) => user.userSeq)
+  @JoinColumn({ name: 'followeeSeq' })
     followeeSeq: number;
 }
