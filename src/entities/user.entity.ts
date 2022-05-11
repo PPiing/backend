@@ -1,6 +1,10 @@
 import {
-  Entity, Column, PrimaryGeneratedColumn, CreateDateColumn,
+  Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn,
 } from 'typeorm';
+import Alarm from './alarm.entity';
+import ChatParticipant from './chat-participant.entity';
+import Friends from './friends.entity';
+import GameLog from './game-log.entity';
 
 @Entity()
 export default class User {
@@ -30,4 +34,22 @@ export default class User {
 
   @CreateDateColumn()
     createdAt: Date; // 생성일
+
+  @OneToMany(() => Alarm, (alarm) => alarm.receiverSeq)
+    receiver: Alarm[];
+
+  @OneToMany(() => Alarm, (alarm) => alarm.senderSeq)
+    sender: Alarm[];
+
+  @OneToMany(() => Friends, (friends) => friends.followeeSeq)
+    followee: Friends[];
+
+  @OneToMany(() => Friends, (friends) => friends.followerSeq)
+    follower: Friends[];
+
+  @OneToMany(() => ChatParticipant, (chatParticipant) => chatParticipant.userSeq)
+    partcSeq: ChatParticipant[];
+
+  @OneToMany(() => GameLog, (gamelog) => gamelog.winnerSeq)
+    winnergameSeq: GameLog[];
 }
