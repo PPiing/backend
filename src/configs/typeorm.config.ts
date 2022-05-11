@@ -6,9 +6,7 @@ import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 export default class TypeOrmConfigService implements TypeOrmOptionsFactory {
   constructor(private configService: ConfigService) {}
 
-  createTypeOrmOptions(
-    connectionName?: string,
-  ): TypeOrmModuleOptions | Promise<TypeOrmModuleOptions> {
+  createTypeOrmOptions(): TypeOrmModuleOptions | Promise<TypeOrmModuleOptions> {
     // or typeorm.config.ts
     return {
       type: 'postgres',
