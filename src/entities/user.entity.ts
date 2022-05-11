@@ -4,7 +4,7 @@ import {
 import Alarm from './alarm.entity';
 import ChatParticipant from './chat-participant.entity';
 import Friends from './friends.entity';
-import GameLog from './gamelog.entity';
+import GameLog from './game-log.entity';
 
 @Entity()
 export default class User {
@@ -52,7 +52,4 @@ export default class User {
 
   @OneToMany(() => GameLog, (gamelog) => gamelog.winnerSeq)
     winnergameSeq: GameLog[];
-
-  @OneToMany(() => GameLog, (gamelog) => gamelog.loserSeq)
-    losergameSeq: GameLog[];
 }
