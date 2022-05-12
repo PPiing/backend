@@ -8,7 +8,7 @@ export default class Alarm {
   @PrimaryGeneratedColumn()
     alsrmSeq: number;
 
-  @Column()
+  @Column() // TODO: 정의 필요
     alarmType: number;
 
   @Column()
@@ -20,7 +20,7 @@ export default class Alarm {
   @Column({ default: false })
     delete: boolean;
 
-  @CreateDateColumn({ default: new Date() })
+  @CreateDateColumn()
     createdAt: Date;
 
   @ManyToOne(() => User, (user) => user.userSeq)

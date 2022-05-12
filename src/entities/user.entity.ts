@@ -11,28 +11,28 @@ export default class User {
   @PrimaryGeneratedColumn()
     userSeq: number; // 유저 시퀀스
 
-  @Column()
+  @Column({ unique: true })
     userId: number; // 42 ID
 
-  @Column()
+  @Column({ unique: true })
     nickName: string; // 닉네임
 
-  @Column()
+  @Column({ unique: true })
     email: string; // 이메일
 
-  @Column()
+  @Column({ default: false })
     secAuthStatuc: boolean; // 이차인증 여부
 
-  @Column()
+  @Column({ default: 'defaultavatar.jpeg' })
     avatarImgUri: string; // 프로필 이미지 URI
 
-  @Column()
+  @Column() // TODO: 논의 필요
     status: boolean; // 접속 여부
 
-  @Column()
+  @Column({ default: false })
     deleteStatus: boolean; // 삭제 여부
 
-  @CreateDateColumn({ default: new Date() })
+  @CreateDateColumn()
     createdAt: Date; // 생성일
 
   @OneToMany(() => Alarm, (alarm) => alarm.receiverSeq)

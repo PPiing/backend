@@ -16,7 +16,7 @@ export default class Chat {
   @Column({ unique: true })
     chatName: string;
 
-  @Column()
+  @Column({ default: '' })
     password: string;
 
   @Column({ default: false })

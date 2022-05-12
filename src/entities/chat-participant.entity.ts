@@ -1,6 +1,6 @@
 import PartcAuth from 'src/enums/partc-auth.enum';
 import {
-  Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
+  Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
 import Chat from './chat.entity';
 import User from './user.entity';
@@ -22,13 +22,13 @@ export default class ChatParticipant {
   @Column()
     mutedUntil: Date;
 
-  @Column()
+  @Column({ default: false })
     isBaned: boolean;
 
-  @CreateDateColumn({ default: new Date() })
+  @CreateDateColumn()
     enteredAt: Date;
 
-  @DeleteDateColumn()
+  @CreateDateColumn()
     leavedAt: Date;
 
   @ManyToOne(() => Chat, (chat) => chat.chatSeq)

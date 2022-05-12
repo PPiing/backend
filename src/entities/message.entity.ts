@@ -12,7 +12,7 @@ export default class Message {
   @Column()
     message: string;
 
-  @CreateDateColumn({ default: new Date() })
+  @CreateDateColumn()
     createdAt: Date;
 
   @ManyToOne(() => Chat, (chat) => chat.msgSeq)
