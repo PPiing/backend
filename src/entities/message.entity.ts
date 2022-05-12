@@ -1,12 +1,11 @@
 import {
-  BaseEntity,
   Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
 import ChatParticipant from './chat-participant.entity';
 import Chat from './chat.entity';
 
 @Entity()
-export default class Message extends BaseEntity {
+export default class Message {
   @PrimaryGeneratedColumn()
     msgSeq: number;
 

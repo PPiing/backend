@@ -1,13 +1,12 @@
 import ChatType from 'src/enums/chat-type.enum';
 import {
-  BaseEntity,
   Column, Entity, OneToMany, PrimaryGeneratedColumn,
 } from 'typeorm';
 import ChatParticipant from './chat-participant.entity';
 import Message from './message.entity';
 
 @Entity()
-export default class Chat extends BaseEntity {
+export default class Chat {
   @PrimaryGeneratedColumn()
     chatSeq: number;
 

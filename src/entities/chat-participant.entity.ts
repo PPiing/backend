@@ -1,13 +1,12 @@
 import PartcAuth from 'src/enums/partc-auth.enum';
 import {
-  BaseEntity, Column, CreateDateColumn,
-  DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
+  Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
 import Chat from './chat.entity';
 import User from './user.entity';
 
 @Entity()
-export default class ChatParticipant extends BaseEntity {
+export default class ChatParticipant {
   @PrimaryGeneratedColumn()
     partcSeq: number;
 
