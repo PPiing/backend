@@ -32,13 +32,13 @@ export default class GameLog {
   @CreateDateColumn({ default: new Date() })
     createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ nullable: true })
     finishedAt: Date;
 
-  @Column()
+  @Column({ nullable: true })
     winnerScore: number;
 
-  @Column()
+  @Column({ nullable: true })
     loserScore: number;
 
   @ManyToOne(() => User, (winner) => winner.winnergameSeq)

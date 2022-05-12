@@ -1,5 +1,5 @@
 import {
-  Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
+  Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
 import User from './user.entity';
 
@@ -8,19 +8,19 @@ export default class Alarm {
   @PrimaryGeneratedColumn()
     alsrmSeq: number;
 
-  @Column()
+  @Column({ nullable: true })
     alarmType: number;
 
-  @Column()
+  @Column({ nullable: true })
     alarmCode: string;
 
-  @Column()
+  @Column({ default: false })
     read: boolean;
 
-  @Column()
+  @Column({ default: false })
     delete: boolean;
 
-  @Column()
+  @CreateDateColumn({ default: new Date() })
     createdAt: Date;
 
   @ManyToOne(() => User, (user) => user.userSeq)

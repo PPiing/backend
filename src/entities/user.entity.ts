@@ -32,7 +32,7 @@ export default class User {
   @Column()
     deleteStatus: boolean; // 삭제 여부
 
-  @CreateDateColumn()
+  @CreateDateColumn({ default: new Date() })
     createdAt: Date; // 생성일
 
   @OneToMany(() => Alarm, (alarm) => alarm.receiverSeq)

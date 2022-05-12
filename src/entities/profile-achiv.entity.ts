@@ -21,10 +21,10 @@ export default class ProfileAchiv {
   @Column({ nullable: true })
     progress: number; // 달성도
 
-  @CreateDateColumn()
+  @CreateDateColumn({ default: new Date() })
     createdAt: Date; // 생성일
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ nullable: true })
     updatedAt: Date; // 수정일
 
   @ManyToOne(() => Profile, (profile) => profile.profileAchiv)

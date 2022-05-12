@@ -8,10 +8,10 @@ export default class Friends {
   @PrimaryGeneratedColumn()
     friendSeq: number;
 
-  @Column()
+  @Column({ default: false })
     isBlocked: boolean;
 
-  @Column()
+  @Column({ nullable: true })
     status: string;
 
   @ManyToOne(() => User, (user) => user.userSeq)

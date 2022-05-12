@@ -29,7 +29,7 @@ export default class ChatParticipant extends BaseEntity {
   @CreateDateColumn({ default: new Date() })
     enteredAt: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ nullable: true })
     deletedAt: Date;
 
   @ManyToOne(() => Chat, (chat) => chat.chatSeq)
