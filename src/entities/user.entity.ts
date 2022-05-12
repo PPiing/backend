@@ -23,7 +23,7 @@ export default class User {
   @Column()
     secAuthStatuc: boolean; // 이차인증 여부
 
-  @Column({ nullable: true })
+  @Column()
     avatarImgUri: string; // 프로필 이미지 URI
 
   @Column()

@@ -18,13 +18,13 @@ export default class ProfileAchiv {
   @Column()
     isRepresent: boolean; // 대표업적
 
-  @Column({ nullable: true })
+  @Column()
     progress: number; // 달성도
 
   @CreateDateColumn({ default: new Date() })
     createdAt: Date; // 생성일
 
-  @UpdateDateColumn({ nullable: true })
+  @UpdateDateColumn()
     updatedAt: Date; // 수정일
 
   @ManyToOne(() => Profile, (profile) => profile.profileAchiv)

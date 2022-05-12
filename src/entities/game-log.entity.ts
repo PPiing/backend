@@ -14,10 +14,10 @@ export default class GameLog {
   @Column()
     isLadder: boolean;
 
-  @Column({ nullable: true })
+  @Column()
     winnerSeq: number;
 
-  @Column({ nullable: true })
+  @Column()
     loserSeq: number;
 
   @Column()
@@ -32,13 +32,13 @@ export default class GameLog {
   @CreateDateColumn({ default: new Date() })
     createdAt: Date;
 
-  @UpdateDateColumn({ nullable: true })
+  @UpdateDateColumn()
     finishedAt: Date;
 
-  @Column({ nullable: true })
+  @Column()
     winnerScore: number;
 
-  @Column({ nullable: true })
+  @Column()
     loserScore: number;
 
   @ManyToOne(() => User, (winner) => winner.winnergameSeq)

@@ -10,16 +10,16 @@ export default class Chat {
   @PrimaryGeneratedColumn()
     chatSeq: number;
 
-  @Column({ nullable: false, default: ChatType.PUBLIC })
+  @Column({ default: ChatType.PUBLIC })
     chatType: ChatType;
 
-  @Column({ nullable: false, unique: true })
+  @Column({ unique: true })
     chatName: string;
 
-  @Column({ nullable: true })
+  @Column()
     password: string;
 
-  @Column({ nullable: false, default: false })
+  @Column({ default: false })
     isDirected: boolean;
 
   @OneToMany(() => Message, (message) => message.chatSeq)

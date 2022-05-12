@@ -8,7 +8,7 @@ export default class Rank {
   @PrimaryGeneratedColumn()
     rankSeq: number; // 랭크 시퀀스
 
-  @Column({ nullable: true })
+  @Column()
     rankScore: number; // 랭크 점수
 
   @Column()

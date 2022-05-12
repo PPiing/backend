@@ -8,10 +8,10 @@ export default class Alarm {
   @PrimaryGeneratedColumn()
     alsrmSeq: number;
 
-  @Column({ nullable: true })
+  @Column()
     alarmType: number;
 
-  @Column({ nullable: true })
+  @Column()
     alarmCode: string;
 
   @Column({ default: false })

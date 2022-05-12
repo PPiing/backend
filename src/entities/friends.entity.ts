@@ -11,7 +11,7 @@ export default class Friends {
   @Column({ default: false })
     isBlocked: boolean;
 
-  @Column({ nullable: true })
+  @Column()
     status: string;
 
   @ManyToOne(() => User, (user) => user.userSeq)

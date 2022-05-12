@@ -19,7 +19,7 @@ export default class ChatParticipant {
   @Column({ default: PartcAuth.NONE })
     partcAuth: PartcAuth;
 
-  @Column({ nullable: true })
+  @Column()
     mutedUntil: Date;
 
   @Column()
@@ -28,7 +28,7 @@ export default class ChatParticipant {
   @CreateDateColumn({ default: new Date() })
     enteredAt: Date;
 
-  @DeleteDateColumn({ nullable: true })
+  @DeleteDateColumn()
     deletedAt: Date;
 
   @ManyToOne(() => Chat, (chat) => chat.chatSeq)
