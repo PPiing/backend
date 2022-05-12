@@ -29,7 +29,7 @@ export default class ChatParticipant {
     enteredAt: Date;
 
   @DeleteDateColumn()
-    deletedAt: Date;
+    leavedAt: Date;
 
   @ManyToOne(() => Chat, (chat) => chat.chatSeq)
   @JoinColumn({ name: 'chatSeq' })
