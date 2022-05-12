@@ -1,3 +1,4 @@
+import AlarmType from 'src/enums/alarm-type.enum';
 import {
   Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -8,8 +9,8 @@ export default class Alarm {
   @PrimaryGeneratedColumn()
     alsrmSeq: number;
 
-  @Column() // TODO: 정의 필요
-    alarmType: number;
+  @Column({ default: AlarmType.NEW_DM })
+    alarmType: AlarmType;
 
   @Column()
     alarmCode: string;

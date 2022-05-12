@@ -1,3 +1,4 @@
+import RelationStatus from 'src/enums/relation-status.enum';
 import {
   Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -11,8 +12,8 @@ export default class Friends {
   @Column({ default: false })
     isBlocked: boolean;
 
-  @Column() // TODO: 구현 필요
-    status: string;
+  @Column({ default: RelationStatus.REQUEST_NOT_ALLOWED })
+    status: RelationStatus;
 
   @ManyToOne(() => User, (user) => user.userSeq)
   @JoinColumn({ name: 'followerSeq' })
