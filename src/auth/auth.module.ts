@@ -9,4 +9,4 @@ import { SessionSerializer } from './session.serializer';
   controllers: [AuthController],
   providers: [SessionSerializer, FtStrategy],
 })
-export default class AuthModule { }
+export class AuthModule { }

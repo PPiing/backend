@@ -6,7 +6,7 @@ import AppController from './app.controller';
 import AppService from './app.service';
 import configuration from './configs/configuration';
 import TypeOrmConfigService from './configs/typeorm.config';
-import AuthModule from './auth/auth.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -24,4 +24,4 @@ import AuthModule from './auth/auth.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export default class AppModule {}
+export class AppModule {}
