@@ -17,7 +17,7 @@ export default class Achiv {
   @Column()
     imgUri: string; // 이미지
 
-  @Column({ nullable: true })
+  @Column()
     totalScore: string; // 목표달성점수
 
   @OneToMany(() => ProfileAchiv, (profileAchiv) => profileAchiv.achiv)

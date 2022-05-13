@@ -1,7 +1,6 @@
 import {
-  Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn,
+  Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
-// eslint-disable-next-line import/no-cycle
 import User from './user.entity';
 
 @Entity()
@@ -12,35 +11,41 @@ export default class GameLog {
   @Column()
     roomId: number;
 
-  @Column()
+  @Column({ default: false })
     isLadder: boolean;
 
   @Column()
-    option1: number;
+    winnerSeq: number;
 
   @Column()
-    option2: number;
+    loserSeq: number;
+
+  @Column({ default: '' })
+    option1: string;
+
+  @Column({ default: '' })
+    option2: string;
+
+  @Column({ default: '' })
+    option3: string;
 
   @Column()
-    option3: number;
-
-  @CreateDateColumn({ default: new Date() })
     createdAt: Date;
 
-  @UpdateDateColumn()
+  @CreateDateColumn()
     finishedAt: Date;
 
-  @Column()
+  @Column({ default: 0 })
     winnerScore: number;
 
-  @Column()
+  @Column({ default: 0 })
     loserScore: number;
 
   @ManyToOne(() => User, (winner) => winner.winnergameSeq)
   @JoinColumn({ name: 'winnerSeq' })
-    winnerSeq: number;
+    winner: User;
 
   @ManyToOne(() => User, (loser) => loser.losergameSeq)
   @JoinColumn({ name: 'loserSeq' })
-    loserSeq: number;
+    loser: User;
 }

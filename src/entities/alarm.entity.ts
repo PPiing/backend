@@ -1,26 +1,27 @@
+import AlarmType from 'src/enums/alarm-type.enum';
 import {
-  Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
+  Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
 import User from './user.entity';
 
 @Entity()
-export default class AlarmEntity {
+export default class Alarm {
   @PrimaryGeneratedColumn()
     alsrmSeq: number;
 
-  @Column()
-    alarmType: number;
+  @Column({ default: AlarmType.NEW_DM })
+    alarmType: AlarmType;
 
   @Column()
     alarmCode: string;
 
-  @Column()
+  @Column({ default: false })
     read: boolean;
 
-  @Column()
+  @Column({ default: false })
     delete: boolean;
 
-  @Column()
+  @CreateDateColumn()
     createdAt: Date;
 
   @ManyToOne(() => User, (user) => user.userSeq)

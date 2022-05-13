@@ -15,10 +15,10 @@ export default class ProfileAchiv {
   @Column()
     achivSeq: string; // 업적 시퀀스
 
-  @Column()
+  @Column({ default: false })
     isRepresent: boolean; // 대표업적
 
-  @Column({ nullable: true })
+  @Column({ default: 0 })
     progress: number; // 달성도
 
   @CreateDateColumn()

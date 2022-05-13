@@ -1,3 +1,4 @@
+import UserStatus from 'src/enums/user-status.enum';
 import {
   Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -11,25 +12,25 @@ export default class User {
   @PrimaryGeneratedColumn()
     userSeq: number; // 유저 시퀀스
 
-  @Column()
+  @Column({ unique: true })
     userId: number; // 42 ID
 
-  @Column()
+  @Column({ unique: true })
     nickName: string; // 닉네임
 
-  @Column()
+  @Column({ unique: true })
     email: string; // 이메일
 
-  @Column()
+  @Column({ default: false })
     secAuthStatuc: boolean; // 이차인증 여부
 
-  @Column({ nullable: true })
+  @Column({ default: 'defaultavatar.jpeg' })
     avatarImgUri: string; // 프로필 이미지 URI
 
-  @Column()
-    status: boolean; // 접속 여부
+  @Column({ default: UserStatus.ONLINE })
+    status: UserStatus; // 접속 여부
 
-  @Column()
+  @Column({ default: false })
     deleteStatus: boolean; // 삭제 여부
 
   @CreateDateColumn()
