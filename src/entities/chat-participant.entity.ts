@@ -1,4 +1,4 @@
-import PartcAuth from 'src/enums/partc-auth.enum';
+import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
 import {
   Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -16,7 +16,7 @@ export default class ChatParticipant {
   @Column()
     chatSeq: number;
 
-  @Column({ default: PartcAuth.NONE })
+  @Column()
     partcAuth: PartcAuth;
 
   @Column()

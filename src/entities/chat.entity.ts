@@ -1,4 +1,4 @@
-import ChatType from 'src/enums/chat-type.enum';
+import ChatType from 'src/enums/mastercode/chat-type.enum';
 import {
   Column, Entity, OneToMany, PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -10,7 +10,7 @@ export default class Chat {
   @PrimaryGeneratedColumn()
     chatSeq: number;
 
-  @Column({ default: ChatType.PUBLIC })
+  @Column()
     chatType: ChatType;
 
   @Column({ unique: true })

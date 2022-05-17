@@ -1,7 +1,7 @@
-import UserStatus from 'src/enums/user-status.enum';
 import {
   Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn,
 } from 'typeorm';
+import UserStatus from 'src/enums/mastercode/user-status.enum';
 import Alarm from './alarm.entity';
 import ChatParticipant from './chat-participant.entity';
 import Friends from './friends.entity';
@@ -27,7 +27,7 @@ export default class User {
   @Column({ default: 'defaultavatar.jpeg' })
     avatarImgUri: string; // 프로필 이미지 URI
 
-  @Column({ default: UserStatus.ONLINE })
+  @Column({ default: UserStatus.USST10 })
     status: UserStatus; // 접속 여부
 
   @Column({ default: false })

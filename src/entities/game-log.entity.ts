@@ -1,6 +1,7 @@
 import {
   Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
+import GameOption from 'src/enums/mastercode/game-option.enum';
 import User from './user.entity';
 
 @Entity()
@@ -20,14 +21,14 @@ export default class GameLog {
   @Column()
     loserSeq: number;
 
-  @Column({ default: '' })
-    option1: string;
+  @Column()
+    option1: GameOption;
 
-  @Column({ default: '' })
-    option2: string;
+  @Column()
+    option2: GameOption;
 
-  @Column({ default: '' })
-    option3: string;
+  @Column()
+    option3: GameOption;
 
   @Column()
     createdAt: Date;
