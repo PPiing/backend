@@ -1,7 +1,7 @@
 import {
   IsBoolean, IsEmail, IsString, IsUrl,
 } from 'class-validator';
-import UserStatus from 'src/enums/user-status.enum';
+import UserStatus from 'src/enums/mastercode/user-status.enum';
 
 export class UpdateUserDto {
   @IsString()

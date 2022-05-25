@@ -1,4 +1,4 @@
-import RelationStatus from 'src/enums/relation-status.enum';
+import RelationStatus from 'src/enums/mastercode/relation-status.enum';
 import {
   Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -12,7 +12,7 @@ export default class Friends {
   @Column({ default: false })
     isBlocked: boolean;
 
-  @Column({ default: RelationStatus.REQUEST_NOT_ALLOWED })
+  @Column()
     status: RelationStatus;
 
   @ManyToOne(() => User, (user) => user.userSeq)
