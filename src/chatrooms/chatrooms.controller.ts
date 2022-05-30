@@ -14,6 +14,7 @@ import { MessageDataDto } from './dto/message-data.dto';
 
 @ApiTags('채팅방')
 @Controller('chatrooms')
+@UsePipes(new ValidationPipe({ transform: true }))
 export default class ChatroomsController {
   private readonly logger = new Logger(ChatroomsController.name);
 
@@ -31,10 +32,9 @@ export default class ChatroomsController {
    */
   @ApiOperation({ summary: '방 만들기', description: '방을 만듭니다. 성공시 HTTP 201과 방 ID, 방 제목을 리턴합니다.' })
   @ApiResponse({ status: 201, type: AddRoomResult, description: '방 생성 성공' })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiResponse({ status: 400, description: 'Body Field Error' })
   @Post('new')
   @HttpCode(201)
-  @UsePipes(new ValidationPipe({ transform: true }))
   addRoom(
     @Body() reqData: CreateRoomDto,
   ): AddRoomResult {
@@ -56,20 +56,24 @@ export default class ChatroomsController {
    * @param data POST data
    * @returns 조인 여부와 방 ID를 반환합니다.
    */
-  @ApiOperation({ summary: '클라이언트의 방 입장 요청 처리', description: '사용자가 방에 입장하려고 합니다. 사용자 ID는 세션으로부터 가져옵니다.' })
+  @ApiOperation({ summary: '클라이언트의 방 입장 요청 처리', description: '사용자가 방에 입장하려고 합니다. 사용자 ID는 추후에 세션으로부터 가져옵니다.' })
   @ApiResponse({ status: 200, description: '방 참여 성공' })
+  @ApiResponse({ status: 400, description: 'Body Field Error' })
   @ApiParam({
     name: 'roomId', type: Number, example: 1, description: '방 ID',
   })
-  @Put('join/:roomId')
+  @Put('join/:roomId/:userId')
   joinRoom(
     @Param('roomId') roomId: string,
+      @Param('userId') userId: string,
       @Body() data: JoinRoomDto,
   ): string {
+    this.logger.debug(`joinRoom: body -> ${JSON.stringify(data)}`);
     const roomid = Number(roomId);
-    const result = this.chatroomsService.addUser(roomid, [data.username]);
+    const user = Number(userId);
+    const result = this.chatroomsService.addUser(roomid, [user]);
     if (result) {
-      this.eventRunner.emit('room:join', roomid, [data.username]);
+      this.eventRunner.emit('room:join', roomid, [user]);
       const rtn: IJoinRoomResult = {
         chatSeq: roomid,
       };
@@ -91,14 +95,17 @@ export default class ChatroomsController {
   @ApiParam({
     name: 'roomId', type: Number, example: 1, description: '방 ID',
   })
-  @Delete('leave/:roomId')
+  @ApiParam({
+    name: 'userId', type: Number, example: 1, description: '방 ID (제거 예정)',
+  })
+  @Delete('leave/:roomId/:userId')
   @HttpCode(204)
   leaveRoom(
     @Param('roomId') roomId: string,
-      @Body() data: any, // FIXME
+      @Param('userId') userId: string,
   ): void {
     const roomid = Number(roomId);
-    const user = data.username;
+    const user = Number(userId);
     const result = this.chatroomsService.leftUser(roomid, user);
     if (result) {
       this.eventRunner.emit('room:leave', roomid, user);

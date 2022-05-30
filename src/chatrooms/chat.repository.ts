@@ -13,7 +13,7 @@ export default class ChatRepository {
       chatName: '푸주홍의 등산클럽',
       password: '',
       isDirected: false,
-      users: ['puju'],
+      users: [1],
     });
     this.MockEntity.push({
       chatSeq: 1,
@@ -21,7 +21,7 @@ export default class ChatRepository {
       chatName: '장이수의 도박클럽',
       password: '',
       isDirected: false,
-      users: ['isu', 'puju'],
+      users: [1, 2],
     });
   }
 
@@ -29,7 +29,7 @@ export default class ChatRepository {
     return this.MockEntity;
   }
 
-  findRoomsByUserId(id: string): any[] {
+  findRoomsByUserId(id: number): any[] {
     return this.MockEntity.filter((room) => room.users.includes(id));
   }
 
@@ -61,7 +61,7 @@ export default class ChatRepository {
     });
   }
 
-  addUser(chatSeq: number, users: any[]): boolean {
+  addUser(chatSeq: number, users: number[]): boolean {
     for (const room of this.MockEntity) {
       if (room.chatSeq === chatSeq) {
         room.users.push(...users);
@@ -71,7 +71,7 @@ export default class ChatRepository {
     return false;
   }
 
-  removeUser(chatSeq: number, user: any): boolean {
+  removeUser(chatSeq: number, user: number): boolean {
     for (const room of this.MockEntity) {
       if (room.chatSeq as number === chatSeq) {
         room.users = room.users.filter((u) => u !== user);

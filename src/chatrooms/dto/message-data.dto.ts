@@ -4,14 +4,13 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class MessageDataDto {
-
   @ApiPropertyOptional({
     description: '메시지 고유 ID',
     example: 1,
   })
   @IsNumber()
   @IsOptional()
-  msgSeq: number;
+    msgSeq: number;
 
   @ApiProperty({
     description: '채팅방 고유 ID',
@@ -19,7 +18,7 @@ export class MessageDataDto {
   })
   @IsNumber()
   @IsNotEmpty()
-  chatSeq: number;
+    chatSeq: number;
 
   @ApiProperty({
     description: '사용자 고유 ID',
@@ -27,7 +26,7 @@ export class MessageDataDto {
   })
   @IsString()
   @IsNotEmpty()
-  partcSeq: number | string; // 추후에 number로 변경
+    partcSeq: number | string; // 추후에 number로 변경
 
   @ApiProperty({
     description: '채팅 내용',
@@ -35,7 +34,7 @@ export class MessageDataDto {
   })
   @IsString()
   @IsNotEmpty()
-  msg: string;
+    msg: string;
 
   @ApiProperty({
     description: '메시지 생성 시간',
@@ -43,5 +42,5 @@ export class MessageDataDto {
   })
   @IsDate()
   @IsNotEmpty()
-  createAt: Date;
+    createAt: Date;
 }

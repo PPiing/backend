@@ -117,7 +117,7 @@ export default class ChatroomsService {
    * @param msg
    * @returns 채팅 메시지 고유 ID
    */
-  async newChat(from: string, chatSeq: number, msg: string): Promise<number> {
+  async newChat(from: number, chatSeq: number, msg: string): Promise<number> {
     return this.cacheChatWrite({
       msgSeq: -1,
       partcSeq: from,
@@ -135,7 +135,11 @@ export default class ChatroomsService {
    * @param limit 제한
    * @returns 채팅 배열
    */
-  async getMessages(chatSeq: number, messageId: number, limit: number): Promise<Array<MessageDataDto>> {
+  async getMessages(
+    chatSeq: number,
+    messageId: number,
+    limit: number,
+  ): Promise<Array<MessageDataDto>> {
     const rtn = await this.cacheChatRead(chatSeq, messageId, limit);
     return rtn;
   }
@@ -147,7 +151,7 @@ export default class ChatroomsService {
    * @param user 접속한 사용자 소켓
    * @param username 접속한 사용자 식별자 (이름)
    */
-  async onlineUserAdd(user: Socket, username: string): Promise<void> {
+  async onlineUserAdd(user: Socket, username: number): Promise<void> {
     // 현재 접속 세션이 생성된 소켓의 고유 ID와 사용자 식별 ID를 저장합니다.
     await this.cacheManager.set(user.id, username);
   }
@@ -169,18 +173,19 @@ export default class ChatroomsService {
    * @param user 클라이언트 소켓
    * @returns 사용자 이름 (없으면 undefined)
    */
-  getUserName(user: Socket): string | undefined {
-    return user.handshake.auth.username;
+  getUserName(user: Socket): number | undefined {
+    return Number.isNaN(user.handshake.auth.username)
+      ? undefined : Number(user.handshake.auth.username);
   }
 
   /**
    * 접속한 클라이언트 소켓을 소속되어 있는 모든 룸에 추가하고 소속된 룸을 반환합니다.
    *
    * @param user 클라이언트 소켓
-   * @param username 클라이언트 식별자 (이름)
+   * @param username 클라이언트 식별자
    * @returns 소속된 룸 목록
    */
-  roomJoin(user: Socket, username: string): any[] {
+  roomJoin(user: Socket, username: number): any[] {
     const rooms = this.chatRepository.findRoomsByUserId(username);
     const rtn = [];
     rooms.forEach((room) => { // FIXME : 타입 명시 필요
@@ -197,14 +202,14 @@ export default class ChatroomsService {
    * @param chatSeq 룸 식별자
    * @param users 추가할 클라이언트 식별자 목록
    */
-  async roomAddUsers(server: Server, chatSeq: number, users: string[]): Promise<void> {
+  async roomAddUsers(server: Server, chatSeq: number, users: number[]): Promise<void> {
     // NOTE: 전체적으로 리팩터링 예정
     // Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>
     // eslint-disable-next-line no-restricted-syntax
     for (const [id, socket] of (server.sockets as any)) { // FIXME : 타입 명시 필요
       // eslint-disable-next-line no-await-in-loop
-      const clientId : undefined | string = await this.cacheManager.get(id);
-      if (clientId && users.includes(clientId)) {
+      const clientId : undefined | number = await this.cacheManager.get(id);
+      if (clientId !== undefined && users.includes(clientId)) {
         socket.join(chatSeq.toString());
       }
     }
@@ -215,16 +220,16 @@ export default class ChatroomsService {
    *
    * @param server 서버 소켓 객체
    * @param chatSeq 룸 식별자
-   * @param user 추가할 클라이언트 식별자 목록
+   * @param user 추가할 클라이언트 식별자
    */
-  async roomLeaveUser(server: Server, chatSeq: number, user: string): Promise<void> {
+  async roomLeaveUser(server: Server, chatSeq: number, user: number): Promise<void> {
     // NOTE: 전체적으로 리팩터링 예정
     // Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>
     // eslint-disable-next-line no-restricted-syntax
     for (const [id, socket] of (server.sockets as any)) { // FIXME : 타입 명시 필요
       // eslint-disable-next-line no-await-in-loop
-      const clientId : undefined | string = await this.cacheManager.get(id);
-      if (clientId && clientId === user) {
+      const clientId : undefined | number = await this.cacheManager.get(id);
+      if (clientId !== undefined && clientId === user) {
         socket.leave(chatSeq.toString());
       }
     }
@@ -273,7 +278,7 @@ export default class ChatroomsService {
    * @param users 추가할 사용자 식별자 목록
    * @returns 추가 성공 여부
    */
-  addUser(chatSeq: number, users: any[]): boolean {
+  addUser(chatSeq: number, users: number[]): boolean {
     return this.chatRepository.addUser(chatSeq, users);
   }
 
@@ -294,7 +299,7 @@ export default class ChatroomsService {
    * @param user 클라이언트 소켓
    * @returns 사용자 ID
    */
-  async whoAmI(user: Socket): Promise<string> {
+  async whoAmI(user: Socket): Promise<number> {
     return this.cacheManager.get(user.id);
   }
 

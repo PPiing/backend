@@ -106,7 +106,7 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
    * @param chatType
    */
   @OnEvent('room:create')
-  async onRoomCreate(chatSeq: number, users: string[] | null, chatType: string) {
+  async onRoomCreate(chatSeq: number, users: number[] | null, chatType: string) {
     this.logger.debug(`onRoomCreated: ${chatSeq}`);
     if (users) {
       // 클라이언트 ID 배열을 이용해 접속중인 클라이언트 소켓에게 룸 조인을 시킵니다.
@@ -142,7 +142,7 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
    * @param user 유저 ID
    */
   @OnEvent('room:leave')
-  async onRoomLeave(chatSeq: number, user: string) {
+  async onRoomLeave(chatSeq: number, user: number) {
     this.logger.debug(`onRoomLeft: ${chatSeq}, user: ${user}`);
     // 본인 포함 방에서 내보낸 (나간) 유저가 나갔다고 해당 룸에 들어가 있는 클라이언트들에게 알립니다.
     this.server.to(chatSeq.toString()).emit('user leave', { chatSeq, user });

@@ -10,7 +10,7 @@ export default class MessageRepository {
     this.MockEntity.push({
       msgSeq: 0,
       chatSeq: 0,
-      partcSeq: 'puju',
+      partcSeq: 1,
       msg: '안녕하세요',
       createAt: new Date(),
     });
