@@ -48,21 +48,8 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
     // 본인이 속한 룸에 조인시킵니다. 그리고 본인이 속한 룸의 리스트를 리턴합니다.
     const roomList = this.chatroomsService.roomJoin(client, username);
 
-    // 클라이언트가 속한 룸 리스트와 아닌 리스트를 산정합니다. (리팩터링 필요)
-    const rtn = this.chatroomsService.findAllRooms();
-    // FIXME: 추후에 리팩터링 할 코드이기 때문에 Eslint는 주석으로 피합니다.
-    rtn.forEach((room) => {
-      if (roomList.includes(room.chatSeq)) {
-        // eslint-disable-next-line no-param-reassign
-        room.isJoined = true;
-      } else {
-        // eslint-disable-next-line no-param-reassign
-        room.isJoined = false;
-      }
-    });
-
     // 룸 리스트를 클라이언트에 전송합니다.
-    client.emit('rooms', rtn);
+    client.emit('rooms', roomList);
   }
 
   /**

@@ -18,13 +18,9 @@ export default class ChatRepository {
       chatSeq: 1,
       chatType: 'CHTP20',
       chatName: '장이수의 도박클럽',
-      password: '',
+      password: '$2b$10$gnY2ITzIrJKgw2HxH5GETOKO6ICbRLCvge1e3xta1UM1CceZCz1Ia', // puju
       isDirected: false,
     });
-  }
-
-  findAllRooms(): any[] {
-    return this.MockEntity;
   }
 
   findRoomByRoomId(chatSeq: number): any {

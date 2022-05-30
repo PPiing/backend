@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body, Controller, Delete, Get, HttpCode, Logger, Param, Post, Put, UsePipes, ValidationPipe,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -36,11 +37,11 @@ export default class ChatroomsController {
   @ApiResponse({ status: 400, description: 'Body Field Error' })
   @Post('new')
   @HttpCode(201)
-  addRoom(
+  async addRoom(
     @Body() reqData: ChatRoomDto,
-  ): AddRoomResultDto {
+  ): Promise<AddRoomResultDto> {
     this.logger.debug(`addRoom: ${reqData.chatName}`);
-    const roomno = this.chatroomsService.addRoom(reqData);
+    const roomno = await this.chatroomsService.addRoom(reqData);
     this.eventRunner.emit('room:create', roomno, null, reqData.chatType);
     const rtn: AddRoomResultDto = {
       chatSeq: roomno,
@@ -59,28 +60,28 @@ export default class ChatroomsController {
    */
   @ApiOperation({ summary: '클라이언트의 방 입장 요청 처리', description: '사용자가 방에 입장하려고 합니다. 사용자 ID는 추후에 세션으로부터 가져옵니다.' })
   @ApiResponse({ status: 200, description: '방 참여 성공' })
-  @ApiResponse({ status: 400, description: 'Body Field Error' })
+  @ApiResponse({ status: 400, description: '비밀번호가 틀렸거나 존재하지 않는 방' })
   @ApiParam({
     name: 'roomId', type: Number, example: 1, description: '방 ID',
   })
   @Put('join/:roomId/:userId')
-  joinRoom(
+  async joinRoom(
     @Param('roomId') roomId: string,
       @Param('userId') userId: string,
       @Body() data: JoinRoomDto,
-  ): string {
+  ): Promise<string> {
     this.logger.debug(`joinRoom: body -> ${JSON.stringify(data)}`);
     const roomid = Number(roomId);
     const user = Number(userId);
-    const result = this.chatroomsService.addUser(roomid, [user]);
-    if (result) {
-      this.eventRunner.emit('room:join', roomid, [user]);
-      const rtn: IJoinRoomResult = {
-        chatSeq: roomid,
-      };
-      return JSON.stringify(rtn);
+    const result = await this.chatroomsService.joinRoomByExUser(roomid, user, data.password);
+    if (result === false) {
+      throw new BadRequestException('비밀번호가 틀렸거나 존재하지 않는 방입니다.');
     }
-    return 'error'; // FIXME: 에러 코드 정의 필요
+    this.eventRunner.emit('room:join', roomid, [user]);
+    const rtn: IJoinRoomResult = {
+      chatSeq: roomid,
+    };
+    return JSON.stringify(rtn);
   }
 
   /**
@@ -161,6 +162,7 @@ export default class ChatroomsController {
   })
   @Get('room/:roomId')
   async getRoom(@Param('roomId') roomId: string): Promise<ChatRoomResultDto> {
+    this.logger.debug(`getRoom: ${roomId}`);
     const room = await this.chatroomsService.getRoomInfo(Number(roomId));
     return room;
   }

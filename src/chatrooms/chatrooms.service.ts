@@ -2,6 +2,7 @@ import {
   BadRequestException,
   CACHE_MANAGER, Inject, Injectable, Logger,
 } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { Cron } from '@nestjs/schedule';
 import { Cache } from 'cache-manager';
 import { Server, Socket } from 'socket.io';
@@ -188,7 +189,7 @@ export default class ChatroomsService {
    * @param username 클라이언트 식별자
    * @returns 소속된 룸 목록
    */
-  roomJoin(user: Socket, username: number): any[] {
+  roomJoin(user: Socket, username: number): number[] {
     const rooms = this.chatParticipantRepository.findRoomsByUserId(username);
     const rtn = [];
     rooms.forEach((room) => { // FIXME : 타입 명시 필요
@@ -257,11 +258,17 @@ export default class ChatroomsService {
    * @param create 생성할 방 정보
    * @returns 생성된 방 고유 ID
    */
-  addRoom(create: ChatRoomDto): number {
+  async addRoom(create: ChatRoomDto): Promise<number> {
     if (this.chatRepository.findRoomByRoomName(create.chatName)) {
       throw new BadRequestException('이미 존재하는 이름의 방입니다.');
     }
-    return this.chatRepository.addRoom(create).chatSeq;
+    const hashPassword = create.password ? await bcrypt.hash(create.password, 10) : undefined;
+    const hashed = {
+      ...create,
+      password: hashPassword,
+    };
+    this.logger.debug(`[ChatRoomService] addRoom : ${JSON.stringify(hashed)}`);
+    return this.chatRepository.addRoom(hashed).chatSeq;
   }
 
   /**
@@ -307,12 +314,33 @@ export default class ChatroomsService {
   }
 
   /**
-   * 데이터베이스에 저장된 모든 룸을 반환합니다.
+   * 외부 접근자가 방에 입장할 때 입장해도 되는지, 올바른 정보를 가지고 있는지 검증합니다.
+   * 올바른 정보를 가비고 있다면 방에 입장합니다.
    *
-   * @returns 모든 룸 목록
+   * @param chatSeq 방 식별자
+   * @param user 사용자 식별자
+   * @param password 비밀번호
+   * @returns 입장 가능 여부
    */
-  findAllRooms(): any[] {
-    return this.chatRepository.findAllRooms();
+  async joinRoomByExUser(
+    chatSeq: number,
+    user: number,
+    password: string | undefined,
+  ): Promise<boolean> {
+    const room = await this.chatRepository.findRoomByRoomId(chatSeq);
+    this.logger.debug(`[ChatRoomService] joinRoomByExUser : ${JSON.stringify(room)}`);
+    if (room === null) {
+      return false;
+    }
+    if (room.password) {
+      if (password === undefined) {
+        return false;
+      }
+      if (!(await bcrypt.compare(password, room.password))) {
+        return false;
+      }
+    }
+    return this.addUser(chatSeq, [user]);
   }
 
   /**
