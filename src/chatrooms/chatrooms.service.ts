@@ -135,7 +135,7 @@ export default class ChatroomsService {
    * @param limit 제한
    * @returns 채팅 배열
    */
-  async getMessages(chatSeq: number, messageId: number, limit: number): Promise<any[]> {
+  async getMessages(chatSeq: number, messageId: number, limit: number): Promise<Array<MessageDataDto>> {
     const rtn = await this.cacheChatRead(chatSeq, messageId, limit);
     return rtn;
   }
