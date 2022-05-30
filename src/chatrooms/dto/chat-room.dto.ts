@@ -1,10 +1,10 @@
 import {
-  IsString, IsNotEmpty, IsBoolean, IsEnum,
+  IsString, IsNotEmpty, IsBoolean, IsEnum, IsOptional,
 } from 'class-validator';
 import ChatType from 'src/enums/mastercode/chat-type.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateRoomDto {
+export class ChatRoomDto {
   /**
    * CHTP10 : 개인 채팅방 (DM)
    * CHTP20 : 단체 채팅방 (public)
@@ -32,7 +32,7 @@ export class CreateRoomDto {
     example: '1q2w3e4r!',
   })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
     password: string;
 
   @ApiProperty({

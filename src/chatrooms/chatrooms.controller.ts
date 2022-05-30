@@ -6,11 +6,12 @@ import {
   ApiTags, ApiResponse, ApiOperation, ApiParam,
 } from '@nestjs/swagger';
 import ChatroomsService from './chatrooms.service';
-import { CreateRoomDto } from './dto/create-room.dto';
+import { ChatRoomDto } from './dto/chat-room.dto';
 import { JoinRoomDto } from './dto/join-room.dto';
 import { IJoinRoomResult } from './interface/join-room';
-import { AddRoomResult } from './dto/add-room-result.dto';
+import { AddRoomResultDto } from './dto/add-room-result.dto';
 import { MessageDataDto } from './dto/message-data.dto';
+import ChatRoomResultDto from './dto/chat-room-result.dto';
 
 @ApiTags('채팅방')
 @Controller('chatrooms')
@@ -31,17 +32,17 @@ export default class ChatroomsController {
    * @returns 방 정보
    */
   @ApiOperation({ summary: '방 만들기', description: '방을 만듭니다. 성공시 HTTP 201과 방 ID, 방 제목을 리턴합니다.' })
-  @ApiResponse({ status: 201, type: AddRoomResult, description: '방 생성 성공' })
+  @ApiResponse({ status: 201, type: AddRoomResultDto, description: '방 생성 성공' })
   @ApiResponse({ status: 400, description: 'Body Field Error' })
   @Post('new')
   @HttpCode(201)
   addRoom(
-    @Body() reqData: CreateRoomDto,
-  ): AddRoomResult {
+    @Body() reqData: ChatRoomDto,
+  ): AddRoomResultDto {
     this.logger.debug(`addRoom: ${reqData.chatName}`);
     const roomno = this.chatroomsService.addRoom(reqData);
     this.eventRunner.emit('room:create', roomno, null, reqData.chatType);
-    const rtn: AddRoomResult = {
+    const rtn: AddRoomResultDto = {
       chatSeq: roomno,
       chatName: reqData.chatName,
     };
@@ -145,5 +146,56 @@ export default class ChatroomsController {
       Number(count),
     );
     return messages;
+  }
+
+  /**
+   * 방 정보를 가져옵니다.
+   *
+   * @param roomId 방 ID
+   * @returns 방 정보를 반환합니다.
+   */
+  @ApiOperation({ summary: '방 정보 조회', description: '방 정보를 조회합니다.' })
+  @ApiResponse({ status: 200, type: ChatRoomResultDto, description: '방 정보 조회 성공' })
+  @ApiParam({
+    name: 'roomId', type: Number, example: 1, description: '방 ID',
+  })
+  @Get('room/:roomId')
+  async getRoom(@Param('roomId') roomId: string): Promise<ChatRoomResultDto> {
+    const room = await this.chatroomsService.getRoomInfo(Number(roomId));
+    return room;
+  }
+
+  /**
+   * 방을 검색합니다. DM과 비공개 방은 제외합니다.
+   *
+   * @param searchKeyword 검색 키워드
+   * @param page 페이지 번호
+   * @param count 페이지당 방 개수
+   * @returns 검색 결과를 반환합니다.
+   * @example
+   */
+  @ApiOperation({ summary: '방 검색', description: '방 검색 기능입니다. 검색 키워드와 페이지 번호를 입력하여 검색 결과를 반환합니다.' })
+  @ApiResponse({ status: 200, type: [ChatRoomResultDto], description: '방 검색 성공' })
+  @ApiParam({
+    name: 'searchKeyword', type: String, example: '푸주', description: '검색 키워드',
+  })
+  @ApiParam({
+    name: 'page', type: Number, example: 1, description: '페이지 번호',
+  })
+  @ApiParam({
+    name: 'count', type: Number, example: 10, description: '페이지당 방 개수',
+  })
+  @Get('search/:searchKeyword/:page/:count')
+  async searchChatroom(
+    @Param('searchKeyword') searchKeyword: string,
+      @Param('page') page: string,
+      @Param('count') count: string,
+  ): Promise<Array<ChatRoomResultDto>> {
+    const result = await this.chatroomsService.searchChatroom(
+      searchKeyword,
+      Number(page),
+      Number(count),
+    );
+    return result;
   }
 }

@@ -3,7 +3,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class AddRoomResult {
+export class AddRoomResultDto {
   @ApiProperty({
     description: '채팅방 ID',
   })

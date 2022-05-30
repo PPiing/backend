@@ -1,6 +1,7 @@
 import { CacheModule, Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
+import ChatParticipantRepository from './chat-participant.repository';
 import ChatRepository from './chat.repository';
 import ChatroomsController from './chatrooms.controller';
 import { ChatroomsGateway } from './chatrooms.gateway';
@@ -21,6 +22,7 @@ import MessageRepository from './message.repository';
     ChatroomsService,
     ChatRepository,
     MessageRepository,
+    ChatParticipantRepository,
   ],
 })
 export class ChatroomsModule { }

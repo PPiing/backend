@@ -5,8 +5,10 @@ import {
 import { Cron } from '@nestjs/schedule';
 import { Cache } from 'cache-manager';
 import { Server, Socket } from 'socket.io';
+import ChatParticipantRepository from './chat-participant.repository';
 import ChatRepository from './chat.repository';
-import { CreateRoomDto } from './dto/create-room.dto';
+import ChatRoomResultDto from './dto/chat-room-result.dto';
+import { ChatRoomDto } from './dto/chat-room.dto';
 import { MessageDataDto } from './dto/message-data.dto';
 import MessageRepository from './message.repository';
 
@@ -17,6 +19,7 @@ export default class ChatroomsService {
   constructor(
     private readonly chatRepository: ChatRepository,
     private messageRepository: MessageRepository,
+    private chatParticipantRepository: ChatParticipantRepository,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
 
@@ -167,13 +170,13 @@ export default class ChatroomsService {
   }
 
   /**
-   * 소켓 연결 단계에서 클라이언트로부터 전송된 사용자 이름을 가져옵니다.
+   * 소켓 연결 단계에서 클라이언트로부터 전송된 사용자 ID를 가져옵니다.
    * 추후에 사용자 검증을 하는 함수로 리펙터링해야 합니다.
    *
    * @param user 클라이언트 소켓
-   * @returns 사용자 이름 (없으면 undefined)
+   * @returns 사용자 ID (없으면 undefined)
    */
-  getUserName(user: Socket): number | undefined {
+  getUserId(user: Socket): number | undefined {
     return Number.isNaN(user.handshake.auth.username)
       ? undefined : Number(user.handshake.auth.username);
   }
@@ -186,11 +189,11 @@ export default class ChatroomsService {
    * @returns 소속된 룸 목록
    */
   roomJoin(user: Socket, username: number): any[] {
-    const rooms = this.chatRepository.findRoomsByUserId(username);
+    const rooms = this.chatParticipantRepository.findRoomsByUserId(username);
     const rtn = [];
     rooms.forEach((room) => { // FIXME : 타입 명시 필요
-      user.join(room.chatSeq.toString()); // 본인이 속한 룸에 조인
-      rtn.push(room.chatSeq);
+      user.join(room.toString()); // 본인이 속한 룸에 조인
+      rtn.push(room);
     });
     return rtn;
   }
@@ -241,10 +244,10 @@ export default class ChatroomsService {
    * @param user 클라이언트 소켓
    */
   roomLeave(user: Socket): void {
-    const username = this.getUserName(user);
-    const rooms = this.chatRepository.findRoomsByUserId(username);
+    const username = this.getUserId(user);
+    const rooms = this.chatParticipantRepository.findRoomsByUserId(username);
     rooms.forEach((room) => {
-      user.leave(room.chatSeq.toString()); // 본인이 속한 룸에서 떠나기
+      user.leave(room.toString()); // 본인이 속한 룸에서 떠나기
     });
   }
 
@@ -254,7 +257,7 @@ export default class ChatroomsService {
    * @param create 생성할 방 정보
    * @returns 생성된 방 고유 ID
    */
-  addRoom(create: CreateRoomDto): number {
+  addRoom(create: ChatRoomDto): number {
     if (this.chatRepository.findRoomByRoomName(create.chatName)) {
       throw new BadRequestException('이미 존재하는 이름의 방입니다.');
     }
@@ -279,7 +282,7 @@ export default class ChatroomsService {
    * @returns 추가 성공 여부
    */
   addUser(chatSeq: number, users: number[]): boolean {
-    return this.chatRepository.addUser(chatSeq, users);
+    return this.chatParticipantRepository.addUser(chatSeq, users);
   }
 
   /**
@@ -290,7 +293,7 @@ export default class ChatroomsService {
    * @returns 제거 성공 여부
    */
   leftUser(chatSeq: any, user: any): boolean {
-    return this.chatRepository.removeUser(chatSeq, user);
+    return this.chatParticipantRepository.removeUser(chatSeq, user);
   }
 
   /**
@@ -310,5 +313,47 @@ export default class ChatroomsService {
    */
   findAllRooms(): any[] {
     return this.chatRepository.findAllRooms();
+  }
+
+  /**
+   * 방을 검색합니다.
+   *
+   * @param searchKeyword 방 검색 키워드
+   * @returns 방 정보
+   */
+  async searchChatroom(
+    searchKeyword: string,
+    page: number,
+    count: number,
+  ): Promise<Array<ChatRoomResultDto>> {
+    const chatroomList = await this.chatRepository.searchChatroom(searchKeyword, page, count);
+    const participants = await Promise.all(chatroomList.map(
+      (chatroom) => this.chatParticipantRepository.getChatParticipantsByRoomid(chatroom.chatSeq),
+    ));
+    return chatroomList.map((chatroom, index) => ({
+      chatSeq: chatroom.chatSeq,
+      chatName: chatroom.chatName,
+      chatType: chatroom.chatType,
+      isPassword: chatroom.password.length > 0,
+      participants: participants[index],
+    }));
+  }
+
+  /**
+   * 방 ID에 대한 방 정보를 가지고 옵니다.
+   *
+   * @param chatSeq 방 ID
+   * @returns 방 정보
+   */
+  async getRoomInfo(chatSeq: number): Promise<ChatRoomResultDto> {
+    const chatroom = await this.chatRepository.findRoomByRoomId(chatSeq);
+    const participants = await this.chatParticipantRepository.getChatParticipantsByRoomid(chatSeq);
+    return {
+      chatSeq: chatroom.chatSeq,
+      chatName: chatroom.chatName,
+      chatType: chatroom.chatType,
+      isPassword: chatroom.password.length > 0,
+      participants,
+    };
   }
 }

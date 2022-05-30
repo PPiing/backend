@@ -3,7 +3,7 @@
  *
  * @author joohongpark
  */
-const enum PartcAuth {
+enum PartcAuth {
   CPAU10 = 'CPAU10', // 일반 유저
   CPAU20 = 'CPAU20', // 관리자
   CPAU30 = 'CPAU30', // 소유자

@@ -13,7 +13,6 @@ export default class ChatRepository {
       chatName: '푸주홍의 등산클럽',
       password: '',
       isDirected: false,
-      users: [1],
     });
     this.MockEntity.push({
       chatSeq: 1,
@@ -21,7 +20,6 @@ export default class ChatRepository {
       chatName: '장이수의 도박클럽',
       password: '',
       isDirected: false,
-      users: [1, 2],
     });
   }
 
@@ -29,8 +27,13 @@ export default class ChatRepository {
     return this.MockEntity;
   }
 
-  findRoomsByUserId(id: number): any[] {
-    return this.MockEntity.filter((room) => room.users.includes(id));
+  findRoomByRoomId(chatSeq: number): any {
+    for (const room of this.MockEntity) {
+      if (room.chatSeq === chatSeq) {
+        return room;
+      }
+    }
+    return null;
   }
 
   findRoomByRoomName(chatName: string): any {
@@ -61,23 +64,13 @@ export default class ChatRepository {
     });
   }
 
-  addUser(chatSeq: number, users: number[]): boolean {
+  searchChatroom(searchKeyword: string, page: number, count: number): any[] {
+    const searchResult = [];
     for (const room of this.MockEntity) {
-      if (room.chatSeq === chatSeq) {
-        room.users.push(...users);
-        return true;
+      if (room.chatName.includes(searchKeyword)) {
+        searchResult.push(room);
       }
     }
-    return false;
-  }
-
-  removeUser(chatSeq: number, user: number): boolean {
-    for (const room of this.MockEntity) {
-      if (room.chatSeq as number === chatSeq) {
-        room.users = room.users.filter((u) => u !== user);
-        return true;
-      }
-    }
-    return false;
+    return searchResult.slice(page * count, page * count + count);
   }
 }

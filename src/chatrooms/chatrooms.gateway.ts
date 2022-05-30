@@ -37,7 +37,7 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
     this.logger.debug(`handleConnection: ${client.id} connected`);
     // TODO
     // 사용자 인증을 분리하는 방안 필요 (인증 실패 시 연결 끊기)
-    const username = this.chatroomsService.getUserName(client);
+    const username = this.chatroomsService.getUserId(client);
     if (username === undefined) {
       throw new Error('Auth Error');
     }
