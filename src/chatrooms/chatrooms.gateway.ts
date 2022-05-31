@@ -118,12 +118,13 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
    * @param user 유저 ID
    */
   @OnEvent('room:leave')
-  async onRoomLeave(chatSeq: number, user: number) {
+  async onRoomLeave(chatSeq: number, user: number, kicked: boolean) {
     this.logger.debug(`onRoomLeft: ${chatSeq}, user: ${user}`);
     // 본인 포함 방에서 내보낸 (나간) 유저가 나갔다고 해당 룸에 들어가 있는 클라이언트들에게 알립니다.
     const data: ISocketSend = {
       chatSeq,
       userIDs: [user],
+      kicked,
     };
     this.server.to(chatSeq.toString()).emit('user leave', data);
     // 유저를 룸에서 내보냅니다 (나갑니다).

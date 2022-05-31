@@ -423,4 +423,45 @@ export default class ChatroomsService {
       participants,
     };
   }
+
+  /**
+   * 특정 방에 특정 유저의 권한을 가져옵니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param user 사용자 식별자
+   * @returns 권한
+   */
+  async getUserAuth(chatSeq: number, user: number): Promise<PartcAuth> {
+    const participant = await this.chatParticipantRepository
+      .getChatParticipantByUserIdAndRoomId(chatSeq, user);
+    return participant.partcAuth;
+  }
+
+  /**
+   * 특정 방에 특정 유저가 참여하고 있는지 검사합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param user 사용자 식별자
+   * @returns 참여 여부
+   */
+  async isParticipant(chatSeq: number, user: number): Promise<boolean> {
+    const participant = await this.chatParticipantRepository
+      .getChatParticipantByUserIdAndRoomId(chatSeq, user);
+    return participant !== undefined;
+  }
+
+  /**
+   * 특정 방에 특정 유저의 권한이 방장인지 검사합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param user 사용자 식별자
+   * @returns 권한
+   */
+  async isMaster(chatSeq: number, user: number): Promise<boolean> {
+    if (await this.isParticipant(chatSeq, user) === false) {
+      return false;
+    }
+    const participant = await this.getUserAuth(chatSeq, user);
+    return participant === PartcAuth.CPAU30;
+  }
 }

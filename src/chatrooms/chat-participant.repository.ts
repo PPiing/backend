@@ -13,7 +13,7 @@ export default class ChatParticipantRepository {
       partcSeq: 0,
       userSeq: 10,
       chatSeq: 0,
-      partcAuth: PartcAuth.CPAU10,
+      partcAuth: PartcAuth.CPAU30,
       mutedUntil: new Date(),
       isBaned: false,
       enteredAt: new Date(),
@@ -52,6 +52,59 @@ export default class ChatParticipantRepository {
       .map((entity) => entity.chatSeq);
   }
 
+  async banUser(chatSeq: number, user: number): Promise<boolean> {
+    const entity = this.MockEntity.find(
+      (e) => e.chatSeq === chatSeq && e.userSeq === user,
+    );
+    if (entity) {
+      entity.isBaned = true;
+      return true;
+    }
+    return false;
+  }
+
+  async unbanUser(chatSeq: number, user: number): Promise<boolean> {
+    const entity = this.MockEntity.find(
+      (e) => e.chatSeq === chatSeq && e.userSeq === user,
+    );
+    if (entity) {
+      entity.isBaned = false;
+      return true;
+    }
+    return false;
+  }
+
+  async muteUser(chatSeq: number, user: number, mutedUntil: Date): Promise<boolean> {
+    const entity = this.MockEntity.find(
+      (e) => e.chatSeq === chatSeq && e.userSeq === user,
+    );
+    if (entity) {
+      entity.mutedUntil = mutedUntil;
+      return true;
+    }
+    return false;
+  }
+
+  async unmuteUser(chatSeq: number, user: number): Promise<boolean> {
+    const entity = this.MockEntity.find(
+      (e) => e.chatSeq === chatSeq && e.userSeq === user,
+    );
+    if (entity) {
+      entity.mutedUntil = new Date();
+      return true;
+    }
+    return false;
+  }
+
+  async getChatParticipantByUserIdAndRoomId(
+    chatSeq: number,
+    userId: number,
+  ): Promise<ChatParticipantDto | undefined> {
+    return this.MockEntity.find(
+      (entity) => entity.userSeq === userId && entity.chatSeq === chatSeq,
+    );
+  }
+
   async addUsers(chatSeq: number, users: number[]): Promise<void> {
     let counter = this.MockEntity.length - 1;
     const insert = users.map((user) => {
@@ -83,7 +136,7 @@ export default class ChatParticipantRepository {
 
   removeUser(chatSeq: number, user: number): boolean {
     this.MockEntity = this.MockEntity.filter(
-      (entity) => entity.chatSeq !== chatSeq && entity.userSeq !== user,
+      (entity) => !(entity.chatSeq === chatSeq && entity.userSeq === user),
     );
     return true;
   }

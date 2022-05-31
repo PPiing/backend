@@ -134,6 +134,47 @@ export default class ChatroomsController {
   }
 
   /**
+   * 특정 사용자를 방에 초대합니다.
+   * 초대하는 사용자가 권한이 없거나 자기 자신을 초대하거나 존재하지 않는 사용자면 에러가 발생합니다.
+   * 추후에 사용자 ID (본인)는 세션에서 가져올 예정입니다.
+   *
+   * @param target 초대할 사용자 ID
+   * @param roomId 초대할 방 ID
+   * @param by 초대한 사용자 ID
+   */
+  @ApiOperation({ summary: '사용자를 방에 초대합니다.', description: '사용자를 방에 초대합니다.' })
+  @ApiResponse({ status: 200, description: '초대 성공' })
+  @ApiResponse({ status: 400, description: '초대할 사용자가 존재하지 않거나 자신을 초대하거나 존재하지 않는 방' })
+  @ApiParam({
+    name: 'target', type: Number, example: 1, description: '초대할 사용자 ID',
+  })
+  @ApiParam({
+    name: 'roomId', type: Number, example: 1, description: '초대할 방 ID',
+  })
+  @ApiParam({
+    name: 'by', type: Number, example: 1, description: '초대한 사용자 ID',
+  })
+  @Put('invite/:target/:roomId/:by')
+  async inviteUser(
+    @Param('target') target: string,
+      @Param('roomId') roomId: string,
+      @Param('by') by: string,
+  ): Promise<void> {
+    this.logger.debug(`inviteUser: ${target} -> ${roomId} -> ${by}`);
+    const targetId = Number(target);
+    const roomno = Number(roomId);
+    const inviter = Number(by);
+    if (await this.chatroomsService.isMaster(roomno, inviter) === false) {
+      throw new BadRequestException('권한이 없습니다.');
+    }
+    if (targetId === inviter) {
+      throw new BadRequestException('자신을 초대할 수 없습니다.');
+    }
+    await this.chatroomsService.addNormalUsers(roomno, [targetId]);
+    this.eventRunner.emit('room:join', roomno, [targetId]);
+  }
+
+  /**
    * 특정 방에서 나가기 요청을 처리합니다.
    * 추후에 사용자 ID는 세션에서 가져올 예정입니다.
    *
@@ -159,8 +200,52 @@ export default class ChatroomsController {
     const user = Number(userId);
     const result = this.chatroomsService.leftUser(roomid, user);
     if (result) {
-      this.eventRunner.emit('room:leave', roomid, user);
+      this.eventRunner.emit('room:leave', roomid, user, false);
     }
+  }
+
+  /**
+   * 특정 사용자를 방에서 강퇴합니다.
+   * 초대하는 사용자가 권한이 없거나 자기 자신을 강퇴하거나 존재하지 않는 사용자면 에러가 발생합니다.
+   * 추후에 사용자 ID (본인)는 세션에서 가져올 예정입니다.
+   *
+   * @param target 강퇴할 사용자 ID
+   * @param roomId 강퇴할 방 ID
+   * @param by 강퇴하는 관리자 ID
+   */
+  @ApiOperation({ summary: '사용자를 방에서 강퇴합니다.', description: '사용자를 방에서 강퇴합니다.' })
+  @ApiResponse({ status: 200, description: '강퇴 성공' })
+  @ApiResponse({ status: 400, description: '강퇴할 사용자가 존재하지 않거나 자신을 강퇴하거나 존재하지 않는 방' })
+  @ApiParam({
+    name: 'target', type: Number, example: 1, description: '강퇴할 사용자 ID',
+  })
+  @ApiParam({
+    name: 'roomId', type: Number, example: 1, description: '강퇴할 방 ID',
+  })
+  @ApiParam({
+    name: 'by', type: Number, example: 1, description: '강퇴하는 관리자 ID',
+  })
+  @Delete('kick/:target/:roomId/:by')
+  async kickUser(
+    @Param('target') target: string,
+      @Param('roomId') roomId: string,
+      @Param('by') by: string,
+  ): Promise<void> {
+    this.logger.debug(`kickUser: ${target} -> ${roomId} -> ${by}`);
+    const targetId = Number(target);
+    const roomno = Number(roomId);
+    const who = Number(by);
+    if (await this.chatroomsService.isMaster(roomno, who) === false) {
+      throw new BadRequestException('권한이 없습니다.');
+    }
+    if (targetId === who) {
+      throw new BadRequestException('자신을 강퇴할 수 없습니다.');
+    }
+    const result = this.chatroomsService.leftUser(roomno, targetId);
+    if (result === false) {
+      throw new BadRequestException('존재하지 않는 사용자입니다.');
+    }
+    this.eventRunner.emit('room:leave', roomno, [targetId], true);
   }
 
   /**
