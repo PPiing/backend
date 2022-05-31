@@ -5,6 +5,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import ChatroomsService from './chatrooms.service';
+import ISocketSend from './interface/socket-send';
 
 /**
  * socket 네임스페이스로 들어오는 소켓 요청들을 처리하는 게이트웨이
@@ -37,19 +38,19 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
     this.logger.debug(`handleConnection: ${client.id} connected`);
     // TODO
     // 사용자 인증을 분리하는 방안 필요 (인증 실패 시 연결 끊기)
-    const username = this.chatroomsService.getUserId(client);
-    if (username === undefined) {
+    const userID = this.chatroomsService.getUserId(client);
+    if (userID === undefined) {
       throw new Error('Auth Error');
     }
 
     // 현재 접속 세션이 생성된 소켓의 고유 ID와 사용자 식별 ID를 저장합니다.
-    await this.chatroomsService.onlineUserAdd(client, username);
+    await this.chatroomsService.onlineUserAdd(client, userID);
 
     // 본인이 속한 룸에 조인시킵니다. 그리고 본인이 속한 룸의 리스트를 리턴합니다.
-    const roomList = this.chatroomsService.roomJoin(client, username);
+    const roomList = this.chatroomsService.roomJoin(client, userID);
 
     // 룸 리스트를 클라이언트에 전송합니다.
-    client.emit('rooms', roomList);
+    client.emit('rooms', roomList); // TODO ISocketSend 적용 예정
   }
 
   /**
@@ -81,29 +82,13 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
     const name = await this.chatroomsService.whoAmI(client);
     if (rooms.has(message.at.toString()) && name !== undefined) {
       const seq = await this.chatroomsService.newChat(name, message.at, message.content);
-      this.server.to(message.at.toString()).emit('chat', { ...message, user: name, seq });
-    }
-  }
-
-  /**
-   * 방을 생성하는 HTTP 요청을 받을 때 호출되는 콜백함수입니다.
-   *
-   * @param chatSeq 방 ID
-   * @param users 유저 ID 배열
-   * @param chatType
-   */
-  @OnEvent('room:create')
-  async onRoomCreate(chatSeq: number, users: number[] | null, chatType: string) {
-    this.logger.debug(`onRoomCreated: ${chatSeq}`);
-    if (users) {
-      // 클라이언트 ID 배열을 이용해 접속중인 클라이언트 소켓에게 룸 조인을 시킵니다.
-      await this.chatroomsService.roomAddUsers(this.server, chatSeq, users);
-    }
-    // 공개방일 때에만 전체에 방 개설 사실을 알리며 그 이외에 경우엔 룸에 참가한 사람에게만 보냅니다.
-    if (this.chatroomsService.isPublic(chatType)) {
-      this.server.emit('new room', { chatSeq });
-    } else {
-      this.server.to(chatSeq.toString()).emit('new room', { chatSeq });
+      const data: ISocketSend = {
+        chatSeq: message.at,
+        userIDs: [name],
+        msg: message.content,
+        id: seq,
+      };
+      this.server.to(message.at.toString()).emit('chat', data);
     }
   }
 
@@ -111,15 +96,19 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
    * 방에 합류하는 HTTP 요청을 받을 때 호출되는 콜백함수입니다.
    *
    * @param chatSeq 방 ID
-   * @param users 유저 ID 배열
+   * @param userIDs 유저 ID 배열
    */
   @OnEvent('room:join')
-  async onRoomJoin(chatSeq: number, users: any[]) {
-    this.logger.debug(`onRoomJoined: ${chatSeq}, users: ${users}`);
+  async onRoomJoin(chatSeq: number, userIDs: number[]) {
+    this.logger.debug(`onRoomJoined: ${chatSeq}, userIDs: ${JSON.stringify(userIDs)}`);
     // 클라이언트 ID 배열을 이용해 접속중인 클라이언트 소켓에게 룸 조인을 시킵니다.
-    await this.chatroomsService.roomAddUsers(this.server, chatSeq, users);
+    const data: ISocketSend = {
+      chatSeq,
+      userIDs,
+    };
+    await this.chatroomsService.roomAddUsers(this.server, chatSeq, userIDs);
     // 룸에 참가한 사람에게 룸에 참가했다는 내용을 보냅니다.
-    this.server.to(chatSeq.toString()).emit('join room', { chatSeq, users });
+    this.server.to(chatSeq.toString()).emit('join room', data);
   }
 
   /**
@@ -132,7 +121,11 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
   async onRoomLeave(chatSeq: number, user: number) {
     this.logger.debug(`onRoomLeft: ${chatSeq}, user: ${user}`);
     // 본인 포함 방에서 내보낸 (나간) 유저가 나갔다고 해당 룸에 들어가 있는 클라이언트들에게 알립니다.
-    this.server.to(chatSeq.toString()).emit('user leave', { chatSeq, user });
+    const data: ISocketSend = {
+      chatSeq,
+      userIDs: [user],
+    };
+    this.server.to(chatSeq.toString()).emit('user leave', data);
     // 유저를 룸에서 내보냅니다 (나갑니다).
     await this.chatroomsService.roomLeaveUser(this.server, chatSeq, user);
   }

@@ -14,6 +14,8 @@ import { AddRoomResultDto } from './dto/add-room-result.dto';
 import { MessageDataDto } from './dto/message-data.dto';
 import ChatRoomResultDto from './dto/chat-room-result.dto';
 
+// TODO URI 파라미터로 들어오는 값에 파이프 적용 고려
+
 @ApiTags('채팅방')
 @Controller('chatrooms')
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -26,26 +28,73 @@ export default class ChatroomsController {
   ) {}
 
   /**
-   * 새 방을 만듭니다. 방에 참여하는 유저는 본인 스스로를 추가합니다.
-   * 현재는 아무도 추가하지 않으며 추후에 사용자 ID는 세션에서 가져올 예정입니다.
+   * 새 방을 만듭니다. 방에 참여하는 유저는 본인 스스로를 추가하며 방장으로 지정합니다.
+   * 추후에 본인 ID는 세션에서 가져올 예정입니다.
    *
-   * @param create
+   * @param reqData
    * @returns 방 정보
    */
   @ApiOperation({ summary: '방 만들기', description: '방을 만듭니다. 성공시 HTTP 201과 방 ID, 방 제목을 리턴합니다.' })
   @ApiResponse({ status: 201, type: AddRoomResultDto, description: '방 생성 성공' })
   @ApiResponse({ status: 400, description: 'Body Field Error' })
-  @Post('new')
+  @ApiParam({
+    name: 'by', type: Number, example: 1, description: '유저 ID (제거 예정)',
+  })
+  @Post('new/:by')
   @HttpCode(201)
   async addRoom(
     @Body() reqData: ChatRoomDto,
+      @Param('by') by: string,
   ): Promise<AddRoomResultDto> {
+    const owner = Number(by);
     this.logger.debug(`addRoom: ${reqData.chatName}`);
     const roomno = await this.chatroomsService.addRoom(reqData);
-    this.eventRunner.emit('room:create', roomno, null, reqData.chatType);
+    if (roomno === -1) {
+      throw new BadRequestException('요청이 유효하지 않습니다. (방제 중복 또는 요청 파라미터 에러)');
+    }
+    await this.chatroomsService.addOwner(roomno, owner);
+    this.eventRunner.emit('room:join', roomno, [owner]);
     const rtn: AddRoomResultDto = {
       chatSeq: roomno,
       chatName: reqData.chatName,
+    };
+    return rtn;
+  }
+
+  /**
+   * 새 디엠 방을 만듭니다. 방에 참여하는 유저와 초대하고자 하는 유저를 추가합니다.
+   * 추후에 본인 ID는 세션에서 가져올 예정입니다.
+   *
+   * @param who 디엠 보낼 사람
+   * @returns 방 정보
+   */
+  @ApiOperation({ summary: '디엠 방 만들기', description: '디엠 방을 만듭니다. 성공시 HTTP 201과 방 ID를 리턴합니다.' })
+  @ApiResponse({ status: 201, type: AddRoomResultDto, description: '방 생성 성공' })
+  @ApiResponse({ status: 400, description: 'Body Field Error' })
+  @ApiParam({
+    name: 'who', type: Number, example: 1, description: '초대받는 유저 ID',
+  })
+  @ApiParam({
+    name: 'by', type: Number, example: 1, description: '유저 ID (제거 예정)',
+  })
+  @Post('new/dm/:who/:by')
+  @HttpCode(201)
+  async addDM(
+    @Param('who') who: string,
+      @Param('by') by: string,
+  ): Promise<AddRoomResultDto> {
+    const inviter = Number(by);
+    const invitee = Number(who);
+    this.logger.debug(`addDM: ${invitee}`);
+    // TODO inviter, invitee 에 대한 유효성 검사 필요
+    const roomno = await this.chatroomsService.addDM(inviter, invitee);
+    if (roomno === -1) {
+      throw new BadRequestException('요청이 유효하지 않습니다. (중복 DM방)');
+    }
+    await this.chatroomsService.addNormalUsers(roomno, [inviter, invitee]);
+    this.eventRunner.emit('room:join', roomno, [inviter, invitee]);
+    const rtn: AddRoomResultDto = {
+      chatSeq: roomno,
     };
     return rtn;
   }

@@ -11,7 +11,7 @@ export default class ChatParticipantRepository {
   constructor() {
     this.MockEntity.push({
       partcSeq: 0,
-      userSeq: 1,
+      userSeq: 10,
       chatSeq: 0,
       partcAuth: PartcAuth.CPAU10,
       mutedUntil: new Date(),
@@ -52,19 +52,33 @@ export default class ChatParticipantRepository {
       .map((entity) => entity.chatSeq);
   }
 
-  addUser(chatSeq: number, users: number[]): boolean {
-    const insert = users.map((user) => ({
-      partcSeq: this.MockEntity.length,
-      userSeq: user,
-      chatSeq,
-      partcAuth: PartcAuth.CPAU10,
-      mutedUntil: new Date(),
-      isBaned: false,
-      enteredAt: new Date(),
-      leavedAt: new Date(),
-    }));
+  async addUsers(chatSeq: number, users: number[]): Promise<void> {
+    let counter = this.MockEntity.length - 1;
+    const insert = users.map((user) => {
+      counter += 1;
+      return {
+        partcSeq: counter,
+        userSeq: user,
+        chatSeq,
+        partcAuth: PartcAuth.CPAU10,
+        mutedUntil: new Date(),
+        isBaned: false,
+        enteredAt: new Date(),
+        leavedAt: new Date(),
+      };
+    });
     this.MockEntity.push(...insert);
-    return true;
+  }
+
+  async changeUserAuth(chatSeq: number, user: number, partcAuth: PartcAuth): Promise<boolean> {
+    const entity = this.MockEntity.find(
+      (e) => e.chatSeq === chatSeq && e.userSeq === user,
+    );
+    if (entity) {
+      entity.partcAuth = partcAuth;
+      return true;
+    }
+    return false;
   }
 
   removeUser(chatSeq: number, user: number): boolean {

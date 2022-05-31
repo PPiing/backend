@@ -14,13 +14,14 @@ export class ChatRoomDto {
   @ApiProperty({
     description: '채팅방 종류 (마스터코드)',
     enum: ['CHTP10', 'CHTP20', 'CHTP30', 'CHTP40'],
+    example: 'CHTP20',
   })
   @IsEnum(ChatType)
   @IsNotEmpty()
     chatType: ChatType;
 
   @ApiProperty({
-    description: '채팅방 이름',
+    description: '채팅방 이름', // DM인 경우 'DM-1-2' 과 같이 이름이 지정됨
     example: '푸주홍의 등산크럽',
   })
   @IsString()

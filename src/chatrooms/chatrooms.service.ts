@@ -1,11 +1,12 @@
 import {
-  BadRequestException,
   CACHE_MANAGER, Inject, Injectable, Logger,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Cron } from '@nestjs/schedule';
 import { Cache } from 'cache-manager';
 import { Server, Socket } from 'socket.io';
+import ChatType from 'src/enums/mastercode/chat-type.enum';
+import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
 import ChatParticipantRepository from './chat-participant.repository';
 import ChatRepository from './chat.repository';
 import ChatRoomResultDto from './dto/chat-room-result.dto';
@@ -153,11 +154,11 @@ export default class ChatroomsService {
    * 접속한 사용자 ID와 소켓 ID를 연결합니다.
    *
    * @param user 접속한 사용자 소켓
-   * @param username 접속한 사용자 식별자 (이름)
+   * @param userID 접속한 사용자 식별자
    */
-  async onlineUserAdd(user: Socket, username: number): Promise<void> {
+  async onlineUserAdd(user: Socket, userID: number): Promise<void> {
     // 현재 접속 세션이 생성된 소켓의 고유 ID와 사용자 식별 ID를 저장합니다.
-    await this.cacheManager.set(user.id, username);
+    await this.cacheManager.set(user.id, userID);
   }
 
   /**
@@ -204,16 +205,16 @@ export default class ChatroomsService {
    *
    * @param server 서버 소켓 객체
    * @param chatSeq 룸 식별자
-   * @param users 추가할 클라이언트 식별자 목록
+   * @param userIDs 추가할 클라이언트 식별자 목록
    */
-  async roomAddUsers(server: Server, chatSeq: number, users: number[]): Promise<void> {
+  async roomAddUsers(server: Server, chatSeq: number, userIDs: number[]): Promise<void> {
     // NOTE: 전체적으로 리팩터링 예정
     // Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>
     // eslint-disable-next-line no-restricted-syntax
     for (const [id, socket] of (server.sockets as any)) { // FIXME : 타입 명시 필요
       // eslint-disable-next-line no-await-in-loop
-      const clientId : undefined | number = await this.cacheManager.get(id);
-      if (clientId !== undefined && users.includes(clientId)) {
+      const userID : undefined | number = await this.cacheManager.get(id);
+      if (userID !== undefined && userIDs.includes(userID)) {
         socket.join(chatSeq.toString());
       }
     }
@@ -224,16 +225,16 @@ export default class ChatroomsService {
    *
    * @param server 서버 소켓 객체
    * @param chatSeq 룸 식별자
-   * @param user 추가할 클라이언트 식별자
+   * @param userID 클라이언트 식별자
    */
-  async roomLeaveUser(server: Server, chatSeq: number, user: number): Promise<void> {
+  async roomLeaveUser(server: Server, chatSeq: number, userID: number): Promise<void> {
     // NOTE: 전체적으로 리팩터링 예정
     // Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>
     // eslint-disable-next-line no-restricted-syntax
     for (const [id, socket] of (server.sockets as any)) { // FIXME : 타입 명시 필요
       // eslint-disable-next-line no-await-in-loop
-      const clientId : undefined | number = await this.cacheManager.get(id);
-      if (clientId !== undefined && clientId === user) {
+      const getUserID : undefined | number = await this.cacheManager.get(id);
+      if (getUserID !== undefined && getUserID === userID) {
         socket.leave(chatSeq.toString());
       }
     }
@@ -260,7 +261,10 @@ export default class ChatroomsService {
    */
   async addRoom(create: ChatRoomDto): Promise<number> {
     if (this.chatRepository.findRoomByRoomName(create.chatName)) {
-      throw new BadRequestException('이미 존재하는 이름의 방입니다.');
+      return -1;
+    }
+    if (create.chatType === ChatType.CHTP10) {
+      return -1; // DM은 여기서 처리하지 않음.
     }
     const hashPassword = create.password ? await bcrypt.hash(create.password, 10) : undefined;
     const hashed = {
@@ -269,6 +273,29 @@ export default class ChatroomsService {
     };
     this.logger.debug(`[ChatRoomService] addRoom : ${JSON.stringify(hashed)}`);
     return this.chatRepository.addRoom(hashed).chatSeq;
+  }
+
+  /**
+   * 새로운 디엠 방을 생성합니다.
+   *
+   * @param user1 대화거는 사람 ID
+   * @param user2 대화할 사람 ID
+   * @returns 생성된 방 고유 ID
+   */
+  async addDM(user1: number, user2: number): Promise<number> {
+    // 기존 디엠 방이 있는지 확인
+    if (this.chatRepository.findRoomByRoomName(`DM-${user1}-${user2}`)
+     || this.chatRepository.findRoomByRoomName(`DM-${user2}-${user1}`)) {
+      return -1;
+    }
+    // TODO 유저 ID가 올바른지 검증 필요 - 외부에서 처리
+    const chatName = `DM-${user1}-${user2}`;
+    const newRoom = {
+      chatName,
+      chatType: ChatType.CHTP10,
+    };
+    this.logger.debug(`[ChatRoomService] addDM : ${JSON.stringify(newRoom)}`);
+    return this.chatRepository.addRoom(newRoom).chatSeq;
   }
 
   /**
@@ -282,14 +309,25 @@ export default class ChatroomsService {
   }
 
   /**
-   * 특정 방에 사용자들을 추가합니다.
+   * 특정 방에 일반 사용자들을 추가합니다.
    *
    * @param chatSeq 방 식별자
-   * @param users 추가할 사용자 식별자 목록
-   * @returns 추가 성공 여부
+   * @param users 추가할 사용자 고유 ID 목록
+   * @returns 사용자 식별자 리스트
    */
-  addUser(chatSeq: number, users: number[]): boolean {
-    return this.chatParticipantRepository.addUser(chatSeq, users);
+  async addNormalUsers(chatSeq: number, users: number[]): Promise<void> {
+    await this.chatParticipantRepository.addUsers(chatSeq, users);
+  }
+
+  /**
+   * 방에 사용자를 추가하고 방을 만든 사람을 방장으로 지정합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param user 방장 고유 ID
+   */
+  async addOwner(chatSeq: number, user: number): Promise<void> {
+    await this.chatParticipantRepository.addUsers(chatSeq, [user]);
+    await this.chatParticipantRepository.changeUserAuth(chatSeq, user, PartcAuth.CPAU30);
   }
 
   /**
@@ -315,12 +353,12 @@ export default class ChatroomsService {
 
   /**
    * 외부 접근자가 방에 입장할 때 입장해도 되는지, 올바른 정보를 가지고 있는지 검증합니다.
-   * 올바른 정보를 가비고 있다면 방에 입장합니다.
+   * 올바른 정보를 가지고 있다면 방에 입장합니다.
    *
    * @param chatSeq 방 식별자
-   * @param user 사용자 식별자
+   * @param user 사용자 식별자 (사용자 고유 ID)
    * @param password 비밀번호
-   * @returns 입장 가능 여부
+   * @returns 성공 여부
    */
   async joinRoomByExUser(
     chatSeq: number,
@@ -340,7 +378,8 @@ export default class ChatroomsService {
         return false;
       }
     }
-    return this.addUser(chatSeq, [user]);
+    await this.addNormalUsers(chatSeq, [user]);
+    return true;
   }
 
   /**
