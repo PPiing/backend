@@ -1,7 +1,10 @@
 import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
 import {
-  Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ChatEvent } from './chat-event.entity';
 import Chat from './chat.entity';
 import User from './user.entity';
 
@@ -28,7 +31,7 @@ export default class ChatParticipant {
   @CreateDateColumn()
     enteredAt: Date;
 
-  @CreateDateColumn()
+  @DeleteDateColumn()
     leavedAt: Date;
 
   @ManyToOne(() => Chat, (chat) => chat.chatSeq)
@@ -38,4 +41,10 @@ export default class ChatParticipant {
   @ManyToOne(() => User, (user) => user.userSeq)
   @JoinColumn({ name: 'userSeq' })
     user: User;
+
+  @OneToMany(() => ChatEvent, (chatEvent) => chatEvent.fromWho)
+    fromWho: ChatEvent[];
+
+  @OneToMany(() => ChatEvent, (chatEvent) => chatEvent.toWho)
+    toWho: ChatEvent[];
 }

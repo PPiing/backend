@@ -2,6 +2,7 @@ import ChatType from 'src/enums/mastercode/chat-type.enum';
 import {
   Column, Entity, OneToMany, PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ChatEvent } from './chat-event.entity';
 import ChatParticipant from './chat-participant.entity';
 import Message from './message.entity';
 
@@ -27,4 +28,7 @@ export default class Chat {
 
   @OneToMany(() => ChatParticipant, (chatParticipant) => chatParticipant.chatSeq)
     partcSeq: ChatParticipant[];
+
+  @OneToMany(() => ChatEvent, (chatEvent) => chatEvent.chatSeq)
+    eventSeq: ChatEvent[];
 }
