@@ -50,7 +50,7 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
     const roomList = this.chatroomsService.roomJoin(client, userID);
 
     // 룸 리스트를 클라이언트에 전송합니다.
-    client.emit('rooms', roomList); // TODO ISocketSend 적용 예정
+    client.emit('chat:init', roomList); // TODO ISocketSend 적용 예정
   }
 
   /**
@@ -93,6 +93,16 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
   }
 
   /**
+   * 알림성 메시지들을 방에 속한 클라이언트에게 송신합니다.
+   *
+   * @param chatSeq 방 ID
+   * @param client 클라이언트 소켓 객체
+   * @param message 알림성 메시지
+   * @param data 알림성 메시지에 대한 추가 정보
+   * @param userID 사용자 ID
+   */
+
+  /**
    * 방에 합류하는 HTTP 요청을 받을 때 호출되는 콜백함수입니다.
    *
    * @param chatSeq 방 ID
@@ -108,7 +118,7 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
     };
     await this.chatroomsService.roomAddUsers(this.server, chatSeq, userIDs);
     // 룸에 참가한 사람에게 룸에 참가했다는 내용을 보냅니다.
-    this.server.to(chatSeq.toString()).emit('join room', data);
+    this.server.to(chatSeq.toString()).emit('room:join', data);
   }
 
   /**
@@ -126,7 +136,7 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
       userIDs: [user],
       kicked,
     };
-    this.server.to(chatSeq.toString()).emit('user leave', data);
+    this.server.to(chatSeq.toString()).emit('room:leave', data);
     // 유저를 룸에서 내보냅니다 (나갑니다).
     await this.chatroomsService.roomLeaveUser(this.server, chatSeq, user);
   }
