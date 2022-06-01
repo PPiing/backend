@@ -44,19 +44,17 @@ export default class ChatRepository {
   addRoom(room: any): any {
     this.MockEntity.push({
       chatSeq: this.MockEntity.length,
-      chatType: 'CHTP20',
+      chatType: room.chatType,
       chatName: room.chatName,
-      password: '',
-      isDirected: false,
-      users: [room.masterID],
+      password: room.password,
+      isDirected: room.chatType === 'CHTP10',
     });
     return ({
       chatSeq: this.MockEntity.length - 1,
-      chatType: 'CHTP20',
+      chatType: room.chatType,
       chatName: room.chatName,
-      password: '',
-      isDirected: false,
-      users: [room.masterID],
+      password: room.password,
+      isDirected: room.chatType === 'CHTP10',
     });
   }
 

@@ -6,6 +6,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   ApiTags, ApiResponse, ApiOperation, ApiParam,
 } from '@nestjs/swagger';
+import ChatType from 'src/enums/mastercode/chat-type.enum';
 import ChatroomsService from './chatrooms.service';
 import { ChatRoomDto } from './dto/chat-room.dto';
 import { JoinRoomDto } from './dto/join-room.dto';
@@ -122,9 +123,15 @@ export default class ChatroomsController {
     this.logger.debug(`joinRoom: body -> ${JSON.stringify(data)}`);
     const roomid = Number(roomId);
     const user = Number(userId);
+    const roomType = await this.chatroomsService.getRoomType(roomid);
+    if (roomType === undefined) {
+      throw new BadRequestException('존재하지 않는 방입니다.');
+    } else if (roomType === ChatType.CHTP10) {
+      throw new BadRequestException('디엠엔 입장할 수 없습니다.');
+    }
     const result = await this.chatroomsService.joinRoomByExUser(roomid, user, data.password);
     if (result === false) {
-      throw new BadRequestException('비밀번호가 틀렸거나 존재하지 않는 방입니다.');
+      throw new BadRequestException('비밀번호가 틀렸습니다.');
     }
     this.eventRunner.emit('room:join', roomid, [user]);
     const rtn: IJoinRoomResult = {
@@ -162,16 +169,22 @@ export default class ChatroomsController {
   ): Promise<void> {
     this.logger.debug(`inviteUser: ${target} -> ${roomId} -> ${by}`);
     const targetId = Number(target);
-    const roomno = Number(roomId);
+    const roomid = Number(roomId);
     const inviter = Number(by);
-    if (await this.chatroomsService.isMaster(roomno, inviter) === false) {
+    const roomType = await this.chatroomsService.getRoomType(roomid);
+    if (roomType === undefined) {
+      throw new BadRequestException('존재하지 않는 방입니다.');
+    } else if (roomType === ChatType.CHTP10) {
+      throw new BadRequestException('디엠엔 입장할 수 없습니다.');
+    }
+    if (await this.chatroomsService.isMaster(roomid, inviter) === false) {
       throw new BadRequestException('권한이 없습니다.');
     }
     if (targetId === inviter) {
       throw new BadRequestException('자신을 초대할 수 없습니다.');
     }
-    await this.chatroomsService.addNormalUsers(roomno, [targetId]);
-    this.eventRunner.emit('room:join', roomno, [targetId]);
+    await this.chatroomsService.addNormalUsers(roomid, [targetId]);
+    this.eventRunner.emit('room:join', roomid, [targetId]);
   }
 
   /**

@@ -299,16 +299,6 @@ export default class ChatroomsService {
   }
 
   /**
-   * 방이 전체 공개방인지 아닌지의 여부를 판별합니다.
-   *
-   * @param room 방 정보
-   * @returns 방이 전체 공개방인지 아닌지
-   */
-  isPublic(roomType: string): boolean {
-    return roomType === 'CHTP20';
-  }
-
-  /**
    * 특정 방에 일반 사용자들을 추가합니다.
    *
    * @param chatSeq 방 식별자
@@ -383,6 +373,20 @@ export default class ChatroomsService {
   }
 
   /**
+   * 방의 유형을 가져옵니다. 만약 방이 존재하지 않다면 undefined를 리턴합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @returns 방 유형 or undefined
+   */
+  async getRoomType(chatSeq: number): Promise<ChatType | undefined> {
+    const room = await this.chatRepository.findRoomByRoomId(chatSeq);
+    if (room === null) {
+      return undefined;
+    }
+    return room.chatType;
+  }
+
+  /**
    * 방을 검색합니다.
    *
    * @param searchKeyword 방 검색 키워드
@@ -401,7 +405,7 @@ export default class ChatroomsService {
       chatSeq: chatroom.chatSeq,
       chatName: chatroom.chatName,
       chatType: chatroom.chatType,
-      isPassword: chatroom.password.length > 0,
+      isPassword: chatroom.password && chatroom.password.length > 0,
       participants: participants[index],
     }));
   }
@@ -419,7 +423,7 @@ export default class ChatroomsService {
       chatSeq: chatroom.chatSeq,
       chatName: chatroom.chatName,
       chatType: chatroom.chatType,
-      isPassword: chatroom.password.length > 0,
+      isPassword: chatroom.password && chatroom.password.length > 0,
       participants,
     };
   }
