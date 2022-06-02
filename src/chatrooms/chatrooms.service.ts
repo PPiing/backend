@@ -399,6 +399,17 @@ export default class ChatroomsService implements OnModuleInit {
   }
 
   /**
+   * 특정 방에서 사용자를 킥할때 해당 내용을 DB에 저장합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param to 킥할 사용자 식별자
+   * @param admin 킥하는 관리자 식별자
+   */
+  async kickUserSave(chatSeq: number, to: number, admin: number): Promise<void> {
+    await this.chatEventRepository.saveChatEvent(admin, to, 'KICK', chatSeq);
+  }
+
+  /**
    * 특정 방에서 사용자를 밴합니다.
    *
    * @param chatSeq 방 식별자
@@ -454,6 +465,25 @@ export default class ChatroomsService implements OnModuleInit {
     const key = `${chatSeq}-${to}-mute`;
     await this.cacheManager.set(key, now, { ttl: muteTimeSec });
     await this.muteStopper();
+  }
+
+  /**
+   * 특정 사용자에 대해 뮤트 해제합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param user 뮤트 해제할 사용자 식별자
+   * @returns 뮤트 해제 성공 여부
+   */
+  async unmuteUser(chatSeq: number, user: number): Promise<boolean> {
+    const find = (await this.chatEventRepository.getChatEvents(user, chatSeq))
+      .find((chatEvent) => chatEvent.eventType === 'MUTE');
+    if (find !== undefined) {
+      await this.chatEventRepository.delChatEvent(find.chatSeq);
+      const key = `${chatSeq}-${user}-mute`;
+      await this.cacheManager.del(key);
+      return true;
+    }
+    return false;
   }
 
   /**

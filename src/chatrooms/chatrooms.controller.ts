@@ -269,6 +269,7 @@ export default class ChatroomsController {
     if (result === false) {
       throw new BadRequestException('존재하지 않는 사용자입니다.');
     }
+    await this.chatroomsService.kickUserSave(roomno, targetId, who);
     this.eventRunner.emit('room:leave', roomno, [targetId], true);
     this.eventRunner.emit('room:notify', roomno, `${targetId} 님이 강퇴당했습니다.`);
   }
@@ -399,6 +400,52 @@ export default class ChatroomsController {
     await this.chatroomsService.muteUser(roomno, targetId, who);
     // 뮤트 유저 캐시에 등록 필요하고 뮤트된 여부를 방 유저들에게 알려주어야 함.
     this.eventRunner.emit('room:notify', roomno, `${targetId} 님이 뮤트되었습니다.`);
+  }
+
+  /**
+   * 뮤트된 사용자를 해제합니다. 뮤트 해제에 성공하면 뮤트 유저 캐시에서 제거하고 뮤트 해제된 사실을 방 유저들에게 알려줍니다.
+   * 뮤트되있지 않은 사용자에게 뮤트를 시도하거나 해제하는 사용자가 권한이 없거나 자기 자신을 해제하거나 존재하지 않는 사용자면 에러가 발생합니다.
+   * 추후에 사용자 ID (본인)는 세션에서 가져올 예정입니다.
+   *
+   * @param target 뮤트 해제할 사용자 ID
+   * @param roomId 뮤트 해제할 방 ID
+   * @param by 뮤트 해제하는 관리자 ID
+   */
+  @ApiOperation({ summary: '뮤트된 사용자 해제', description: '뮤트된 사용자를 해제합니다.' })
+  @ApiResponse({ status: 200, description: '뮤트 해제 성공' })
+  @ApiResponse({ status: 400, description: '뮤트 해제할 사용자가 존재하지 않거나 자신을 해제하거나 존재하지 않는 방' })
+  @ApiParam({
+    name: 'target', type: Number, example: 1, description: '뮤트 해제할 사용자 ID',
+  })
+  @ApiParam({
+    name: 'roomId', type: Number, example: 1, description: '뮤트 해제할 방 ID',
+  })
+  @ApiParam({
+    name: 'by', type: Number, example: 1, description: '뮤트 해제하는 관리자 ID',
+  })
+  @Put('unmute/:target/:roomId/:by')
+  async unmuteUser(
+    @Param('target') target: string,
+      @Param('roomId') roomId: string,
+      @Param('by') by: string,
+  ): Promise<void> {
+    this.logger.debug(`unmuteUser: ${target} -> ${roomId} -> ${by}`);
+    const targetId = Number(target);
+    const roomno = Number(roomId);
+    const who = Number(by);
+    if (await this.chatroomsService.isMaster(roomno, who) === false) {
+      throw new BadRequestException('권한이 없습니다.');
+    }
+    if (targetId === who) {
+      throw new BadRequestException('자신을 해제할 수 없습니다.');
+    }
+    // TODO 사용자 존재 여부 확인 필요
+    const result = await this.chatroomsService.unmuteUser(roomno, targetId);
+    if (result === false) {
+      throw new BadRequestException('뮤트되어있지 않은 사용자입니다.');
+    }
+    // 뮤트 해제 유저 캐시에 등록 필요하고 뮤트된 여부를 방 유저들에게 알려주어야 함.
+    this.eventRunner.emit('room:notify', roomno, `${targetId} 님이 뮤트 해제되었습니다.`);
   }
 
   /**
