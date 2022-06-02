@@ -1,29 +1,41 @@
 import {
-  CACHE_MANAGER, Inject, Injectable, Logger,
+  CACHE_MANAGER, Inject, Injectable, Logger, OnModuleInit,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { Cron } from '@nestjs/schedule';
+import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 import { Cache } from 'cache-manager';
 import { Server, Socket } from 'socket.io';
 import ChatType from 'src/enums/mastercode/chat-type.enum';
 import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
-import ChatParticipantRepository from './chat-participant.repository';
-import ChatRepository from './chat.repository';
+import ChatParticipantRepository from './repository/chat-participant.repository';
+import ChatRepository from './repository/chat.repository';
 import ChatRoomResultDto from './dto/chat-room-result.dto';
 import { ChatRoomDto } from './dto/chat-room.dto';
 import { MessageDataDto } from './dto/message-data.dto';
-import MessageRepository from './message.repository';
+import MessageRepository from './repository/message.repository';
+import { ChatEventRepository } from './repository/chat-event.repository';
 
 @Injectable()
-export default class ChatroomsService {
+export default class ChatroomsService implements OnModuleInit {
   private readonly logger = new Logger(ChatroomsService.name);
 
   constructor(
     private readonly chatRepository: ChatRepository,
     private messageRepository: MessageRepository,
     private chatParticipantRepository: ChatParticipantRepository,
+    private chatEventRepository: ChatEventRepository,
+    private schedulerRegistry: SchedulerRegistry,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
+
+  /**
+   * 서비스 모듈이 초기화될 때 실행됩니다.
+   * 비동기 함수로 실행해야 하고 다른 모듈들도 초기화 된 후 실행해야 하기 때문에 생성자를 사용하지 않았습니다.
+   */
+  async onModuleInit() {
+    await this.muteStopper();
+    await this.setInitMutedUsers();
+  }
 
   /**
    * nestjs의 캐시 매니저와 스케줄러를 이용해 Inline Cache의 Write-Behind를 구현합니다.
@@ -40,6 +52,61 @@ export default class ChatroomsService {
       this.messageRepository.saveMessages(chatCache);
       await this.cacheManager.del('chat');
     }
+  }
+
+  /**
+   * 뮤트가 만료된 사용자를 찾아 채팅방에서 뮤트를 해제하는 콜백함수입니다.
+   * 클래스의 컨텍스트를 가져가기 위해 화살표 함수로 선언하였습니다.
+   */
+  muteStopper = async () => {
+    this.logger.debug('exec muteStopper');
+    const timeout = this.schedulerRegistry.doesExist('timeout', 'muteStopper');
+    if (timeout) {
+      this.schedulerRegistry.deleteTimeout('muteStopper');
+    }
+    const getRemainTimeSec = (t1: Date, t2: Date): number => (t1.getTime() - t2.getTime()) / 1000;
+    const muteTimeSec = 60;
+    const muted = (await this.chatEventRepository.getAllAvailableChatEvents())
+      .filter((chatEvent) => chatEvent.eventType === 'MUTE')
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    const now = new Date();
+    const stop = [];
+    const nextTime = muted.find((chatEvent) => {
+      if (getRemainTimeSec(now, chatEvent.createdAt) > muteTimeSec) {
+        stop.push(chatEvent.chatSeq);
+        return false;
+      }
+      return true;
+    });
+    stop.forEach(async (chatSeq) => {
+      await this.chatEventRepository.delChatEvent(chatSeq);
+    });
+    if (nextTime !== undefined) {
+      this.logger.debug('add muteStopper');
+      this.schedulerRegistry.addTimeout(
+        'muteStopper',
+        setTimeout(
+          this.muteStopper,
+          (muteTimeSec - getRemainTimeSec(now, nextTime.createdAt)) * 1000,
+        ),
+      );
+    }
+  };
+
+  /**
+   * 앱 처음 실행시 기존 DB에 저장된 Mute 처리된 유저들을 조회해 캐시에 저장합니다.
+   */
+  async setInitMutedUsers(): Promise<void> {
+    const muteTimeSec = 60;
+    const getRemainTimeSec = (t1: Date, t2: Date): number => (t1.getTime() - t2.getTime()) / 1000;
+    const now = new Date();
+    const muted = (await this.chatEventRepository.getAllAvailableChatEvents())
+      .filter((chatEvent) => chatEvent.eventType === 'MUTE');
+    muted.forEach(async (chatEvent) => {
+      const ttl = muteTimeSec - getRemainTimeSec(now, chatEvent.createdAt);
+      const key = `${chatEvent.chatSeq}-${chatEvent.toWho}-mute`;
+      await this.cacheManager.set(key, chatEvent.createdAt, { ttl });
+    });
   }
 
   /**
@@ -329,6 +396,41 @@ export default class ChatroomsService {
    */
   leftUser(chatSeq: any, user: any): boolean {
     return this.chatParticipantRepository.removeUser(chatSeq, user);
+  }
+
+  /**
+   * 특정 사용자를 뮤트합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param to 뮤트할 사용자 식별자
+   * @param admin 뮤트시키는 사용자 식별자
+   */
+  async muteUser(chatSeq: number, to: number, admin: number): Promise<void> {
+    const muteTimeSec = 60;
+    const now = new Date();
+    await this.chatEventRepository.saveChatEvent(admin, to, 'MUTE', chatSeq);
+    const key = `${chatSeq}-${to}-mute`;
+    await this.cacheManager.set(key, now, { ttl: muteTimeSec });
+    await this.muteStopper();
+  }
+
+  /**
+   * 특정 방의 특정 유저가 뮤트당했는지 확인합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param user 뮤트 확인할 유저 식별자
+   * @returns 뮤트 풀리는 시간 (뮤트되지 않았으면 0)
+   */
+  async isMuted(chatSeq: any, user: any): Promise<number> {
+    const key = `${chatSeq}-${user}-mute`;
+    const now = new Date();
+    const muteTimeSec = 60;
+    const getRemainTimeSec = (t1: Date, t2: Date): number => (t1.getTime() - t2.getTime()) / 1000;
+    const rtn: undefined | Date = await this.cacheManager.get(key);
+    if (rtn === undefined) {
+      return 0;
+    }
+    return (muteTimeSec - getRemainTimeSec(now, rtn));
   }
 
   /**

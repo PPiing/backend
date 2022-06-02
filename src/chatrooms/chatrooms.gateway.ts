@@ -80,27 +80,48 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
     // client.rooms은 클라이언트가 속한 룸 리스트를 담고 있습니다.
     const { rooms } = client;
     const name = await this.chatroomsService.whoAmI(client);
+    const muted = await this.chatroomsService.isMuted(message.at, name);
     if (rooms.has(message.at.toString()) && name !== undefined) {
-      const seq = await this.chatroomsService.newChat(name, message.at, message.content);
-      const data: ISocketSend = {
-        chatSeq: message.at,
-        userIDs: [name],
-        msg: message.content,
-        id: seq,
-      };
-      this.server.to(message.at.toString()).emit('chat', data);
+      if (muted === 0) {
+        const seq = await this.chatroomsService.newChat(name, message.at, message.content);
+        const data: ISocketSend = {
+          chatSeq: message.at,
+          userIDs: [name],
+          msg: message.content,
+          id: seq,
+        };
+        this.server.to(message.at.toString()).emit('chat', data);
+      } else {
+        const data: ISocketSend = {
+          chatSeq: message.at,
+          userIDs: [0],
+          msg: `현재 mute 상태입니다. ${Math.ceil(muted)} 초 뒤 차단이 풀립니다.`,
+          id: -1,
+        };
+        client.emit('chat', data);
+      }
     }
   }
 
   /**
-   * 알림성 메시지들을 방에 속한 클라이언트에게 송신합니다.
+   * 서버에서 생성되는 알림 메시지를 클라이언트에 보내고자 할 때 호출되는 콜백함수입니다.
    *
    * @param chatSeq 방 ID
-   * @param client 클라이언트 소켓 객체
    * @param message 알림성 메시지
-   * @param data 알림성 메시지에 대한 추가 정보
-   * @param userID 사용자 ID
    */
+  @OnEvent('room:notify')
+  async onRoomNotify(chatSeq: number, message: string) {
+    this.logger.debug(`onRoomNotify: ${chatSeq} sent message: ${message}`);
+    const adminId = 0;
+    const seq = await this.chatroomsService.newChat(adminId, chatSeq, message);
+    const data: ISocketSend = {
+      chatSeq,
+      userIDs: [adminId],
+      msg: message,
+      id: seq,
+    };
+    this.server.to(chatSeq.toString()).emit('chat', data);
+  }
 
   /**
    * 방에 합류하는 HTTP 요청을 받을 때 호출되는 콜백함수입니다.

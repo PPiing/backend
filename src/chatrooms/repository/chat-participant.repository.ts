@@ -2,7 +2,7 @@
 // NOTE: 전체적으로 리팩터링 예정
 import { Injectable } from '@nestjs/common';
 import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
-import { ChatParticipantDto } from './dto/chat-participant.dto';
+import { ChatParticipantDto } from '../dto/chat-participant.dto';
 
 @Injectable()
 export default class ChatParticipantRepository {

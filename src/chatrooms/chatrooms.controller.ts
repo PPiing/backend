@@ -134,6 +134,7 @@ export default class ChatroomsController {
       throw new BadRequestException('비밀번호가 틀렸습니다.');
     }
     this.eventRunner.emit('room:join', roomid, [user]);
+    this.eventRunner.emit('room:notify', roomid, `${user} 님이 입장했습니다.`);
     const rtn: IJoinRoomResult = {
       chatSeq: roomid,
     };
@@ -185,6 +186,7 @@ export default class ChatroomsController {
     }
     await this.chatroomsService.addNormalUsers(roomid, [targetId]);
     this.eventRunner.emit('room:join', roomid, [targetId]);
+    this.eventRunner.emit('room:notify', roomid, `${targetId} 님이 초대되었습니다.`);
   }
 
   /**
@@ -214,6 +216,7 @@ export default class ChatroomsController {
     const result = this.chatroomsService.leftUser(roomid, user);
     if (result) {
       this.eventRunner.emit('room:leave', roomid, user, false);
+      this.eventRunner.emit('room:notify', roomid, `${user} 님이 방을 나갔습니다.`);
     }
   }
 
@@ -259,6 +262,50 @@ export default class ChatroomsController {
       throw new BadRequestException('존재하지 않는 사용자입니다.');
     }
     this.eventRunner.emit('room:leave', roomno, [targetId], true);
+    this.eventRunner.emit('room:notify', roomno, `${targetId} 님이 강퇴당했습니다.`);
+  }
+
+  /**
+   * 특정 사용자를 뮤트시킵니다.
+   * 뮤트하는 사용자가 권한이 없거나 자기 자신을 뮤트하거나 존재하지 않는 사용자면 에러가 발생합니다.
+   * 추후에 사용자 ID (본인)는 세션에서 가져올 예정입니다.
+   *
+   * @param target 뮤트할 사용자 ID
+   * @param roomId 뮤트할 방 ID
+   * @param by 뮤트하는 관리자 ID
+   */
+  @ApiOperation({ summary: '사용자를 뮤트시킵니다.', description: '사용자를 뮤트시킵니다.' })
+  @ApiResponse({ status: 200, description: '뮤트 성공' })
+  @ApiResponse({ status: 400, description: '뮤트할 사용자가 존재하지 않거나 자신을 뮤트하거나 존재하지 않는 방' })
+  @ApiParam({
+    name: 'target', type: Number, example: 1, description: '뮤트할 사용자 ID',
+  })
+  @ApiParam({
+    name: 'roomId', type: Number, example: 1, description: '뮤트할 방 ID',
+  })
+  @ApiParam({
+    name: 'by', type: Number, example: 1, description: '뮤트하는 관리자 ID',
+  })
+  @Put('mute/:target/:roomId/:by')
+  async muteUser(
+    @Param('target') target: string,
+      @Param('roomId') roomId: string,
+      @Param('by') by: string,
+  ): Promise<void> {
+    this.logger.debug(`muteUser: ${target} -> ${roomId} -> ${by}`);
+    const targetId = Number(target);
+    const roomno = Number(roomId);
+    const who = Number(by);
+    if (await this.chatroomsService.isMaster(roomno, who) === false) {
+      throw new BadRequestException('권한이 없습니다.');
+    }
+    if (targetId === who) {
+      throw new BadRequestException('자신을 뮤트할 수 없습니다.');
+    }
+    // TODO 사용자 존재 여부 확인 필요
+    await this.chatroomsService.muteUser(roomno, targetId, who);
+    // 뮤트 유저 캐시에 등록 필요하고 뮤트된 여부를 방 유저들에게 알려주어야 함.
+    this.eventRunner.emit('room:notify', roomno, `${targetId} 님이 뮤트되었습니다.`);
   }
 
   /**
