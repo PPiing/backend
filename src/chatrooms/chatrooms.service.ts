@@ -45,7 +45,7 @@ export default class ChatroomsService implements OnModuleInit {
   async writeBehind(): Promise<void> {
     const chatCache: undefined | Array<MessageDataDto> = await this.cacheManager.get('chat');
     const chatIndex: undefined | number = await this.cacheManager.get('chat_index');
-    await this.cacheManager.set('chat_index', chatIndex, { ttl: 120 });
+    await this.cacheManager.set('chat_index', chatIndex);
     if (chatCache !== undefined && chatIndex !== undefined) {
       const len = chatCache.length;
       this.logger.debug(`DB에 저장된 채팅 메시지 수: ${len}`);
@@ -171,10 +171,10 @@ export default class ChatroomsService implements OnModuleInit {
       msg: chat.msg,
       createAt: chat.createAt,
     };
-    await this.cacheManager.set('chat_index', chatIndex + 1, { ttl: 120 });
+    await this.cacheManager.set('chat_index', chatIndex + 1);
     const chatCache: undefined | Array<MessageDataDto> = await this.cacheManager.get('chat');
     if (chatCache === undefined) {
-      await this.cacheManager.set('chat', [chatData], { ttl: 120 });
+      await this.cacheManager.set('chat', [chatData]);
     } else {
       chatCache.push(chatData);
     }
@@ -396,6 +396,48 @@ export default class ChatroomsService implements OnModuleInit {
    */
   leftUser(chatSeq: any, user: any): boolean {
     return this.chatParticipantRepository.removeUser(chatSeq, user);
+  }
+
+  /**
+   * 특정 방에서 사용자를 밴합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param to 밴할 사용자 식별자
+   * @param admin 밴하는 관리자 식별자
+   * @returns 밴 성공 여부
+   */
+  async banUser(chatSeq: number, to: number, admin: number): Promise<boolean> {
+    if (await this.isBanned(chatSeq, to)) {
+      return false;
+    }
+    await this.chatEventRepository.saveChatEvent(admin, to, 'BAN', chatSeq);
+    return true;
+  }
+
+  /**
+   * 특정 방의 특정 유저가 밴당했는지 확인합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param user 밴 확인할 유저 식별자
+   * @returns 밴 여부
+   */
+  async isBanned(chatSeq: any, user: any): Promise<boolean> {
+    const find = (await this.chatEventRepository.getChatEvents(user, chatSeq))
+      .find((chatEvent) => chatEvent.eventType === 'BAN');
+    this.logger.debug(`[ChatRoomService] isBanned : ${JSON.stringify(find)}`);
+    return find !== undefined;
+  }
+
+  /**
+   * 밴당한 유저를 해제합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param user 해제할 유저 식별자
+   */
+  async unbanUser(chatSeq: any, user: any): Promise<void> {
+    const find = (await this.chatEventRepository.getChatEvents(user, chatSeq))
+      .find((chatEvent) => chatEvent.eventType === 'BAN');
+    await this.chatEventRepository.delChatEvent(find.eventSeq);
   }
 
   /**

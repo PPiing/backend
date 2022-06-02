@@ -133,6 +133,10 @@ export default class ChatroomsController {
     if (result === false) {
       throw new BadRequestException('비밀번호가 틀렸습니다.');
     }
+    const banned = await this.chatroomsService.isBanned(roomid, user);
+    if (banned) {
+      throw new BadRequestException('방에서 추방되었습니다.');
+    }
     this.eventRunner.emit('room:join', roomid, [user]);
     this.eventRunner.emit('room:notify', roomid, `${user} 님이 입장했습니다.`);
     const rtn: IJoinRoomResult = {
@@ -184,6 +188,10 @@ export default class ChatroomsController {
     if (targetId === inviter) {
       throw new BadRequestException('자신을 초대할 수 없습니다.');
     }
+    const banned = await this.chatroomsService.isBanned(roomid, targetId);
+    if (banned) {
+      throw new BadRequestException('차단된 유저는 초대할 수 없습니다. 먼저 차단을 풀어주세요.');
+    }
     await this.chatroomsService.addNormalUsers(roomid, [targetId]);
     this.eventRunner.emit('room:join', roomid, [targetId]);
     this.eventRunner.emit('room:notify', roomid, `${targetId} 님이 초대되었습니다.`);
@@ -222,7 +230,7 @@ export default class ChatroomsController {
 
   /**
    * 특정 사용자를 방에서 강퇴합니다.
-   * 초대하는 사용자가 권한이 없거나 자기 자신을 강퇴하거나 존재하지 않는 사용자면 에러가 발생합니다.
+   * 강퇴하는 사용자가 권한이 없거나 자기 자신을 강퇴하거나 존재하지 않는 사용자면 에러가 발생합니다.
    * 추후에 사용자 ID (본인)는 세션에서 가져올 예정입니다.
    *
    * @param target 강퇴할 사용자 ID
@@ -263,6 +271,91 @@ export default class ChatroomsController {
     }
     this.eventRunner.emit('room:leave', roomno, [targetId], true);
     this.eventRunner.emit('room:notify', roomno, `${targetId} 님이 강퇴당했습니다.`);
+  }
+
+  /**
+   * 특정 사용자를 방에서 밴하고 입장을 막습니다.
+   * 밴하는 사용자가 권한이 없거나 자기 자신을 밴하거나 존재하지 않는 사용자면 에러가 발생합니다.
+   * 추후에 사용자 ID (본인)는 세션에서 가져올 예정입니다.
+   *
+   * @param target 밴할 사용자 ID
+   * @param roomId 밴할 방 ID
+   * @param by 밴하는 관리자 ID
+   */
+  @ApiOperation({ summary: '사용자 밴', description: '사용자를 방에서 밴 (강퇴 및 재입장 불가)합니다.' })
+  @ApiResponse({ status: 200, description: '밴 성공' })
+  @ApiResponse({ status: 400, description: '밴할 사용자가 존재하지 않거나 자신을 밴하거나 존재하지 않는 방' })
+  @ApiParam({
+    name: 'target', type: Number, example: 1, description: '밴할 사용자 ID',
+  })
+  @ApiParam({
+    name: 'roomId', type: Number, example: 1, description: '밴할 방 ID',
+  })
+  @ApiParam({
+    name: 'by', type: Number, example: 1, description: '밴하는 관리자 ID',
+  })
+  @Delete('ban/:target/:roomId/:by')
+  async banUser(
+    @Param('target') target: string,
+      @Param('roomId') roomId: string,
+      @Param('by') by: string,
+  ): Promise<void> {
+    this.logger.debug(`banUser: ${target} -> ${roomId} -> ${by}`);
+    const targetId = Number(target);
+    const roomno = Number(roomId);
+    const who = Number(by);
+    if (await this.chatroomsService.isMaster(roomno, who) === false) {
+      throw new BadRequestException('권한이 없습니다.');
+    }
+    if (targetId === who) {
+      throw new BadRequestException('자신을 밴할 수 없습니다.');
+    }
+    const result = await this.chatroomsService.banUser(roomno, targetId, who);
+    if (result === false) {
+      throw new BadRequestException('존재하지 않는 사용자입니다.');
+    }
+    this.eventRunner.emit('room:leave', roomno, [targetId], true);
+    this.eventRunner.emit('room:notify', roomno, `${targetId} 님이 밴당했습니다.`);
+  }
+
+  /**
+   * 밴된 사용자를 밴 해제합니다.
+   * 밴 해제하는 사용자가 권한이 없거나 자기 자신을 밴 해제하거나 존재하지 않는 사용자면 에러가 발생합니다.
+   *
+   * @param target 밴 해제할 사용자 ID
+   * @param roomId 밴 해제할 방 ID
+   * @param by 밴 해제하는 관리자 ID
+   */
+  @ApiOperation({ summary: '밴 해제', description: '밴된 사용자를 밴 해제합니다.' })
+  @ApiResponse({ status: 200, description: '밴 해제 성공' })
+  @ApiResponse({ status: 400, description: '밴 해제할 사용자가 존재하지 않거나 자신을 밴 해제하거나 존재하지 않는 방' })
+  @ApiParam({
+    name: 'target', type: Number, example: 1, description: '밴 해제할 사용자 ID',
+  })
+  @ApiParam({
+    name: 'roomId', type: Number, example: 1, description: '밴 해제할 방 ID',
+  })
+  @ApiParam({
+    name: 'by', type: Number, example: 1, description: '밴 해제하는 관리자 ID',
+  })
+  @Put('unban/:target/:roomId/:by')
+  async unbanUser(
+    @Param('target') target: string,
+      @Param('roomId') roomId: string,
+      @Param('by') by: string,
+  ): Promise<void> {
+    this.logger.debug(`unbanUser: ${target} -> ${roomId} -> ${by}`);
+    const targetId = Number(target);
+    const roomno = Number(roomId);
+    const who = Number(by);
+    if (await this.chatroomsService.isMaster(roomno, who) === false) {
+      throw new BadRequestException('권한이 없습니다.');
+    }
+    if (targetId === who) {
+      throw new BadRequestException('자신을 밴 해제할 수 없습니다.');
+    }
+    await this.chatroomsService.unbanUser(roomno, targetId);
+    this.eventRunner.emit('room:notify', roomno, `${targetId} 님이 밴 해제되었습니다.`);
   }
 
   /**

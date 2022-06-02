@@ -40,7 +40,9 @@ export class ChatEventRepository {
   async delChatEvent(eventSeq: number): Promise<void> {
     // NOTE 수정 필요
     const result = this.MockEntity.find((v) => v.eventSeq === eventSeq);
-    result.deletedAt = new Date();
+    if (result) {
+      result.deletedAt = new Date();
+    }
   }
 
   async getAllAvailableChatEvents(): Promise<any[]> {
