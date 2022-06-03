@@ -5,6 +5,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import ChatroomsService from './chatrooms.service';
+import ISocketRecv from './interface/socket-recv';
 import ISocketSend from './interface/socket-send';
 
 /**
@@ -49,8 +50,12 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
     // 본인이 속한 룸에 조인시킵니다. 그리고 본인이 속한 룸의 리스트를 리턴합니다.
     const roomList = this.chatroomsService.roomJoin(client, userID);
 
+    const data: ISocketSend = {
+      rooms: roomList,
+    };
+
     // 룸 리스트를 클라이언트에 전송합니다.
-    client.emit('chat:init', roomList); // TODO ISocketSend 적용 예정
+    client.emit('chat:init', data);
   }
 
   /**
@@ -75,9 +80,10 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
    * @param client 클라이언트 소켓 객체
    */
   @SubscribeMessage('chat')
-  async handleChat(client: Socket, message: any) {
+  async handleChat(client: Socket, message: ISocketRecv) {
     this.logger.debug(`handleChat: ${client.id} sent message: ${message.content}`);
     // client.rooms은 클라이언트가 속한 룸 리스트를 담고 있습니다.
+    const adminId = 0;
     const { rooms } = client;
     const name = await this.chatroomsService.whoAmI(client.id);
     const muted = await this.chatroomsService.isMuted(message.at, name);
@@ -106,7 +112,7 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
       } else {
         const data: ISocketSend = {
           chatSeq: message.at,
-          userIDs: [0],
+          userIDs: [adminId],
           msg: `현재 mute 상태입니다. ${Math.ceil(muted)} 초 뒤 차단이 풀립니다.`,
           id: -1,
         };

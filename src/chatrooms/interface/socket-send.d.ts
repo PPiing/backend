@@ -1,4 +1,5 @@
 export default interface ISocketSend {
+  rooms?: number[]; // 채팅방 번호 배열
   chatSeq?: number; // 채팅룸 ID
   userIDs?: number[]; // 동작을 수행할 대상의 userIDs 배열
   msg?: string; // 메시지
