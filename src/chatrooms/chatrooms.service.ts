@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   CACHE_MANAGER, Inject, Injectable, Logger, OnModuleInit,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
@@ -246,6 +247,58 @@ export default class ChatroomsService implements OnModuleInit {
   }
 
   /**
+   * 유저들이 존재하는지 확인합니다.
+   * 추후에 DB에서 조회하는 것으로 변경해야 합니다.
+   *
+   * @param users 유저 배열
+   * @returns 유저가 존재하는지 여부 (한명이라도 존재하지 않으면 false 리턴)
+   */
+  async existUsers(users: Array<number>): Promise<boolean> {
+    // TODO 추후에 await this.userRepository.existUser(user); 과 같은 형태로 판단해야함
+    const find = users.find((user) => user < 0);
+    return find === undefined;
+  }
+
+  /**
+   * 방들이 존재하는지 확인합니다.
+   * 추후에 DB에서 조회하는 것으로 변경해야 합니다.
+   *
+   * @param rooms 방 배열
+   * @returns 방이 존재하는지 여부 (하나라도 존재하지 않으면 false 리턴)
+   */
+  async existRooms(rooms: Array<number>): Promise<boolean> {
+    // TODO 추후에 await this.roomRepository.existRoom(room); 과 같은 형태로 판단해야함
+    const find = rooms.find((room) => room < 0);
+    return find === undefined;
+  }
+
+  /**
+   * 유저들 중 하나라도 존재하지 않으면 에러를 발생시킵니다.
+   *
+   * @param users 유저 배열
+   * @throws 유저가 존재하지 않는 경우
+   */
+  async checkUsers(users: Array<number>): Promise<void> {
+    const existUsers = await this.existUsers(users);
+    if (!existUsers) {
+      throw new BadRequestException('존재하지 않는 유저입니다.');
+    }
+  }
+
+  /**
+   * 방들 중 하나라도 존재하지 않으면 에러를 발생시킵니다.
+   *
+   * @param rooms 방 배열
+   * @throws 방이 존재하지 않는 경우
+   */
+  async checkRooms(rooms: Array<number>): Promise<void> {
+    const existRooms = await this.existRooms(rooms);
+    if (!existRooms) {
+      throw new BadRequestException('존재하지 않는 방입니다.');
+    }
+  }
+
+  /**
    * 특정 방의 특정 메시지 이전의 채팅을 limit만큼 가져옵니다.
    *
    * @param chatSeq 방 ID
@@ -376,10 +429,10 @@ export default class ChatroomsService implements OnModuleInit {
    */
   async addRoom(create: ChatRoomDto): Promise<number> {
     if (this.chatRepository.findRoomByRoomName(create.chatName)) {
-      return -1;
+      throw new BadRequestException('방제목이 중복되었습니다.');
     }
     if (create.chatType === ChatType.CHTP10) {
-      return -1; // DM은 여기서 처리하지 않음.
+      throw new BadRequestException('방 타입이 잘못되었습니다.');
     }
     const hashPassword = create.password ? await bcrypt.hash(create.password, 10) : undefined;
     const hashed = {
@@ -401,7 +454,7 @@ export default class ChatroomsService implements OnModuleInit {
     // 기존 디엠 방이 있는지 확인
     if (this.chatRepository.findRoomByRoomName(`DM-${user1}-${user2}`)
      || this.chatRepository.findRoomByRoomName(`DM-${user2}-${user1}`)) {
-      return -1;
+      throw new BadRequestException('이미 존재하는 DM입니다.');
     }
     // TODO 유저 ID가 올바른지 검증 필요 - 외부에서 처리
     const chatName = `DM-${user1}-${user2}`;
