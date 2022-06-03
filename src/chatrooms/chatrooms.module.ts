@@ -8,6 +8,7 @@ import { ChatroomsGateway } from './chatrooms.gateway';
 import ChatroomsService from './chatrooms.service';
 import MessageRepository from './repository/message.repository';
 import { ChatEventRepository } from './repository/chat-event.repository';
+import FriendsRepository from './repository/friends.repository';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ChatEventRepository } from './repository/chat-event.repository';
     MessageRepository,
     ChatParticipantRepository,
     ChatEventRepository,
+    FriendsRepository,
   ],
 })
 export class ChatroomsModule { }

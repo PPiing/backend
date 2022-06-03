@@ -10,7 +10,7 @@ export default class MessageRepository {
     this.MockEntity.push({
       msgSeq: 0,
       chatSeq: 0,
-      partcSeq: 1,
+      userSeq: 10,
       msg: '안녕하세요',
       createAt: new Date(),
     });
@@ -21,7 +21,7 @@ export default class MessageRepository {
       this.MockEntity.push({
         msgSeq: message.msgSeq, // 실제 테이블에선 Auto Increment한 속성이므로 값을 넣으면 안됨.
         chatSeq: message.chatSeq,
-        partcSeq: message.from,
+        userSeq: message.userSeq,
         msg: message.msg,
         createAt: message.createAt,
       });
@@ -29,11 +29,13 @@ export default class MessageRepository {
     return this.MockEntity[this.MockEntity.length - 1];
   }
 
-  getMessages(chatSeq: number, messageId: number, limit: number): any[] {
+  getMessages(chatSeq: number, messageId: number, limit: number, blockedUsers: number[]): any[] {
     const chats = Array.from(this.MockEntity.values()).reverse();
     const filteredChats: any[] = [];
     for (const chat of chats) {
-      if (chat.chatSeq === chatSeq && chat.msgSeq < messageId) {
+      if (chat.chatSeq === chatSeq
+        && chat.msgSeq < messageId
+        && !blockedUsers.includes(chat.userSeq)) {
         filteredChats.push(chat);
       }
     }

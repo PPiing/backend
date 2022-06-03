@@ -129,14 +129,15 @@ export default class ChatroomsController {
     } else if (roomType === ChatType.CHTP10) {
       throw new BadRequestException('디엠엔 입장할 수 없습니다.');
     }
-    const result = await this.chatroomsService.joinRoomByExUser(roomid, user, data.password);
-    if (result === false) {
-      throw new BadRequestException('비밀번호가 틀렸습니다.');
-    }
     const banned = await this.chatroomsService.isBanned(roomid, user);
     if (banned) {
       throw new BadRequestException('방에서 추방되었습니다.');
     }
+    const result = await this.chatroomsService.joinRoomByExUser(roomid, user, data.password);
+    if (result === false) {
+      throw new BadRequestException('비밀번호가 틀렸습니다.');
+    }
+    this.chatroomsService.userInSave(roomid, user);
     this.eventRunner.emit('room:join', roomid, [user]);
     this.eventRunner.emit('room:notify', roomid, `${user} 님이 입장했습니다.`);
     const rtn: IJoinRoomResult = {
@@ -193,6 +194,7 @@ export default class ChatroomsController {
       throw new BadRequestException('차단된 유저는 초대할 수 없습니다. 먼저 차단을 풀어주세요.');
     }
     await this.chatroomsService.addNormalUsers(roomid, [targetId]);
+    this.chatroomsService.userInSave(roomid, targetId);
     this.eventRunner.emit('room:join', roomid, [targetId]);
     this.eventRunner.emit('room:notify', roomid, `${targetId} 님이 초대되었습니다.`);
   }
@@ -223,6 +225,7 @@ export default class ChatroomsController {
     const user = Number(userId);
     const result = this.chatroomsService.leftUser(roomid, user);
     if (result) {
+      this.chatroomsService.userOutSave(roomid, user);
       this.eventRunner.emit('room:leave', roomid, user, false);
       this.eventRunner.emit('room:notify', roomid, `${user} 님이 방을 나갔습니다.`);
     }
@@ -449,10 +452,84 @@ export default class ChatroomsController {
   }
 
   /**
+   * 사용자를 차단합니다.
+   * 차단하려는 사용자가 존재하지 않거나 자신을 차단하려는 경우 에러가 발생합니다.
+   * 추후에 사용자 ID (본인)는 세션에서 가져올 예정입니다.
+   *
+   * @param target 차단할 사용자 ID
+   * @param by 차단하는 사람의 ID
+   * @returns 차단 성공 여부
+   */
+  @ApiOperation({ summary: '사용자 차단', description: '사용자를 차단합니다.' })
+  @ApiResponse({ status: 200, description: '차단 성공' })
+  @ApiResponse({ status: 400, description: '차단할 사용자가 존재하지 않거나 자신을 차단하려는 경우 에러가 발생합니다.' })
+  @ApiParam({
+    name: 'target', type: Number, example: 1, description: '차단할 사용자 ID',
+  })
+  @ApiParam({
+    name: 'by', type: Number, example: 1, description: '차단하는 사람의 ID',
+  })
+  @Put('block/:target/:by')
+  async blockUser(
+    @Param('target') target: string,
+      @Param('by') by: string,
+  ): Promise<void> {
+    this.logger.debug(`blockUser: ${target} -> ${by}`);
+    const targetId = Number(target);
+    const byId = Number(by);
+    if (targetId === byId) {
+      throw new BadRequestException('자신을 차단할 수 없습니다.');
+    }
+    // TODO 사용자 존재 여부 확인 필요
+    const result = await this.chatroomsService.blockUser(byId, targetId);
+    if (result === false) {
+      throw new BadRequestException('이미 차단된 사용자입니다.');
+    }
+  }
+
+  /**
+   * 차단한 사용자의 차단을 풉니다.
+   * 차단되어 있지 않거나 차단을 풀려는 사용자가 존재하지 않거나 본인에 대해 수행할경우 에러가 발생합니다.
+   * 추후에 사용자 ID (본인)는 세션에서 가져올 예정입니다.
+   *
+   * @param target 차단을 푸려는 사용자 ID
+   * @param by 차단하는 사람의 ID
+   * @returns 차단 성공 여부
+   */
+  @ApiOperation({ summary: '사용자 차단 해제', description: '차단한 사용자의 차단을 풉니다.' })
+  @ApiResponse({ status: 200, description: '차단 해제 성공' })
+  @ApiResponse({ status: 400, description: '차단되어 있지 않거나 차단을 풀려는 사용자가 존재하지 않거나 본인에 대해 수행할경우 에러가 발생합니다.' })
+  @ApiParam({
+    name: 'target', type: Number, example: 1, description: '차단을 푸려는 사용자 ID',
+  })
+  @ApiParam({
+    name: 'by', type: Number, example: 1, description: '차단하는 사람의 ID',
+  })
+  @Delete('block/:target/:by')
+  async unblockUser(
+    @Param('target') target: string,
+      @Param('by') by: string,
+  ): Promise<void> {
+    this.logger.debug(`blockUser: ${target} -> ${by}`);
+    const targetId = Number(target);
+    const byId = Number(by);
+    if (targetId === byId) {
+      throw new BadRequestException('자신에 대해 차단 해제를 할 수 없습니다.');
+    }
+    // TODO 사용자 존재 여부 확인 필요
+    const result = await this.chatroomsService.unblockUser(byId, targetId);
+    if (result === false) {
+      throw new BadRequestException('이미 차단해제된 사용자입니다.');
+    }
+  }
+
+  /**
    * 채팅방 ID와 채팅 메시지의 고유 ID를 받아 이전 채팅을 가져옵니다.
+   * 추후에 사용자 ID (본인)는 세션에서 가져올 예정입니다.
    *
    * @param roomId 방 ID (NOTE: 방 ID는 방 고유 ID-숫자이며 nest가 별도로 형변환을 하지 않습니다.)
    * @param msgID 채팅 메시지의 고유 ID
+   * @param by 요청한 사람 ID
    * @returns 채팅 메시지를 반환합니다.
    */
   @ApiOperation({
@@ -469,16 +546,21 @@ export default class ChatroomsController {
   @ApiParam({
     name: 'count', type: Number, example: 10, description: '가져올 메시지 개수',
   })
-  @Get('message/:roomId/:msgID/:count')
+  @ApiParam({
+    name: 'by', type: Number, example: 1, description: '요청한 사람의 ID',
+  })
+  @Get('message/:roomId/:msgID/:count/:by')
   async getMessage(
     @Param('roomId') roomId: string,
       @Param('msgID') msgID: string,
       @Param('count') count: string,
+      @Param('by') by: string,
   ): Promise<Array<MessageDataDto>> {
     const messages = await this.chatroomsService.getMessages(
       Number(roomId),
       Number(msgID),
       Number(count),
+      Number(by),
     );
     return messages;
   }

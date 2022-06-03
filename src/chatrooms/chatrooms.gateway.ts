@@ -79,18 +79,30 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
     this.logger.debug(`handleChat: ${client.id} sent message: ${message.content}`);
     // client.rooms은 클라이언트가 속한 룸 리스트를 담고 있습니다.
     const { rooms } = client;
-    const name = await this.chatroomsService.whoAmI(client);
+    const name = await this.chatroomsService.whoAmI(client.id);
     const muted = await this.chatroomsService.isMuted(message.at, name);
     if (rooms.has(message.at.toString()) && name !== undefined) {
       if (muted === 0) {
         const seq = await this.chatroomsService.newChat(name, message.at, message.content);
+        const blockList = await this.chatroomsService.getBlockedUsers(name);
+        const clientList = await this.server.in(message.at.toString()).fetchSockets();
+        const exceptUsers = [];
+        const promiseUserIdList = clientList.map(
+          (socket) => this.chatroomsService.whoAmI(socket.id),
+        );
+        const userIdList = await Promise.all(promiseUserIdList);
+        userIdList.forEach((userId, index) => {
+          if (blockList.has(userId)) {
+            exceptUsers.push(clientList[index].id);
+          }
+        });
         const data: ISocketSend = {
           chatSeq: message.at,
           userIDs: [name],
           msg: message.content,
           id: seq,
         };
-        this.server.to(message.at.toString()).emit('chat', data);
+        this.server.to(message.at.toString()).except(exceptUsers).emit('chat', data);
       } else {
         const data: ISocketSend = {
           chatSeq: message.at,

@@ -18,7 +18,7 @@ export class ChatParticipantDto {
     chatSeq: number;
 
   @ApiProperty({
-    description: '유저 ID',
+    description: '유저 권한',
     type: PartcAuth,
   })
     partcAuth: PartcAuth;

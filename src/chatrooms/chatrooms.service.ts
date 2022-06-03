@@ -14,6 +14,7 @@ import { ChatRoomDto } from './dto/chat-room.dto';
 import { MessageDataDto } from './dto/message-data.dto';
 import MessageRepository from './repository/message.repository';
 import { ChatEventRepository } from './repository/chat-event.repository';
+import FriendsRepository from './repository/friends.repository';
 
 @Injectable()
 export default class ChatroomsService implements OnModuleInit {
@@ -25,6 +26,7 @@ export default class ChatroomsService implements OnModuleInit {
     private chatParticipantRepository: ChatParticipantRepository,
     private chatEventRepository: ChatEventRepository,
     private schedulerRegistry: SchedulerRegistry,
+    private friendsRepository: FriendsRepository,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
 
@@ -35,6 +37,7 @@ export default class ChatroomsService implements OnModuleInit {
   async onModuleInit() {
     await this.muteStopper();
     await this.setInitMutedUsers();
+    await this.setInitBlockedUsers();
   }
 
   /**
@@ -110,6 +113,26 @@ export default class ChatroomsService implements OnModuleInit {
   }
 
   /**
+   * 앱 처음 실행시 기존 DB에 저장된 Block 처리된 유저들을 조회해 캐시에 저장합니다.
+   * followerSeq가 followeeSeq를 차단한 관계입니다.
+   */
+  async setInitBlockedUsers(): Promise<void> {
+    const blocked = await this.friendsRepository.getAllBlockedFriends();
+    const tmp = new Map<string, Set<number>>();
+    blocked.forEach((friend) => {
+      const key = `${friend.followeeSeq}-block`;
+      if (tmp.has(key)) {
+        tmp.get(key).add(friend.followerSeq);
+      } else {
+        tmp.set(key, new Set<number>([friend.followerSeq]));
+      }
+    });
+    tmp.forEach(async (value, key) => {
+      await this.cacheManager.set(key.toString(), value);
+    });
+  }
+
+  /**
    * nestjs의 캐시 매니저를 이용해 읽기 작업의 Look-Aside를 구현합니다.
    * msgSeq 이전의 메세지를 가져옵니다.
    *
@@ -122,6 +145,7 @@ export default class ChatroomsService implements OnModuleInit {
     chatSeq: number,
     msgSeq: number,
     limit: number,
+    reqUserSeq: number,
   ): Promise<Array<MessageDataDto>> {
     let limitCnt = limit;
     let newMsgSeq = msgSeq;
@@ -137,16 +161,38 @@ export default class ChatroomsService implements OnModuleInit {
     let filteredChats: Array<MessageDataDto> = [];
     const cache: undefined | Array<MessageDataDto> = await this.cacheManager.get('chat');
     if (cache === undefined) {
-      filteredChats = this.messageRepository.getMessages(chatSeq, newMsgSeq, limitCnt);
+      const blockedUsers = await this.friendsRepository.blockedUsers(reqUserSeq);
+      filteredChats = this.messageRepository.getMessages(
+        chatSeq,
+        newMsgSeq,
+        limitCnt,
+        blockedUsers,
+      );
     } else {
       for (let index = cache.length - 1; index >= 0; index -= 1) {
-        if (cache[index].chatSeq === chatSeq && cache[index].msgSeq < newMsgSeq && limitCnt !== 0) {
+        // NOTE: 다음 커밋시점에서 수정예정
+        /* eslint-disable no-await-in-loop */
+        const isBlockedUser = await this.friendsRepository.blocked(
+          reqUserSeq,
+          cache[index].userSeq,
+        );
+        if (cache[index].chatSeq === chatSeq
+          && cache[index].msgSeq < newMsgSeq
+          && limitCnt !== 0
+          && !isBlockedUser
+        ) {
           filteredChats.push(cache[index]);
           limitCnt -= 1;
         }
       }
       if (limitCnt !== 0) {
-        const dbrtn = this.messageRepository.getMessages(chatSeq, newMsgSeq, limitCnt);
+        const blockedUsers = await this.friendsRepository.blockedUsers(reqUserSeq);
+        const dbrtn = this.messageRepository.getMessages(
+          chatSeq,
+          newMsgSeq,
+          limitCnt,
+          blockedUsers,
+        );
         filteredChats.push(...dbrtn);
       }
     }
@@ -166,7 +212,7 @@ export default class ChatroomsService implements OnModuleInit {
     }
     const chatData: MessageDataDto = {
       msgSeq: chatIndex,
-      partcSeq: chat.partcSeq,
+      userSeq: chat.userSeq,
       chatSeq: chat.chatSeq,
       msg: chat.msg,
       createAt: chat.createAt,
@@ -192,7 +238,7 @@ export default class ChatroomsService implements OnModuleInit {
   async newChat(from: number, chatSeq: number, msg: string): Promise<number> {
     return this.cacheChatWrite({
       msgSeq: -1,
-      partcSeq: from,
+      userSeq: from,
       chatSeq,
       msg,
       createAt: new Date(),
@@ -205,14 +251,16 @@ export default class ChatroomsService implements OnModuleInit {
    * @param chatSeq 방 ID
    * @param messageId 메시지 ID
    * @param limit 제한
+   * @param reqUserSeq 요청자 ID
    * @returns 채팅 배열
    */
   async getMessages(
     chatSeq: number,
     messageId: number,
     limit: number,
+    reqUserSeq: number,
   ): Promise<Array<MessageDataDto>> {
-    const rtn = await this.cacheChatRead(chatSeq, messageId, limit);
+    const rtn = await this.cacheChatRead(chatSeq, messageId, limit, reqUserSeq);
     return rtn;
   }
 
@@ -388,6 +436,26 @@ export default class ChatroomsService implements OnModuleInit {
   }
 
   /**
+   * 특정 방에 클라이언트 입장 여부를 이벤트에 기록합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param user 사용자 식별자
+   */
+  async userInSave(chatSeq: number, user: number): Promise<void> {
+    await this.chatEventRepository.saveChatEvent(user, user, 'IN', chatSeq);
+  }
+
+  /**
+   * 특정 방에 클라이언트 퇴장 여부를 이벤트에 기록합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param user 사용자 식별자
+   */
+  async userOutSave(chatSeq: number, user: number): Promise<void> {
+    await this.chatEventRepository.saveChatEvent(user, user, 'OUT', chatSeq);
+  }
+
+  /**
    * 특정 방에서 사용자를 제거합니다.
    *
    * @param chatSeq 방 식별자
@@ -418,6 +486,9 @@ export default class ChatroomsService implements OnModuleInit {
    * @returns 밴 성공 여부
    */
   async banUser(chatSeq: number, to: number, admin: number): Promise<boolean> {
+    if (!(await this.leftUser(chatSeq, to))) {
+      return false;
+    }
     if (await this.isBanned(chatSeq, to)) {
       return false;
     }
@@ -506,13 +577,66 @@ export default class ChatroomsService implements OnModuleInit {
   }
 
   /**
+   * 특정 유저를 차단한 유저 셋을 가져옵니다.
+   *
+   * @param user 차단당한 유저 식별자
+   * @returns 차단한 유저 셋
+   */
+  async getBlockedUsers(user: number): Promise<Set<number>> {
+    const key = `${user}-block`;
+    const blockedUsers: Set<number> | undefined = await this.cacheManager.get(key);
+    if (blockedUsers === undefined) {
+      return new Set();
+    }
+    return blockedUsers;
+  }
+
+  /**
+   * 특정 유저를 차단합니다.
+   *
+   * @param user 유저 식별자
+   * @param willBlockUser 차단할 유저 식별자
+   * @returns 차단 성공 여부
+   */
+  async blockUser(user: number, willBlockUser: number): Promise<boolean> {
+    const key = `${willBlockUser}-block`;
+    const blockedUsers = await this.getBlockedUsers(willBlockUser);
+    if (blockedUsers.has(user)) {
+      return false;
+    }
+    blockedUsers.add(user);
+    await this.cacheManager.set(key, blockedUsers);
+    await this.friendsRepository.setBlock(user, willBlockUser);
+    return true;
+  }
+
+  /**
+   * 특정 유저가 차단한 유저에 대해 차단을 해제합니다.
+   *
+   * @param user 유저 식별자
+   * @param blockedUser 차단 해제할 유저 식별자
+   * @returns 차단 해제 성공 여부
+   */
+  async unblockUser(user: number, blockedUser: number): Promise<boolean> {
+    const key = `${blockedUser}-block`;
+    const blockedUsers: Set<number> | undefined = await this.cacheManager.get(key);
+    if (blockedUsers === undefined || !blockedUsers.has(user)) {
+      return false;
+    }
+    blockedUsers.delete(user);
+    await this.cacheManager.set(key, blockedUsers);
+    await this.friendsRepository.setUnblock(user, blockedUser);
+    return true;
+  }
+
+  /**
    * 소켓 고유 ID를 이용해 실사용자의 ID를 가져옵니다.
    *
-   * @param user 클라이언트 소켓
+   * @param user 클라이언트 소켓 ID
    * @returns 사용자 ID
    */
-  async whoAmI(user: Socket): Promise<number> {
-    return this.cacheManager.get(user.id);
+  async whoAmI(user: string): Promise<number> {
+    return this.cacheManager.get(user);
   }
 
   /**

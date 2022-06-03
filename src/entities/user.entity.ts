@@ -3,7 +3,7 @@ import {
 } from 'typeorm';
 import UserStatus from 'src/enums/mastercode/user-status.enum';
 import Alarm from './alarm.entity';
-import ChatParticipant from './chat-participant.entity';
+import Message from './message.entity';
 import Friends from './friends.entity';
 import GameLog from './game-log.entity';
 
@@ -48,8 +48,8 @@ export default class User {
   @OneToMany(() => Friends, (friends) => friends.followerSeq)
     follower: Friends[];
 
-  @OneToMany(() => ChatParticipant, (chatParticipant) => chatParticipant.userSeq)
-    partcSeq: ChatParticipant[];
+  @OneToMany(() => Message, (message) => message.userSeq)
+    messages: Message[];
 
   @OneToMany(() => GameLog, (gamelog) => gamelog.winnerSeq)
     winnergameSeq: GameLog[];

@@ -21,12 +21,12 @@ export class MessageDataDto {
     chatSeq: number;
 
   @ApiProperty({
-    description: '사용자 고유 ID',
+    description: '유저 ID',
     example: 1,
   })
   @IsString()
   @IsNotEmpty()
-    partcSeq: number | string; // 추후에 number로 변경
+    userSeq: number;
 
   @ApiProperty({
     description: '채팅 내용',
