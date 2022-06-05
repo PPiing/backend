@@ -1,5 +1,5 @@
 import {
-  Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
+  Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
 import ChatParticipant from './chat-participant.entity';
 import Chat from './chat.entity';
@@ -33,7 +33,7 @@ export class ChatEvent {
     createdAt: Date;
 
   @Column({ default: false })
-    deletedCheck: Boolean;
+    deletedCheck: boolean;
 
   @Column({ default: new Date() })
     expiredAt: Date;
