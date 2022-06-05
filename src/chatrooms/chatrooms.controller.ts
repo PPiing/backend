@@ -448,18 +448,25 @@ export default class ChatroomsController {
     name: 'roomId', type: Number, example: 1, description: '뮤트할 방 ID',
   })
   @ApiParam({
+    name: 'time', type: Number, example: 60, description: '뮤트할 시간 (1초 ~ 86400초(24시간))',
+  })
+  @ApiParam({
     name: 'by', type: Number, example: 1, description: '뮤트하는 관리자 ID (제거 예정)',
   })
-  @Put('mute/:target/:roomId/:by')
+  @Put('mute/:target/:roomId/:time/:by')
   @HttpCode(204)
   async muteUser(
     @Param('target', ParseIntPipe) target: number,
       @Param('roomId', ParseIntPipe) roomId: number,
+      @Param('time', ParseIntPipe) time: number,
       @Param('by', ParseIntPipe) by: number,
   ): Promise<void> {
     this.logger.debug(`muteUser: ${target} -> ${roomId} -> ${by}`);
     await this.chatroomsService.checkUsers([target, by]);
     await this.chatroomsService.checkRooms([roomId]);
+    if (time < 0 || time > (60 * 60 * 24)) {
+      throw new BadRequestException('차단 시간은 0에서 24시간 사이의 초 단위의 숫자여야 합니다.');
+    }
     if (await this.chatroomsService.isNormalUser(roomId, by) === true) {
       throw new BadRequestException('권한이 없습니다.');
     }
@@ -469,7 +476,7 @@ export default class ChatroomsController {
     if (target === by) {
       throw new BadRequestException('자신을 뮤트할 수 없습니다.');
     }
-    await this.chatroomsService.muteUser(roomId, target, by);
+    await this.chatroomsService.muteUser(roomId, target, by, time);
     // 뮤트 유저 캐시에 등록 필요하고 뮤트된 여부를 방 유저들에게 알려주어야 함.
     this.eventRunner.emit('room:notify', roomId, `${target} 님이 뮤트되었습니다.`);
   }

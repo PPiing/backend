@@ -69,14 +69,13 @@ export default class ChatroomsService implements OnModuleInit {
       this.schedulerRegistry.deleteTimeout('muteStopper');
     }
     const getRemainTimeSec = (t1: Date, t2: Date): number => (t1.getTime() - t2.getTime()) / 1000;
-    const muteTimeSec = 60;
     const muted = (await this.chatEventRepository.getAllAvailableChatEvents())
       .filter((chatEvent) => chatEvent.eventType === 'MUTE')
-      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+      .sort((a, b) => a.expiredAt.getTime() - b.expiredAt.getTime());
     const now = new Date();
     const stop = [];
     const nextTime = muted.find((chatEvent) => {
-      if (getRemainTimeSec(now, chatEvent.createdAt) > muteTimeSec) {
+      if (getRemainTimeSec(chatEvent.expiredAt, now) < 0) {
         stop.push(chatEvent.chatSeq);
         return false;
       }
@@ -91,7 +90,7 @@ export default class ChatroomsService implements OnModuleInit {
         'muteStopper',
         setTimeout(
           this.muteStopper,
-          (muteTimeSec - getRemainTimeSec(now, nextTime.createdAt)) * 1000,
+          getRemainTimeSec(nextTime.expiredAt, now) * 1000,
         ),
       );
     }
@@ -101,15 +100,14 @@ export default class ChatroomsService implements OnModuleInit {
    * 앱 처음 실행시 기존 DB에 저장된 Mute 처리된 유저들을 조회해 캐시에 저장합니다.
    */
   async setInitMutedUsers(): Promise<void> {
-    const muteTimeSec = 60;
     const getRemainTimeSec = (t1: Date, t2: Date): number => (t1.getTime() - t2.getTime()) / 1000;
     const now = new Date();
     const muted = (await this.chatEventRepository.getAllAvailableChatEvents())
       .filter((chatEvent) => chatEvent.eventType === 'MUTE');
     muted.forEach(async (chatEvent) => {
-      const ttl = muteTimeSec - getRemainTimeSec(now, chatEvent.createdAt);
+      const ttl = getRemainTimeSec(chatEvent.expiredAt, now);
       const key = `${chatEvent.chatSeq}-${chatEvent.toWho}-mute`;
-      await this.cacheManager.set(key, chatEvent.createdAt, { ttl });
+      await this.cacheManager.set(key, chatEvent.expiredAt, { ttl });
     });
   }
 
@@ -605,13 +603,13 @@ export default class ChatroomsService implements OnModuleInit {
    * @param chatSeq 방 식별자
    * @param to 뮤트할 사용자 식별자
    * @param admin 뮤트시키는 사용자 식별자
+   * @param time 뮤트시킬 시간
    */
-  async muteUser(chatSeq: number, to: number, admin: number): Promise<void> {
-    const muteTimeSec = 60;
-    const now = new Date();
-    await this.chatEventRepository.saveChatEvent(admin, to, 'MUTE', chatSeq);
+  async muteUser(chatSeq: number, to: number, admin: number, time: number): Promise<void> {
+    const expiredAt = new Date((new Date()).getTime() + time * 1000);
+    await this.chatEventRepository.saveChatEvent(admin, to, 'MUTE', chatSeq, time);
     const key = `${chatSeq}-${to}-mute`;
-    await this.cacheManager.set(key, now, { ttl: muteTimeSec });
+    await this.cacheManager.set(key, expiredAt, { ttl: time });
     await this.muteStopper();
   }
 
@@ -644,13 +642,12 @@ export default class ChatroomsService implements OnModuleInit {
   async isMuted(chatSeq: any, user: any): Promise<number> {
     const key = `${chatSeq}-${user}-mute`;
     const now = new Date();
-    const muteTimeSec = 60;
     const getRemainTimeSec = (t1: Date, t2: Date): number => (t1.getTime() - t2.getTime()) / 1000;
     const rtn: undefined | Date = await this.cacheManager.get(key);
     if (rtn === undefined) {
       return 0;
     }
-    return (muteTimeSec - getRemainTimeSec(now, rtn));
+    return getRemainTimeSec(rtn, now);
   }
 
   /**
