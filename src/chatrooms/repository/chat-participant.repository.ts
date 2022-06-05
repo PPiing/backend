@@ -14,8 +14,6 @@ export default class ChatParticipantRepository {
       userSeq: 10,
       chatSeq: 0,
       partcAuth: PartcAuth.CPAU30,
-      mutedUntil: new Date(),
-      isBaned: false,
       enteredAt: new Date(),
       leavedAt: new Date(),
     });
@@ -27,8 +25,6 @@ export default class ChatParticipantRepository {
       userSeq: userid,
       chatSeq: roomid,
       partcAuth: auth,
-      mutedUntil: new Date(),
-      isBaned: false,
       enteredAt: new Date(),
       leavedAt: new Date(),
     });
@@ -52,50 +48,6 @@ export default class ChatParticipantRepository {
       .map((entity) => entity.chatSeq);
   }
 
-  async banUser(chatSeq: number, user: number): Promise<boolean> {
-    const entity = this.MockEntity.find(
-      (e) => e.chatSeq === chatSeq && e.userSeq === user,
-    );
-    if (entity) {
-      entity.isBaned = true;
-      return true;
-    }
-    return false;
-  }
-
-  async unbanUser(chatSeq: number, user: number): Promise<boolean> {
-    const entity = this.MockEntity.find(
-      (e) => e.chatSeq === chatSeq && e.userSeq === user,
-    );
-    if (entity) {
-      entity.isBaned = false;
-      return true;
-    }
-    return false;
-  }
-
-  async muteUser(chatSeq: number, user: number, mutedUntil: Date): Promise<boolean> {
-    const entity = this.MockEntity.find(
-      (e) => e.chatSeq === chatSeq && e.userSeq === user,
-    );
-    if (entity) {
-      entity.mutedUntil = mutedUntil;
-      return true;
-    }
-    return false;
-  }
-
-  async unmuteUser(chatSeq: number, user: number): Promise<boolean> {
-    const entity = this.MockEntity.find(
-      (e) => e.chatSeq === chatSeq && e.userSeq === user,
-    );
-    if (entity) {
-      entity.mutedUntil = new Date();
-      return true;
-    }
-    return false;
-  }
-
   async getChatParticipantByUserIdAndRoomId(
     chatSeq: number,
     userId: number,
@@ -114,8 +66,6 @@ export default class ChatParticipantRepository {
         userSeq: user,
         chatSeq,
         partcAuth: PartcAuth.CPAU10,
-        mutedUntil: new Date(),
-        isBaned: false,
         enteredAt: new Date(),
         leavedAt: new Date(),
       };

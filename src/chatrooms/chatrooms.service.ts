@@ -489,6 +489,26 @@ export default class ChatroomsService implements OnModuleInit {
   }
 
   /**
+   * 방의 특정 유저를 매니저로 임명합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param user 임명할 유저 고유 ID
+   */
+  async setManager(chatSeq: number, user: number): Promise<void> {
+    await this.chatParticipantRepository.changeUserAuth(chatSeq, user, PartcAuth.CPAU20);
+  }
+
+  /**
+   * 방의 특정 유저를 매니저로 임명합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param user 임명할 유저 고유 ID
+   */
+  async setNormalUser(chatSeq: number, user: number): Promise<void> {
+    await this.chatParticipantRepository.changeUserAuth(chatSeq, user, PartcAuth.CPAU10);
+  }
+
+  /**
    * 특정 방에 클라이언트 입장 여부를 이벤트에 기록합니다.
    *
    * @param chatSeq 방 식별자
@@ -645,6 +665,29 @@ export default class ChatroomsService implements OnModuleInit {
   }
 
   /**
+   * 현재 소켓 접속한 유저 중 특정 룸에서 인자로 입력된 유저를 차단한 유저의 소켓 ID를 리턴합니다.
+   *
+   * @param user 차단당한 유저 식별자
+   * @param server 서버 소켓 객체
+   * @returns 차단한 유저 식별자 리스트
+   */
+  async getBlockedSocketIdList(user: number, room: number, server: Server): Promise<string[]> {
+    const clientList = await server.in(room.toString()).fetchSockets();
+    const blockList = await this.getBlockedUsers(user);
+    const rtn = [];
+    const promiseUserIdList = clientList.map(
+      (socket) => this.whoAmI(socket.id),
+    );
+    const userIdList = await Promise.all(promiseUserIdList);
+    userIdList.forEach((userId, index) => {
+      if (blockList.has(userId)) {
+        rtn.push(clientList[index].id);
+      }
+    });
+    return rtn;
+  }
+
+  /**
    * 특정 유저를 차단합니다.
    *
    * @param user 유저 식별자
@@ -780,6 +823,46 @@ export default class ChatroomsService implements OnModuleInit {
   }
 
   /**
+   * 방의 인원이 몇명인지 가져옵니다.
+   *
+   * @param chatSeq 방 ID
+   * @returns 방 인원 수
+   */
+  async getRoomParticipantsCount(chatSeq: number): Promise<number> {
+    const participants = await this.chatParticipantRepository.getChatParticipantsByRoomid(chatSeq);
+    return participants.length;
+  }
+
+  /**
+   * 방을 지웁니다.
+   *
+   * @param chatSeq 방 ID
+   */
+  async deleteRoom(chatSeq: number): Promise<void> {
+    await this.chatRepository.deleteRoom(chatSeq);
+  }
+
+  /**
+   * 관리자가 사라질 경우 다음 관리자를 지명합니다.
+   * 매니저가 있는 방이라면 매니저에게 우선권을 부여하며 매니저가 없는 방이라면 일반 유저를 매니저로 지정합니다.
+   *
+   * @param chatSeq 방 ID
+   * @returns 다음 관리자 식별자
+   */
+  async getNextAdmin(chatSeq: number): Promise<number> {
+    const participants = await this.chatParticipantRepository.getChatParticipantsByRoomid(chatSeq);
+    const manager = participants.find((user) => user.partcAuth === PartcAuth.CPAU20);
+    if (manager) {
+      return manager.userSeq;
+    }
+    const normalUser = participants.find((user) => user.partcAuth === PartcAuth.CPAU10);
+    if (normalUser) {
+      return normalUser.userSeq;
+    }
+    return -1;
+  }
+
+  /**
    * 특정 방에 특정 유저의 권한을 가져옵니다.
    *
    * @param chatSeq 방 식별자
@@ -818,5 +901,35 @@ export default class ChatroomsService implements OnModuleInit {
     }
     const participant = await this.getUserAuth(chatSeq, user);
     return participant === PartcAuth.CPAU30;
+  }
+
+  /**
+   * 특정 방에 특정 유저의 권한이 매니저인지 검사합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param user 사용자 식별자
+   * @returns 권한
+   */
+  async isManager(chatSeq: number, user: number): Promise<boolean> {
+    if (await this.isParticipant(chatSeq, user) === false) {
+      return false;
+    }
+    const participant = await this.getUserAuth(chatSeq, user);
+    return participant === PartcAuth.CPAU20;
+  }
+
+  /**
+   * 특정 방에 특정 유저의 권한이 일반 유저인지 검사합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param user 사용자 식별자
+   * @returns 권한
+   */
+  async isNormalUser(chatSeq: number, user: number): Promise<boolean> {
+    if (await this.isParticipant(chatSeq, user) === false) {
+      return false;
+    }
+    const participant = await this.getUserAuth(chatSeq, user);
+    return participant === PartcAuth.CPAU10;
   }
 }

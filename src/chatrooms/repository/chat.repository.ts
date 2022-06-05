@@ -67,4 +67,10 @@ export default class ChatRepository {
     }
     return searchResult.slice(page * count, page * count + count);
   }
+
+  async deleteRoom(chatSeq: number): Promise<void> {
+    this.MockEntity = this.MockEntity.filter(
+      (entity) => !(entity.chatSeq === chatSeq),
+    );
+  }
 }

@@ -130,6 +130,47 @@ export default class ChatroomsController {
   }
 
   /**
+   * 특정 방에서 나가기 요청을 처리합니다.
+   * 추후에 사용자 ID는 세션에서 가져올 예정입니다.
+   *
+   * @param roomId 방 ID
+   * @param by 초대한 사용자 ID
+   */
+  @ApiOperation({ summary: '방 퇴장', description: '사용자가 방에서 나가려고 합니다. 성공시 HTTP 204 (No content)를 리턴합니다.' })
+  @ApiResponse({ status: 204, description: '방 나가기 성공' })
+  @ApiParam({
+    name: 'roomId', type: Number, example: 1, description: '방 ID',
+  })
+  @ApiParam({
+    name: 'by', type: Number, example: 1, description: '유저 ID (제거 예정)',
+  })
+  @Delete('leave/:roomId/:by')
+  @HttpCode(204)
+  async leaveRoom(
+    @Param('roomId', ParseIntPipe) roomId: number,
+      @Param('by', ParseIntPipe) by: number,
+  ): Promise<void> {
+    this.logger.debug(`leaveRoom: ${roomId} -> ${by}`);
+    await this.chatroomsService.checkUsers([by]);
+    await this.chatroomsService.checkRooms([roomId]);
+    const isMaster = await this.chatroomsService.isMaster(roomId, by);
+    const result = this.chatroomsService.leftUser(roomId, by);
+    if (result) {
+      this.chatroomsService.userOutSave(roomId, by);
+      this.eventRunner.emit('room:leave', roomId, by, false);
+      this.eventRunner.emit('room:notify', roomId, `${by} 님이 방을 나갔습니다.`);
+      const peoples = await this.chatroomsService.getRoomParticipantsCount(roomId);
+      if (peoples === 0) {
+        await this.chatroomsService.deleteRoom(roomId);
+      } else if (isMaster) {
+        const nextAdmin = await this.chatroomsService.getNextAdmin(roomId);
+        await this.chatroomsService.addOwner(roomId, nextAdmin);
+        this.eventRunner.emit('room:notify', roomId, `방장이 나가 ${nextAdmin} 님이 방장이 되었습니다.`);
+      }
+    }
+  }
+
+  /**
    * 특정 사용자를 방에 초대합니다.
    * 초대하는 사용자가 권한이 없거나 자기 자신을 초대하거나 존재하지 않는 사용자면 에러가 발생합니다.
    * 추후에 사용자 ID (본인)는 세션에서 가져올 예정입니다.
@@ -164,7 +205,7 @@ export default class ChatroomsController {
     if (roomType === ChatType.CHTP10) {
       throw new BadRequestException('디엠엔 입장할 수 없습니다.');
     }
-    if (await this.chatroomsService.isMaster(roomId, by) === false) {
+    if (await this.chatroomsService.isNormalUser(roomId, by) === true) {
       throw new BadRequestException('권한이 없습니다.');
     }
     if (target === by) {
@@ -178,38 +219,6 @@ export default class ChatroomsController {
     this.chatroomsService.userInSave(roomId, target);
     this.eventRunner.emit('room:join', roomId, [target]);
     this.eventRunner.emit('room:notify', roomId, `${target} 님이 초대되었습니다.`);
-  }
-
-  /**
-   * 특정 방에서 나가기 요청을 처리합니다.
-   * 추후에 사용자 ID는 세션에서 가져올 예정입니다.
-   *
-   * @param roomId 방 ID
-   * @param by 초대한 사용자 ID
-   */
-  @ApiOperation({ summary: '방 퇴장', description: '사용자가 방에서 나가려고 합니다. 성공시 HTTP 204 (No content)를 리턴합니다.' })
-  @ApiResponse({ status: 204, description: '방 나가기 성공' })
-  @ApiParam({
-    name: 'roomId', type: Number, example: 1, description: '방 ID',
-  })
-  @ApiParam({
-    name: 'by', type: Number, example: 1, description: '유저 ID (제거 예정)',
-  })
-  @Delete('leave/:roomId/:by')
-  @HttpCode(204)
-  async leaveRoom(
-    @Param('roomId', ParseIntPipe) roomId: number,
-      @Param('by', ParseIntPipe) by: number,
-  ): Promise<void> {
-    this.logger.debug(`leaveRoom: ${roomId} -> ${by}`);
-    await this.chatroomsService.checkUsers([by]);
-    await this.chatroomsService.checkRooms([roomId]);
-    const result = this.chatroomsService.leftUser(roomId, by);
-    if (result) {
-      this.chatroomsService.userOutSave(roomId, by);
-      this.eventRunner.emit('room:leave', roomId, by, false);
-      this.eventRunner.emit('room:notify', roomId, `${by} 님이 방을 나갔습니다.`);
-    }
   }
 
   /**
@@ -243,8 +252,11 @@ export default class ChatroomsController {
     this.logger.debug(`kickUser: ${target} -> ${roomId} -> ${by}`);
     await this.chatroomsService.checkUsers([target, by]);
     await this.chatroomsService.checkRooms([roomId]);
-    if (await this.chatroomsService.isMaster(roomId, by) === false) {
+    if (await this.chatroomsService.isNormalUser(roomId, by) === true) {
       throw new BadRequestException('권한이 없습니다.');
+    }
+    if (await this.chatroomsService.isNormalUser(roomId, target) === false) {
+      throw new BadRequestException('같은 관리자는 강퇴할 수 없습니다.');
     }
     if (target === by) {
       throw new BadRequestException('자신을 강퇴할 수 없습니다.');
@@ -253,6 +265,86 @@ export default class ChatroomsController {
     await this.chatroomsService.kickUserSave(roomId, target, by);
     this.eventRunner.emit('room:leave', roomId, [target], true);
     this.eventRunner.emit('room:notify', roomId, `${target} 님이 강퇴당했습니다.`);
+  }
+
+  /**
+   * 방 유저를 부방장에 임명합니다. 방장만이 실행할 수 있습니다.
+   * 추후에 사용자 ID (본인)는 세션에서 가져올 예정입니다.
+   *
+   * @param roomId 방 ID
+   * @param target 유저 ID
+   * @param by 요청한 사람 ID
+   */
+  @ApiOperation({
+    summary: '부방장 임명',
+    description: '방장이 일반 유저에 대해 부방장으로 임명합니다.',
+  })
+  @ApiResponse({ status: 204, description: '직책 변경 성공' })
+  @ApiParam({
+    name: 'roomId', type: Number, example: 1, description: '방 ID',
+  })
+  @ApiParam({
+    name: 'target', type: Number, example: 1, description: '유저 ID',
+  })
+  @ApiParam({
+    name: 'by', type: Number, example: 1, description: '요청한 사람의 ID (제거 예정)',
+  })
+  @Put('manager/:roomId/:target/:by')
+  @HttpCode(204)
+  async setManager(
+    @Param('roomId', ParseIntPipe) roomId: number,
+      @Param('target', ParseIntPipe) target: number,
+      @Param('by', ParseIntPipe) by: number,
+  ): Promise<void> {
+    await this.chatroomsService.checkUsers([target, by]);
+    await this.chatroomsService.checkRooms([roomId]);
+    if (await this.chatroomsService.isMaster(roomId, by) === false) {
+      throw new BadRequestException('권한이 없습니다.');
+    }
+    if (await this.chatroomsService.isNormalUser(roomId, target) === true) {
+      await this.chatroomsService.setManager(roomId, target);
+      this.eventRunner.emit('room:notify', roomId, `${target} 님이 매니저가 되었습니다.`);
+    }
+  }
+
+  /**
+   * 방 유저를 부방장에서 해임합니다. 방장만이 실행할 수 있습니다.
+   * 추후에 사용자 ID (본인)는 세션에서 가져올 예정입니다.
+   *
+   * @param roomId 방 ID
+   * @param target 유저 ID
+   * @param by 요청한 사람 ID
+   */
+  @ApiOperation({
+    summary: '부방장 해임',
+    description: '방장이 방 유저를 부방장에서 해임합니다.',
+  })
+  @ApiResponse({ status: 204, description: '직책 변경 성공' })
+  @ApiParam({
+    name: 'roomId', type: Number, example: 1, description: '방 ID',
+  })
+  @ApiParam({
+    name: 'target', type: Number, example: 1, description: '유저 ID',
+  })
+  @ApiParam({
+    name: 'by', type: Number, example: 1, description: '요청한 사람의 ID (제거 예정)',
+  })
+  @Delete('manager/:roomId/:target/:by')
+  @HttpCode(204)
+  async unsetManager(
+    @Param('roomId', ParseIntPipe) roomId: number,
+      @Param('target', ParseIntPipe) target: number,
+      @Param('by', ParseIntPipe) by: number,
+  ): Promise<void> {
+    await this.chatroomsService.checkUsers([target, by]);
+    await this.chatroomsService.checkRooms([roomId]);
+    if (await this.chatroomsService.isMaster(roomId, by) === false) {
+      throw new BadRequestException('권한이 없습니다.');
+    }
+    if (await this.chatroomsService.isManager(roomId, target) === true) {
+      await this.chatroomsService.setNormalUser(roomId, target);
+      this.eventRunner.emit('room:notify', roomId, `${target} 님이 매니저에서 해임되었습니다.`);
+    }
   }
 
   /**
@@ -368,13 +460,15 @@ export default class ChatroomsController {
     this.logger.debug(`muteUser: ${target} -> ${roomId} -> ${by}`);
     await this.chatroomsService.checkUsers([target, by]);
     await this.chatroomsService.checkRooms([roomId]);
-    if (await this.chatroomsService.isMaster(roomId, by) === false) {
+    if (await this.chatroomsService.isNormalUser(roomId, by) === true) {
       throw new BadRequestException('권한이 없습니다.');
+    }
+    if (await this.chatroomsService.isNormalUser(roomId, target) === false) {
+      throw new BadRequestException('같은 관리자에게 뮤트할 수 없습니다.');
     }
     if (target === by) {
       throw new BadRequestException('자신을 뮤트할 수 없습니다.');
     }
-    // TODO 사용자 존재 여부 확인 필요
     await this.chatroomsService.muteUser(roomId, target, by);
     // 뮤트 유저 캐시에 등록 필요하고 뮤트된 여부를 방 유저들에게 알려주어야 함.
     this.eventRunner.emit('room:notify', roomId, `${target} 님이 뮤트되었습니다.`);
@@ -411,13 +505,12 @@ export default class ChatroomsController {
     this.logger.debug(`unmuteUser: ${target} -> ${roomId} -> ${by}`);
     await this.chatroomsService.checkUsers([target, by]);
     await this.chatroomsService.checkRooms([roomId]);
-    if (await this.chatroomsService.isMaster(roomId, by) === false) {
+    if (await this.chatroomsService.isNormalUser(roomId, by) === true) {
       throw new BadRequestException('권한이 없습니다.');
     }
     if (target === by) {
       throw new BadRequestException('자신을 해제할 수 없습니다.');
     }
-    // TODO 사용자 존재 여부 확인 필요
     const result = await this.chatroomsService.unmuteUser(roomId, target);
     if (result === false) {
       throw new BadRequestException('뮤트되어있지 않은 사용자입니다.');
@@ -455,7 +548,6 @@ export default class ChatroomsController {
     if (target === by) {
       throw new BadRequestException('자신을 차단할 수 없습니다.');
     }
-    // TODO 사용자 존재 여부 확인 필요
     const result = await this.chatroomsService.blockUser(by, target);
     if (result === false) {
       throw new BadRequestException('이미 차단된 사용자입니다.');

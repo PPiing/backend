@@ -90,18 +90,11 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
     if (rooms.has(message.at.toString()) && name !== undefined) {
       if (muted === 0) {
         const seq = await this.chatroomsService.newChat(name, message.at, message.content);
-        const blockList = await this.chatroomsService.getBlockedUsers(name);
-        const clientList = await this.server.in(message.at.toString()).fetchSockets();
-        const exceptUsers = [];
-        const promiseUserIdList = clientList.map(
-          (socket) => this.chatroomsService.whoAmI(socket.id),
+        const exceptUsers = await this.chatroomsService.getBlockedSocketIdList(
+          name,
+          message.at,
+          this.server,
         );
-        const userIdList = await Promise.all(promiseUserIdList);
-        userIdList.forEach((userId, index) => {
-          if (blockList.has(userId)) {
-            exceptUsers.push(clientList[index].id);
-          }
-        });
         const data: ISocketSend = {
           chatSeq: message.at,
           userIDs: [name],
