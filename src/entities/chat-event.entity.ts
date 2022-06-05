@@ -32,6 +32,9 @@ export class ChatEvent {
   @CreateDateColumn({ default: new Date() })
     createdAt: Date;
 
-  @DeleteDateColumn({ default: new Date() })
-    deletedAt: Date;
+  @Column({ default: false })
+    deletedCheck: Boolean;
+
+  @Column({ default: new Date() })
+    expiredAt: Date;
 }
