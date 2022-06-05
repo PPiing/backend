@@ -653,35 +653,15 @@ export default class ChatroomsController {
   }
 
   /**
-   * 방을 검색합니다. DM과 비공개 방은 제외합니다.
+   * 방을 둘러봅니다. DM과 비공개 방은 제외합니다.
    *
-   * @param searchKeyword 검색 키워드
-   * @param page 페이지 번호
-   * @param count 페이지당 방 개수
-   * @returns 검색 결과를 반환합니다.
+   * @returns 입장할 수 있는 방 목록을 반환합니다.
    */
-  @ApiOperation({ summary: '방 검색', description: '방 검색 기능입니다. 검색 키워드와 페이지 번호를 입력하여 검색 결과를 반환합니다.' })
-  @ApiResponse({ status: 200, type: [ChatRoomResultDto], description: '방 검색 성공' })
-  @ApiParam({
-    name: 'searchKeyword', type: String, example: '푸주', description: '검색 키워드',
-  })
-  @ApiParam({
-    name: 'page', type: Number, example: 1, description: '페이지 번호',
-  })
-  @ApiParam({
-    name: 'count', type: Number, example: 10, description: '페이지당 방 개수',
-  })
-  @Get('search/:searchKeyword/:page/:count')
-  async searchChatroom(
-    @Param('searchKeyword') searchKeyword: string,
-      @Param('page', ParseIntPipe) page: number,
-      @Param('count', ParseIntPipe) count: number,
-  ): Promise<Array<ChatRoomResultDto>> {
-    const result = await this.chatroomsService.searchChatroom(
-      searchKeyword,
-      Number(page),
-      Number(count),
-    );
+  @ApiOperation({ summary: '방 둘러보기', description: 'DM과 비공개 방을 제외한 방들을 출력해 줍니다.' })
+  @ApiResponse({ status: 200, type: [ChatRoomResultDto], description: '방 목록' })
+  @Get('search')
+  async searchChatroom(): Promise<Array<ChatRoomResultDto>> {
+    const result = await this.chatroomsService.searchChatroom();
     return result;
   }
 }

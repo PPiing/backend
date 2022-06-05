@@ -261,14 +261,12 @@ export default class ChatroomsService implements OnModuleInit {
 
   /**
    * 방들이 존재하는지 확인합니다.
-   * 추후에 DB에서 조회하는 것으로 변경해야 합니다.
    *
    * @param rooms 방 배열
    * @returns 방이 존재하는지 여부 (하나라도 존재하지 않으면 false 리턴)
    */
   async existRooms(rooms: Array<number>): Promise<boolean> {
-    // TODO 추후에 await this.roomRepository.existRoom(room); 과 같은 형태로 판단해야함
-    const find = rooms.find((room) => room < 0);
+    const find = rooms.find((room) => this.chatRepository.findRoomByRoomId(room) === null);
     return find === undefined;
   }
 
@@ -433,6 +431,12 @@ export default class ChatroomsService implements OnModuleInit {
     }
     if (create.chatType === ChatType.CHTP10) {
       throw new BadRequestException('방 타입이 잘못되었습니다.');
+    }
+    if (create.chatType !== ChatType.CHTP30 && create.password !== undefined) {
+      throw new BadRequestException('비밀번호가 걸린 방이 아닌 경우 비밀번호는 입력할 수 없습니다.');
+    }
+    if (create.chatType === ChatType.CHTP30 && !create.password) {
+      throw new BadRequestException('비밀번호가 걸린 방을 만들고자 할 때에는 비밀번호를 입력해야 합니다.');
     }
     const hashPassword = create.password ? await bcrypt.hash(create.password, 10) : undefined;
     const hashed = {
@@ -781,27 +785,29 @@ export default class ChatroomsService implements OnModuleInit {
   }
 
   /**
-   * 방을 검색합니다.
+   * 공개방, 비밀번호 걸린 방을 가지고 옵니다.
    *
-   * @param searchKeyword 방 검색 키워드
-   * @returns 방 정보
+   * @returns 공개방, 비밀번호 걸린 방 목록
    */
-  async searchChatroom(
-    searchKeyword: string,
-    page: number,
-    count: number,
-  ): Promise<Array<ChatRoomResultDto>> {
-    const chatroomList = await this.chatRepository.searchChatroom(searchKeyword, page, count);
-    const participants = await Promise.all(chatroomList.map(
-      (chatroom) => this.chatParticipantRepository.getChatParticipantsByRoomid(chatroom.chatSeq),
-    ));
-    return chatroomList.map((chatroom, index) => ({
-      chatSeq: chatroom.chatSeq,
-      chatName: chatroom.chatName,
-      chatType: chatroom.chatType,
-      isPassword: chatroom.password && chatroom.password.length > 0,
-      participants: participants[index],
+  async searchChatroom(): Promise<Array<ChatRoomResultDto>> {
+    const chatroomList = await this.chatRepository.searchChatroomByChatType([
+      ChatType.CHTP20,
+      ChatType.CHTP30,
+    ]);
+
+    const promiseChatParticipantsList = chatroomList.map(
+      (room) => this.chatParticipantRepository.getChatParticipantsByRoomid(room.chatSeq),
+    );
+    const chatParticipantsList = await Promise.all(promiseChatParticipantsList);
+
+    const rtn: ChatRoomResultDto[] = chatroomList.map((room, idx) => ({
+      chatSeq: room.chatSeq,
+      chatName: room.chatName,
+      chatType: room.chatType,
+      isPassword: room.password !== undefined,
+      participants: chatParticipantsList[idx],
     }));
+    return rtn;
   }
 
   /**

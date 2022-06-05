@@ -1,6 +1,7 @@
 /* eslint-disable no-restricted-syntax */
 // NOTE: 전체적으로 리팩터링 예정
 import { Injectable } from '@nestjs/common';
+import ChatType from 'src/enums/mastercode/chat-type.enum';
 
 @Injectable()
 export default class ChatRepository {
@@ -11,12 +12,11 @@ export default class ChatRepository {
       chatSeq: 0,
       chatType: 'CHTP20',
       chatName: '푸주홍의 등산클럽',
-      password: '',
       isDirected: false,
     });
     this.MockEntity.push({
       chatSeq: 1,
-      chatType: 'CHTP20',
+      chatType: 'CHTP30',
       chatName: '장이수의 도박클럽',
       password: '$2b$10$gnY2ITzIrJKgw2HxH5GETOKO6ICbRLCvge1e3xta1UM1CceZCz1Ia', // puju
       isDirected: false,
@@ -58,14 +58,8 @@ export default class ChatRepository {
     });
   }
 
-  searchChatroom(searchKeyword: string, page: number, count: number): any[] {
-    const searchResult = [];
-    for (const room of this.MockEntity) {
-      if (room.chatName.includes(searchKeyword)) {
-        searchResult.push(room);
-      }
-    }
-    return searchResult.slice(page * count, page * count + count);
+  async searchChatroomByChatType(chatTypes: ChatType[]): Promise<any[]> {
+    return this.MockEntity.filter((entity) => chatTypes.includes(entity.chatType));
   }
 
   async deleteRoom(chatSeq: number): Promise<void> {
