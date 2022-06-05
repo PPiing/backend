@@ -1,14 +1,9 @@
 import {
   Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
+import EventType from 'src/enums/mastercode/event-type.enum';
 import ChatParticipant from './chat-participant.entity';
 import Chat from './chat.entity';
-
-const enum ChatEventType {
-  BAN = 'BAN',
-  KICK = 'KICK',
-  MUTE = 'MUTE',
-}
 
 @Entity()
 export class ChatEvent {
@@ -16,7 +11,7 @@ export class ChatEvent {
     eventSeq: number;
 
   @Column()
-    eventType: ChatEventType;
+    eventType: EventType;
 
   @ManyToOne(() => ChatParticipant)
   @JoinColumn({ name: 'fromWho' })

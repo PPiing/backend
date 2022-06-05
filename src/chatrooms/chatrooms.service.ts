@@ -8,6 +8,7 @@ import { Cache } from 'cache-manager';
 import { Server, Socket } from 'socket.io';
 import ChatType from 'src/enums/mastercode/chat-type.enum';
 import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
+import EventType from 'src/enums/mastercode/event-type.enum';
 import ChatParticipantRepository from './repository/chat-participant.repository';
 import ChatRepository from './repository/chat.repository';
 import ChatRoomResultDto from './dto/chat-room-result.dto';
@@ -70,7 +71,7 @@ export default class ChatroomsService implements OnModuleInit {
     }
     const getRemainTimeSec = (t1: Date, t2: Date): number => (t1.getTime() - t2.getTime()) / 1000;
     const muted = (await this.chatEventRepository.getAllAvailableChatEvents())
-      .filter((chatEvent) => chatEvent.eventType === 'MUTE')
+      .filter((chatEvent) => chatEvent.eventType === EventType.EVST30)
       .sort((a, b) => a.expiredAt.getTime() - b.expiredAt.getTime());
     const now = new Date();
     const stop = [];
@@ -103,7 +104,7 @@ export default class ChatroomsService implements OnModuleInit {
     const getRemainTimeSec = (t1: Date, t2: Date): number => (t1.getTime() - t2.getTime()) / 1000;
     const now = new Date();
     const muted = (await this.chatEventRepository.getAllAvailableChatEvents())
-      .filter((chatEvent) => chatEvent.eventType === 'MUTE');
+      .filter((chatEvent) => chatEvent.eventType === EventType.EVST30);
     muted.forEach(async (chatEvent) => {
       const ttl = getRemainTimeSec(chatEvent.expiredAt, now);
       const key = `${chatEvent.chatSeq}-${chatEvent.toWho}-mute`;
@@ -517,7 +518,7 @@ export default class ChatroomsService implements OnModuleInit {
    * @param user 사용자 식별자
    */
   async userInSave(chatSeq: number, user: number): Promise<void> {
-    await this.chatEventRepository.saveChatEvent(user, user, 'IN', chatSeq);
+    await this.chatEventRepository.saveChatEvent(user, user, EventType.EVST40, chatSeq);
   }
 
   /**
@@ -527,7 +528,7 @@ export default class ChatroomsService implements OnModuleInit {
    * @param user 사용자 식별자
    */
   async userOutSave(chatSeq: number, user: number): Promise<void> {
-    await this.chatEventRepository.saveChatEvent(user, user, 'OUT', chatSeq);
+    await this.chatEventRepository.saveChatEvent(user, user, EventType.EVST45, chatSeq);
   }
 
   /**
@@ -549,7 +550,7 @@ export default class ChatroomsService implements OnModuleInit {
    * @param admin 킥하는 관리자 식별자
    */
   async kickUserSave(chatSeq: number, to: number, admin: number): Promise<void> {
-    await this.chatEventRepository.saveChatEvent(admin, to, 'KICK', chatSeq);
+    await this.chatEventRepository.saveChatEvent(admin, to, EventType.EVST10, chatSeq);
   }
 
   /**
@@ -567,7 +568,7 @@ export default class ChatroomsService implements OnModuleInit {
     if (await this.isBanned(chatSeq, to)) {
       return false;
     }
-    await this.chatEventRepository.saveChatEvent(admin, to, 'BAN', chatSeq);
+    await this.chatEventRepository.saveChatEvent(admin, to, EventType.EVST20, chatSeq);
     return true;
   }
 
@@ -580,7 +581,7 @@ export default class ChatroomsService implements OnModuleInit {
    */
   async isBanned(chatSeq: any, user: any): Promise<boolean> {
     const find = (await this.chatEventRepository.getChatEvents(user, chatSeq))
-      .find((chatEvent) => chatEvent.eventType === 'BAN');
+      .find((chatEvent) => chatEvent.eventType === EventType.EVST20);
     this.logger.debug(`[ChatRoomService] isBanned : ${JSON.stringify(find)}`);
     return find !== undefined;
   }
@@ -593,7 +594,7 @@ export default class ChatroomsService implements OnModuleInit {
    */
   async unbanUser(chatSeq: any, user: any): Promise<void> {
     const find = (await this.chatEventRepository.getChatEvents(user, chatSeq))
-      .find((chatEvent) => chatEvent.eventType === 'BAN');
+      .find((chatEvent) => chatEvent.eventType === EventType.EVST20);
     await this.chatEventRepository.delChatEvent(find.eventSeq);
   }
 
@@ -607,7 +608,7 @@ export default class ChatroomsService implements OnModuleInit {
    */
   async muteUser(chatSeq: number, to: number, admin: number, time: number): Promise<void> {
     const expiredAt = new Date((new Date()).getTime() + time * 1000);
-    await this.chatEventRepository.saveChatEvent(admin, to, 'MUTE', chatSeq, time);
+    await this.chatEventRepository.saveChatEvent(admin, to, EventType.EVST30, chatSeq, time);
     const key = `${chatSeq}-${to}-mute`;
     await this.cacheManager.set(key, expiredAt, { ttl: time });
     await this.muteStopper();
@@ -622,7 +623,7 @@ export default class ChatroomsService implements OnModuleInit {
    */
   async unmuteUser(chatSeq: number, user: number): Promise<boolean> {
     const find = (await this.chatEventRepository.getChatEvents(user, chatSeq))
-      .find((chatEvent) => chatEvent.eventType === 'MUTE');
+      .find((chatEvent) => chatEvent.eventType === EventType.EVST30);
     if (find !== undefined) {
       await this.chatEventRepository.delChatEvent(find.chatSeq);
       const key = `${chatSeq}-${user}-mute`;

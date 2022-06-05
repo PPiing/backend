@@ -1,6 +1,7 @@
 /* eslint-disable no-restricted-syntax */
 // NOTE: 전체적으로 리팩터링 예정
 import { Injectable } from '@nestjs/common';
+import EventType from 'src/enums/mastercode/event-type.enum';
 
 @Injectable()
 export class ChatEventRepository {
@@ -9,7 +10,7 @@ export class ChatEventRepository {
   constructor() {
     this.MockEntity.push({
       eventSeq: 0,
-      eventType: 'MUTE',
+      eventType: EventType.EVST30,
       fromWho: 1,
       toWho: 10,
       chatSeq: 0,
@@ -22,7 +23,7 @@ export class ChatEventRepository {
   async saveChatEvent(
     from: number,
     to: number,
-    what: string,
+    what: EventType,
     where: number,
     expired?: number,
   ): Promise<void> {
