@@ -4,6 +4,7 @@ import {
   OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
 import ChatroomsService from './chatrooms.service';
 import ISocketRecv from './interface/socket-recv';
 import ISocketSend from './interface/socket-send';
@@ -171,5 +172,24 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
     this.server.to(chatSeq.toString()).emit('room:leave', data);
     // 유저를 룸에서 내보냅니다 (나갑니다).
     await this.chatroomsService.roomLeaveUser(this.server, chatSeq, user);
+  }
+
+  /**
+   * 방의 유저의 권한이 변경될 때 호출되는 콜백함수입니다.
+   *
+   * @param chatSeq 방 ID
+   * @param user 유저 ID
+   * @param role 권한
+   */
+  @OnEvent('room:grant')
+  async onRoomGrant(chatSeq: number, user: number, role: PartcAuth) {
+    this.logger.debug(`onRoomGrant: ${chatSeq}, user: ${user} to ${role}`);
+    // 본인 포함 방에서 내보낸 (나간) 유저가 나갔다고 해당 룸에 들어가 있는 클라이언트들에게 알립니다.
+    const data: ISocketSend = {
+      chatSeq,
+      userIDs: [user],
+      role,
+    };
+    this.server.to(chatSeq.toString()).emit('room:grant', data);
   }
 }

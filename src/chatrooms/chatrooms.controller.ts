@@ -10,6 +10,7 @@ import {
   ApiTags, ApiResponse, ApiOperation, ApiParam,
 } from '@nestjs/swagger';
 import ChatType from 'src/enums/mastercode/chat-type.enum';
+import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
 import ChatroomsService from './chatrooms.service';
 import { ChatRoomDto } from './dto/chat-room.dto';
 import { JoinRoomDto } from './dto/join-room.dto';
@@ -166,6 +167,7 @@ export default class ChatroomsController {
         const nextAdmin = await this.chatroomsService.getNextAdmin(roomId);
         await this.chatroomsService.addOwner(roomId, nextAdmin);
         this.eventRunner.emit('room:notify', roomId, `방장이 나가 ${nextAdmin} 님이 방장이 되었습니다.`);
+        this.eventRunner.emit('room:grant', roomId, nextAdmin, PartcAuth.CPAU30);
       }
     }
   }
@@ -304,6 +306,7 @@ export default class ChatroomsController {
     if (await this.chatroomsService.isNormalUser(roomId, target) === true) {
       await this.chatroomsService.setManager(roomId, target);
       this.eventRunner.emit('room:notify', roomId, `${target} 님이 매니저가 되었습니다.`);
+      this.eventRunner.emit('room:grant', roomId, target, PartcAuth.CPAU20);
     }
   }
 
@@ -344,6 +347,7 @@ export default class ChatroomsController {
     if (await this.chatroomsService.isManager(roomId, target) === true) {
       await this.chatroomsService.setNormalUser(roomId, target);
       this.eventRunner.emit('room:notify', roomId, `${target} 님이 매니저에서 해임되었습니다.`);
+      this.eventRunner.emit('room:grant', roomId, target, PartcAuth.CPAU10);
     }
   }
 
