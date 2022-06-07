@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { randomUUID } from 'crypto';
-import { GameType } from 'src/enums/mastercode/game-type.enum';
+import  GameType from 'src/enums/mastercode/game-type.enum';
 import {
   GameData, PatchRule, MetaData, RuleData,
 } from './dto/game-data';

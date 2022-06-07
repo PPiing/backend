@@ -1,6 +1,6 @@
 import { IsNumber, IsString } from 'class-validator';
 import GameOption from 'src/enums/mastercode/game-option.enum';
-import { GameType } from 'src/enums/mastercode/game-type.enum';
+import GameType from 'src/enums/mastercode/game-type.enum';
 
 export class CreateGameLogDto {
   @IsNumber()
