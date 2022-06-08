@@ -15,7 +15,7 @@ export class AuthController {
 
   @Get('42/callback')
   @UseGuards(FtGuard)
-  @Redirect('/', 302)
+  @Redirect('http://bongcheonmountainclub.iptime.org/', 302) // login url
   callback(@Req() req: any) {
     // sign up user
     const [userId, email] = [req.user.userId, req.user.email];
