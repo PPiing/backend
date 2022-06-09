@@ -1,70 +1,57 @@
-/* eslint-disable no-restricted-syntax */
-// NOTE: 전체적으로 리팩터링 예정
-import { Injectable } from '@nestjs/common';
+/* eslint-disable */
+// NOTE 추후에 데이터베이스 연동시에 해당 옵션을 제거할 것
+import Chat from 'src/entities/chat.entity';
 import ChatType from 'src/enums/mastercode/chat-type.enum';
+import { EntityRepository, Repository } from 'typeorm';
+import ChatDto from '../dto/chat.dto';
 
-@Injectable()
-export default class ChatRepository {
-  MockEntity: any[] = [];
-
-  constructor() {
-    this.MockEntity.push({
-      chatSeq: 0,
-      chatType: 'CHTP20',
-      chatName: '푸주홍의 등산클럽',
-      isDirected: false,
-    });
-    this.MockEntity.push({
-      chatSeq: 1,
-      chatType: 'CHTP30',
-      chatName: '장이수의 도박클럽',
-      password: '$2b$10$gnY2ITzIrJKgw2HxH5GETOKO6ICbRLCvge1e3xta1UM1CceZCz1Ia', // puju
-      isDirected: false,
-    });
-  }
-
-  findRoomByRoomId(chatSeq: number): any {
-    for (const room of this.MockEntity) {
-      if (room.chatSeq === chatSeq) {
-        return room;
-      }
-    }
+@EntityRepository(Chat)
+export default class ChatRepository extends Repository<Chat> {
+  /**
+   * 방 ID로 방을 검색합니다. 만약 방이 존재하지 않으면 NULL을 반환합니다.
+   *
+   * @param chatSeq 방 고유 ID
+   * @returns 방 객체 or null
+   */
+  async findRoomByRoomId(chatSeq: number): Promise<ChatDto | null> {
     return null;
   }
 
-  findRoomByRoomName(chatName: string): any {
-    for (const room of this.MockEntity) {
-      if (room.chatName === chatName) {
-        return room;
-      }
-    }
+  /**
+   * 방 이름으로 방을 검색합니다. 만약 방이 존재하지 않으면 NULL을 반환합니다.
+   *
+   * @param chatName 방 이름
+   * @returns 방 객체 or null
+   */
+  async findRoomByRoomName(chatName: string): Promise<ChatDto | null> {
     return null;
   }
 
-  addRoom(room: any): any {
-    this.MockEntity.push({
-      chatSeq: this.MockEntity.length,
-      chatType: room.chatType,
-      chatName: room.chatName,
-      password: room.password,
-      isDirected: room.chatType === 'CHTP10',
-    });
-    return ({
-      chatSeq: this.MockEntity.length - 1,
-      chatType: room.chatType,
-      chatName: room.chatName,
-      password: room.password,
-      isDirected: room.chatType === 'CHTP10',
-    });
+  /**
+   * 방을 추가합니다. 방을 추가하고 나서 방 고유 ID를 반환합니다.
+   *
+   * @param room 새 방 객체
+   * @returns 생성된 방 고유 ID
+   */
+  async addRoom(room: ChatDto): Promise<number> {
+    return 0;
   }
 
-  async searchChatroomByChatType(chatTypes: ChatType[]): Promise<any[]> {
-    return this.MockEntity.filter((entity) => chatTypes.includes(entity.chatType));
+  /**
+   * 인자로 주어진 채팅 타입에 속하는 방을 모두 검색합니다.
+   *
+   * @param chatTypes 채팅 타입 배열
+   * @returns 채팅방 객체 배열
+   */
+  async searchChatroomsByChatType(chatTypes: ChatType[]): Promise<ChatDto[]> {
+    return [];
   }
 
+  /**
+   * 방을 삭제합니다.
+   *
+   * @param chatSeq 방 고유 ID
+   */
   async deleteRoom(chatSeq: number): Promise<void> {
-    this.MockEntity = this.MockEntity.filter(
-      (entity) => !(entity.chatSeq === chatSeq),
-    );
   }
 }

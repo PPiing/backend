@@ -11,19 +11,19 @@ import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
 import EventType from 'src/enums/mastercode/event-type.enum';
 import ChatParticipantRepository from './repository/chat-participant.repository';
 import ChatRepository from './repository/chat.repository';
-import ChatRoomResultDto from './dto/chat-room-result.dto';
-import { ChatRoomDto } from './dto/chat-room.dto';
 import { MessageDataDto } from './dto/message-data.dto';
 import MessageRepository from './repository/message.repository';
-import { ChatEventRepository } from './repository/chat-event.repository';
+import ChatEventRepository from './repository/chat-event.repository';
 import FriendsRepository from './repository/friends.repository';
+import { ChatRequestDto } from './dto/chat-request.dto';
+import { ChatResponseDto } from './dto/chat-response..dto';
 
 @Injectable()
 export default class ChatroomsService implements OnModuleInit {
   private readonly logger = new Logger(ChatroomsService.name);
 
   constructor(
-    private readonly chatRepository: ChatRepository,
+    private chatRepository: ChatRepository,
     private messageRepository: MessageRepository,
     private chatParticipantRepository: ChatParticipantRepository,
     private chatEventRepository: ChatEventRepository,
@@ -54,7 +54,7 @@ export default class ChatroomsService implements OnModuleInit {
     if (chatCache !== undefined && chatIndex !== undefined) {
       const len = chatCache.length;
       this.logger.debug(`DB에 저장된 채팅 메시지 수: ${len}`);
-      this.messageRepository.saveMessages(chatCache);
+      await this.messageRepository.saveMessages(chatCache);
       await this.cacheManager.del('chat');
     }
   }
@@ -82,9 +82,8 @@ export default class ChatroomsService implements OnModuleInit {
       }
       return true;
     });
-    stop.forEach(async (chatSeq) => {
-      await this.chatEventRepository.delChatEvent(chatSeq);
-    });
+    const stopJob = stop.map((chatSeq) => this.chatEventRepository.delChatEvent(chatSeq));
+    await Promise.all(stopJob);
     if (nextTime !== undefined) {
       this.logger.debug('add muteStopper');
       this.schedulerRegistry.addTimeout(
@@ -114,17 +113,17 @@ export default class ChatroomsService implements OnModuleInit {
 
   /**
    * 앱 처음 실행시 기존 DB에 저장된 Block 처리된 유저들을 조회해 캐시에 저장합니다.
-   * followerSeq가 followeeSeq를 차단한 관계입니다.
+   * from이 to를 차단한 관계입니다.
    */
   async setInitBlockedUsers(): Promise<void> {
     const blocked = await this.friendsRepository.getAllBlockedFriends();
     const tmp = new Map<string, Set<number>>();
     blocked.forEach((friend) => {
-      const key = `${friend.followeeSeq}-block`;
+      const key = `${friend.to}-block`;
       if (tmp.has(key)) {
-        tmp.get(key).add(friend.followerSeq);
+        tmp.get(key).add(friend.from);
       } else {
-        tmp.set(key, new Set<number>([friend.followerSeq]));
+        tmp.set(key, new Set<number>([friend.from]));
       }
     });
     tmp.forEach(async (value, key) => {
@@ -162,7 +161,7 @@ export default class ChatroomsService implements OnModuleInit {
     const cache: undefined | Array<MessageDataDto> = await this.cacheManager.get('chat');
     if (cache === undefined) {
       const blockedUsers = await this.friendsRepository.blockedUsers(reqUserSeq);
-      filteredChats = this.messageRepository.getMessages(
+      filteredChats = await this.messageRepository.getMessages(
         chatSeq,
         newMsgSeq,
         limitCnt,
@@ -172,10 +171,10 @@ export default class ChatroomsService implements OnModuleInit {
       for (let index = cache.length - 1; index >= 0; index -= 1) {
         // NOTE: 다음 커밋시점에서 수정예정
         /* eslint-disable no-await-in-loop */
-        const isBlockedUser = await this.friendsRepository.blocked(
-          reqUserSeq,
-          cache[index].userSeq,
-        );
+        const isBlockedUser = await this.friendsRepository.blocked({
+          from: reqUserSeq,
+          to: cache[index].userSeq,
+        });
         if (cache[index].chatSeq === chatSeq
           && cache[index].msgSeq < newMsgSeq
           && limitCnt !== 0
@@ -187,7 +186,7 @@ export default class ChatroomsService implements OnModuleInit {
       }
       if (limitCnt !== 0) {
         const blockedUsers = await this.friendsRepository.blockedUsers(reqUserSeq);
-        const dbrtn = this.messageRepository.getMessages(
+        const dbrtn = await this.messageRepository.getMessages(
           chatSeq,
           newMsgSeq,
           limitCnt,
@@ -265,7 +264,10 @@ export default class ChatroomsService implements OnModuleInit {
    * @returns 방이 존재하는지 여부 (하나라도 존재하지 않으면 false 리턴)
    */
   async existRooms(rooms: Array<number>): Promise<boolean> {
-    const find = rooms.find((room) => this.chatRepository.findRoomByRoomId(room) === null);
+    const roomSearchList = await Promise.all(
+      rooms.map((room) => this.chatRepository.findRoomByRoomId(room)),
+    );
+    const find = roomSearchList.find((room) => room === null);
     return find === undefined;
   }
 
@@ -355,8 +357,8 @@ export default class ChatroomsService implements OnModuleInit {
    * @param username 클라이언트 식별자
    * @returns 소속된 룸 목록
    */
-  roomJoin(user: Socket, username: number): number[] {
-    const rooms = this.chatParticipantRepository.findRoomsByUserId(username);
+  async roomJoin(user: Socket, username: number): Promise<number[]> {
+    const rooms = await this.chatParticipantRepository.findRoomsByUserId(username);
     const rtn = [];
     rooms.forEach((room) => { // FIXME : 타입 명시 필요
       user.join(room.toString()); // 본인이 속한 룸에 조인
@@ -410,9 +412,9 @@ export default class ChatroomsService implements OnModuleInit {
    *
    * @param user 클라이언트 소켓
    */
-  roomLeave(user: Socket): void {
+  async roomLeave(user: Socket): Promise<void> {
     const username = this.getUserId(user);
-    const rooms = this.chatParticipantRepository.findRoomsByUserId(username);
+    const rooms = await this.chatParticipantRepository.findRoomsByUserId(username);
     rooms.forEach((room) => {
       user.leave(room.toString()); // 본인이 속한 룸에서 떠나기
     });
@@ -424,26 +426,26 @@ export default class ChatroomsService implements OnModuleInit {
    * @param create 생성할 방 정보
    * @returns 생성된 방 고유 ID
    */
-  async addRoom(create: ChatRoomDto): Promise<number> {
-    if (this.chatRepository.findRoomByRoomName(create.chatName)) {
+  async addRoom(create: ChatRequestDto): Promise<number> {
+    if (await this.chatRepository.findRoomByRoomName(create.chatName)) {
       throw new BadRequestException('방제목이 중복되었습니다.');
     }
     if (create.chatType === ChatType.CHTP10) {
       throw new BadRequestException('방 타입이 잘못되었습니다.');
     }
-    if (create.chatType !== ChatType.CHTP30 && create.password !== undefined) {
+    if (create.chatType !== ChatType.CHTP30 && !!create.password) {
       throw new BadRequestException('비밀번호가 걸린 방이 아닌 경우 비밀번호는 입력할 수 없습니다.');
     }
     if (create.chatType === ChatType.CHTP30 && !create.password) {
       throw new BadRequestException('비밀번호가 걸린 방을 만들고자 할 때에는 비밀번호를 입력해야 합니다.');
     }
-    const hashPassword = create.password ? await bcrypt.hash(create.password, 10) : undefined;
+    const hashPassword = create.password ? await bcrypt.hash(create.password, 10) : '';
     const hashed = {
       ...create,
       password: hashPassword,
     };
     this.logger.debug(`[ChatRoomService] addRoom : ${JSON.stringify(hashed)}`);
-    return this.chatRepository.addRoom(hashed).chatSeq;
+    return this.chatRepository.addRoom(hashed);
   }
 
   /**
@@ -455,8 +457,8 @@ export default class ChatroomsService implements OnModuleInit {
    */
   async addDM(user1: number, user2: number): Promise<number> {
     // 기존 디엠 방이 있는지 확인
-    if (this.chatRepository.findRoomByRoomName(`DM-${user1}-${user2}`)
-     || this.chatRepository.findRoomByRoomName(`DM-${user2}-${user1}`)) {
+    if ((await this.chatRepository.findRoomByRoomName(`DM-${user1}-${user2}`))
+     || (await this.chatRepository.findRoomByRoomName(`DM-${user2}-${user1}`))) {
       throw new BadRequestException('이미 존재하는 DM입니다.');
     }
     // TODO 유저 ID가 올바른지 검증 필요 - 외부에서 처리
@@ -464,9 +466,11 @@ export default class ChatroomsService implements OnModuleInit {
     const newRoom = {
       chatName,
       chatType: ChatType.CHTP10,
+      password: '',
+      isDirected: true,
     };
     this.logger.debug(`[ChatRoomService] addDM : ${JSON.stringify(newRoom)}`);
-    return this.chatRepository.addRoom(newRoom).chatSeq;
+    return this.chatRepository.addRoom(newRoom);
   }
 
   /**
@@ -477,6 +481,12 @@ export default class ChatroomsService implements OnModuleInit {
    * @returns 사용자 식별자 리스트
    */
   async addNormalUsers(chatSeq: number, users: number[]): Promise<void> {
+    const roomParticipants = await this.chatParticipantRepository
+      .getChatParticipantsByRoomid(chatSeq);
+    const check = roomParticipants.find((participant) => users.includes(participant.userSeq));
+    if (check !== undefined) {
+      throw new BadRequestException('이미 존재하는 사용자를 추가하려고 합니다.');
+    }
     await this.chatParticipantRepository.addUsers(chatSeq, users);
   }
 
@@ -487,6 +497,11 @@ export default class ChatroomsService implements OnModuleInit {
    * @param user 방장 고유 ID
    */
   async addOwner(chatSeq: number, user: number): Promise<void> {
+    const check = await this.chatParticipantRepository
+      .getChatParticipantByUserIdAndRoomId(chatSeq, user);
+    if (check !== undefined) {
+      throw new BadRequestException('이미 존재하는 사용자를 추가하려고 합니다.');
+    }
     await this.chatParticipantRepository.addUsers(chatSeq, [user]);
     await this.chatParticipantRepository.changeUserAuth(chatSeq, user, PartcAuth.CPAU30);
   }
@@ -502,7 +517,7 @@ export default class ChatroomsService implements OnModuleInit {
   }
 
   /**
-   * 방의 특정 유저를 매니저로 임명합니다.
+   * 방의 특정 유저를 일반 유저로 임명합니다.
    *
    * @param chatSeq 방 식별자
    * @param user 임명할 유저 고유 ID
@@ -538,7 +553,7 @@ export default class ChatroomsService implements OnModuleInit {
    * @param user 제거할 사용자 식별자
    * @returns 제거 성공 여부
    */
-  leftUser(chatSeq: any, user: any): boolean {
+  async leftUser(chatSeq: any, user: any): Promise<boolean> {
     return this.chatParticipantRepository.removeUser(chatSeq, user);
   }
 
@@ -579,7 +594,7 @@ export default class ChatroomsService implements OnModuleInit {
    * @param user 밴 확인할 유저 식별자
    * @returns 밴 여부
    */
-  async isBanned(chatSeq: any, user: any): Promise<boolean> {
+  async isBanned(chatSeq: number, user: number): Promise<boolean> {
     const find = (await this.chatEventRepository.getChatEvents(user, chatSeq))
       .find((chatEvent) => chatEvent.eventType === EventType.EVST20);
     this.logger.debug(`[ChatRoomService] isBanned : ${JSON.stringify(find)}`);
@@ -592,12 +607,13 @@ export default class ChatroomsService implements OnModuleInit {
    * @param chatSeq 방 식별자
    * @param user 해제할 유저 식별자
    */
-  async unbanUser(chatSeq: any, user: any): Promise<void> {
+  async unbanUser(chatSeq: number, user: number): Promise<void> {
     const find = (await this.chatEventRepository.getChatEvents(user, chatSeq))
       .find((chatEvent) => chatEvent.eventType === EventType.EVST20);
     await this.chatEventRepository.delChatEvent(find.eventSeq);
   }
 
+  // TODO 여기까지 테스트케이스 완료
   /**
    * 특정 사용자를 뮤트합니다.
    *
@@ -704,7 +720,10 @@ export default class ChatroomsService implements OnModuleInit {
     }
     blockedUsers.add(user);
     await this.cacheManager.set(key, blockedUsers);
-    await this.friendsRepository.setBlock(user, willBlockUser);
+    await this.friendsRepository.setBlock({
+      from: user,
+      to: willBlockUser,
+    });
     return true;
   }
 
@@ -723,7 +742,10 @@ export default class ChatroomsService implements OnModuleInit {
     }
     blockedUsers.delete(user);
     await this.cacheManager.set(key, blockedUsers);
-    await this.friendsRepository.setUnblock(user, blockedUser);
+    await this.friendsRepository.setUnblock({
+      from: user,
+      to: blockedUser,
+    });
     return true;
   }
 
@@ -787,8 +809,8 @@ export default class ChatroomsService implements OnModuleInit {
    *
    * @returns 공개방, 비밀번호 걸린 방 목록
    */
-  async searchChatroom(): Promise<Array<ChatRoomResultDto>> {
-    const chatroomList = await this.chatRepository.searchChatroomByChatType([
+  async searchChatroom(): Promise<Array<ChatResponseDto>> {
+    const chatroomList = await this.chatRepository.searchChatroomsByChatType([
       ChatType.CHTP20,
       ChatType.CHTP30,
     ]);
@@ -798,7 +820,7 @@ export default class ChatroomsService implements OnModuleInit {
     );
     const chatParticipantsList = await Promise.all(promiseChatParticipantsList);
 
-    const rtn: ChatRoomResultDto[] = chatroomList.map((room, idx) => ({
+    const rtn: ChatResponseDto[] = chatroomList.map((room, idx) => ({
       chatSeq: room.chatSeq,
       chatName: room.chatName,
       chatType: room.chatType,
@@ -814,7 +836,7 @@ export default class ChatroomsService implements OnModuleInit {
    * @param chatSeq 방 ID
    * @returns 방 정보
    */
-  async getRoomInfo(chatSeq: number): Promise<ChatRoomResultDto> {
+  async getRoomInfo(chatSeq: number): Promise<ChatResponseDto> {
     const chatroom = await this.chatRepository.findRoomByRoomId(chatSeq);
     const participants = await this.chatParticipantRepository.getChatParticipantsByRoomid(chatSeq);
     return {

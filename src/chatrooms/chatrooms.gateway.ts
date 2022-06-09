@@ -49,7 +49,7 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
     await this.chatroomsService.onlineUserAdd(client, userID);
 
     // 본인이 속한 룸에 조인시킵니다. 그리고 본인이 속한 룸의 리스트를 리턴합니다.
-    const roomList = this.chatroomsService.roomJoin(client, userID);
+    const roomList = await this.chatroomsService.roomJoin(client, userID);
 
     const data: ISocketSend = {
       rooms: roomList,
@@ -69,7 +69,7 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
   async handleDisconnect(client: Socket) {
     this.logger.debug(`handleDisconnect: ${client.id} disconnected`);
     // 본인이 속한 룸에서 나갑니다.
-    this.chatroomsService.roomLeave(client);
+    await this.chatroomsService.roomLeave(client);
 
     // 클라이언트와 채팅 소켓 연결이 끊어지면 정보를 제거합니다.
     await this.chatroomsService.onlineUserRemove(client);

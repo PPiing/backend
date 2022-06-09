@@ -1,101 +1,92 @@
-/* eslint-disable no-restricted-syntax */
-// NOTE: 전체적으로 리팩터링 예정
-import { Injectable } from '@nestjs/common';
+/* eslint-disable */
+// NOTE 추후에 데이터베이스 연동시에 해당 옵션을 제거할 것
+import ChatParticipant from 'src/entities/chat-participant.entity';
 import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
+import { EntityRepository, Repository } from 'typeorm';
 import { ChatParticipantDto } from '../dto/chat-participant.dto';
 
-@Injectable()
-export default class ChatParticipantRepository {
-  MockEntity: ChatParticipantDto[] = [];
-
-  constructor() {
-    this.MockEntity.push({
-      partcSeq: 0,
-      userSeq: 10,
-      chatSeq: 0,
-      partcAuth: PartcAuth.CPAU30,
-      enteredAt: new Date(),
-      leavedAt: new Date(),
-    });
-    this.MockEntity.push({
-      partcSeq: 1,
-      userSeq: 10,
-      chatSeq: 1,
-      partcAuth: PartcAuth.CPAU30,
-      enteredAt: new Date(),
-      leavedAt: new Date(),
-    });
+@EntityRepository(ChatParticipant)
+export default class ChatParticipantRepository extends Repository<ChatParticipant> {
+  /**
+   * 채팅방의 신규 참여자를 추가합니다.
+   *
+   * @param userid 참여자 ID
+   * @param roomid 방 ID
+   * @param auth 권한
+   */
+  async saveChatParticipants(userid: number, roomid: number, auth: PartcAuth): Promise<void> {
   }
 
-  saveChatParticipants(userid: number, roomid: number, auth: PartcAuth): any {
-    this.MockEntity.push({
-      partcSeq: this.MockEntity.length, // 실제 테이블에선 Auto Increment한 속성이므로 값을 넣으면 안됨.
-      userSeq: userid,
-      chatSeq: roomid,
-      partcAuth: auth,
-      enteredAt: new Date(),
-      leavedAt: new Date(),
-    });
+  /**
+   * 방 ID로 방의 참여자를 조회합니다.
+   *
+   * @param roomid 방 ID
+   * @returns 상세 정보 배열
+   */
+  async getChatParticipantsByRoomid(roomid: number): Promise<ChatParticipantDto[]> {
+    return [];
   }
 
-  async getChatParticipantsByRoomid(roomid: number): Promise<any> {
-    return this.MockEntity.filter(
-      (participant) => participant.chatSeq === roomid,
-    );
+  /**
+   * 유저 ID로 유저가 참여한 채팅방을 조회합니다.
+   *
+   * @param userid 참여자 ID
+   * @returns 상세 정보 배열
+   */
+  async getChatParticipantsByUserid(userid: number): Promise<ChatParticipantDto[]> {
+    return [];
   }
 
-  async getChatParticipantsByUserid(userid: number): Promise<any> {
-    return this.MockEntity.filter(
-      (participant) => participant.userSeq === userid,
-    );
+  /**
+   * 유저 ID로 유저가 참여한 채팅방의 ID를 조회합니다.
+   *
+   * @param id 참여자 ID
+   * @returns 채팅방 ID 배열
+   */
+  async findRoomsByUserId(id: number): Promise<number[]> {
+    return [];
   }
 
-  findRoomsByUserId(id: number): number[] {
-    return this.MockEntity
-      .filter((entity) => entity.userSeq === id)
-      .map((entity) => entity.chatSeq);
-  }
-
+  /**
+   * 특정 방에 속한 특정 유저에 대한 상세 정보를 조회합니다. 정보가 없을 경우 undefined를 반환합니다.
+   *
+   * @param chatSeq 방 ID
+   * @param userId 참여자 ID
+   * @returns 상세 정보 or undefined
+   */
   async getChatParticipantByUserIdAndRoomId(
     chatSeq: number,
     userId: number,
   ): Promise<ChatParticipantDto | undefined> {
-    return this.MockEntity.find(
-      (entity) => entity.userSeq === userId && entity.chatSeq === chatSeq,
-    );
+    return undefined;
   }
 
+  /**
+   * 채팅방에 유저들을 추가합니다.
+   *
+   * @param chatSeq 방 ID
+   * @param users 유저 ID 배열
+   */
   async addUsers(chatSeq: number, users: number[]): Promise<void> {
-    let counter = this.MockEntity.length - 1;
-    const insert = users.map((user) => {
-      counter += 1;
-      return {
-        partcSeq: counter,
-        userSeq: user,
-        chatSeq,
-        partcAuth: PartcAuth.CPAU10,
-        enteredAt: new Date(),
-        leavedAt: new Date(),
-      };
-    });
-    this.MockEntity.push(...insert);
   }
 
-  async changeUserAuth(chatSeq: number, user: number, partcAuth: PartcAuth): Promise<boolean> {
-    const entity = this.MockEntity.find(
-      (e) => e.chatSeq === chatSeq && e.userSeq === user,
-    );
-    if (entity) {
-      entity.partcAuth = partcAuth;
-      return true;
-    }
-    return false;
+  /**
+   * 특정 방에 속한 특정 유저의 권한을 변경합니다.
+   *
+   * @param chatSeq 방 ID
+   * @param user 유저 ID
+   * @param partcAuth 권한
+   */
+  async changeUserAuth(chatSeq: number, user: number, partcAuth: PartcAuth): Promise<void> {
   }
 
-  removeUser(chatSeq: number, user: number): boolean {
-    this.MockEntity = this.MockEntity.filter(
-      (entity) => !(entity.chatSeq === chatSeq && entity.userSeq === user),
-    );
+  /**
+   * 채팅방에 유저를 제거합니다. 만약 유저가 존재하지 않았다면 false를 반환합니다.
+   *
+   * @param chatSeq 방 ID
+   * @param user 유저 ID
+   */
+  async removeUser(chatSeq: number, user: number): Promise<boolean> {
     return true;
   }
 }

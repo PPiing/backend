@@ -1,59 +1,53 @@
-/* eslint-disable no-restricted-syntax */
-// NOTE: 친구목록에서 차단여부만 고려하고 있음.
-import { Injectable } from '@nestjs/common';
+/* eslint-disable */
+// NOTE 추후에 데이터베이스 연동시에 해당 옵션을 제거할 것
+import Friends from 'src/entities/friends.entity';
+import { EntityRepository, Repository } from 'typeorm';
+import { BlockDto } from '../dto/block.dto';
 
-@Injectable()
-export default class FriendsRepository {
-  MockEntity: any[] = [];
-
-  constructor() {
-    this.MockEntity.push({
-      friendSeq: 0,
-      followerSeq: 10,
-      followeeSeq: 11,
-      isBlocked: true,
-    });
+@EntityRepository(Friends)
+export default class FriendsRepository extends Repository<Friends> {
+  /**
+   * 누가 누구를 차단하였는지에 대한 결과를 전부 반환합니다.
+   *
+   * @returns BlockDto 배열
+   */
+  async getAllBlockedFriends(): Promise<BlockDto[]> {
+    return [];
   }
 
-  async getAllBlockedFriends(): Promise<any[]> {
-    const result = this.MockEntity.filter(
-      (v) => v.isBlocked === true,
-    );
-    return result;
+  /**
+   * 인자로 주어진 관계에 대해 차단을 해제합니다.
+   *
+   * @param relation 관계
+   */
+  async setUnblock(relation: BlockDto): Promise<void> {
   }
 
-  async setUnblock(from: number, to: number): Promise<void> {
-    const result = this.MockEntity.find((v) => v.followerSeq === from && v.followeeSeq === to);
-    if (result) {
-      result.isBlocked = false;
-    }
+  /**
+   * 인자로 주어진 관계에 대해 차단을 적용합니다.
+   *
+   * @param relation 관계
+   */
+  async setBlock(relation: BlockDto): Promise<void> {
   }
 
-  async setBlock(from: number, to: number): Promise<void> {
-    const result = this.MockEntity.find((v) => v.followerSeq === from && v.followeeSeq === to);
-    if (result) {
-      result.isBlocked = true;
-    } else {
-      this.MockEntity.push({
-        friendSeq: this.MockEntity.length,
-        followerSeq: from,
-        followeeSeq: to,
-        isBlocked: true,
-      });
-    }
-  }
-
-  async blocked(from: number, to: number): Promise<boolean> {
-    const result = this.MockEntity.find((v) => v.followerSeq === from && v.followeeSeq === to);
-    if (result) {
-      return result.isBlocked;
-    }
+  /**
+   * 인자로 주어진 관계가 차단되어 있는지 확인합니다.
+   *
+   * @param relation 관계
+   * @returns 차단 여부
+   */
+  async blocked(relation: BlockDto): Promise<boolean> {
     return false;
   }
 
+  /**
+   * 인자로 주어진 사용자가 누구를 차단하였는지에 대한 결과를 반환합니다.
+   *
+   * @param from 차단을 건 사람
+   * @returns 차단당한 사람들
+   */
   async blockedUsers(from: number): Promise<number[]> {
-    return this.MockEntity.filter(
-      (v) => v.followerSeq === from && v.isBlocked === true,
-    ).map((v) => v.followeeSeq);
+    return [];
   }
 }

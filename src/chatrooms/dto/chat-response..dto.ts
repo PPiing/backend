@@ -1,8 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
 import ChatType from 'src/enums/mastercode/chat-type.enum';
+import { ApiProperty } from '@nestjs/swagger';
 import { ChatParticipantDto } from './chat-participant.dto';
 
-export default class ChatRoomResultDto {
+export class ChatResponseDto {
   @ApiProperty({
     description: '채팅방 ID',
   })

@@ -12,10 +12,10 @@ import {
 import ChatType from 'src/enums/mastercode/chat-type.enum';
 import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
 import ChatroomsService from './chatrooms.service';
-import { ChatRoomDto } from './dto/chat-room.dto';
+import { ChatRequestDto } from './dto/chat-request.dto';
+import { ChatResponseDto } from './dto/chat-response..dto';
 import { JoinRoomDto } from './dto/join-room.dto';
 import { MessageDataDto } from './dto/message-data.dto';
-import ChatRoomResultDto from './dto/chat-room-result.dto';
 
 @ApiTags('채팅방')
 @Controller('chatrooms')
@@ -45,7 +45,7 @@ export default class ChatroomsController {
   @Post('new/:by')
   @HttpCode(204)
   async addRoom(
-    @Body() reqData: ChatRoomDto,
+    @Body() reqData: ChatRequestDto,
       @Param('by', ParseIntPipe) by: number,
   ): Promise<void> {
     this.logger.debug(`addRoom: ${reqData.chatName}`);
@@ -155,7 +155,7 @@ export default class ChatroomsController {
     await this.chatroomsService.checkUsers([by]);
     await this.chatroomsService.checkRooms([roomId]);
     const isMaster = await this.chatroomsService.isMaster(roomId, by);
-    const result = this.chatroomsService.leftUser(roomId, by);
+    const result = await this.chatroomsService.leftUser(roomId, by);
     if (result) {
       this.chatroomsService.userOutSave(roomId, by);
       this.eventRunner.emit('room:leave', roomId, by, false);
@@ -263,7 +263,7 @@ export default class ChatroomsController {
     if (target === by) {
       throw new BadRequestException('자신을 강퇴할 수 없습니다.');
     }
-    this.chatroomsService.leftUser(roomId, target);
+    await this.chatroomsService.leftUser(roomId, target);
     await this.chatroomsService.kickUserSave(roomId, target, by);
     this.eventRunner.emit('room:leave', roomId, [target], true);
     this.eventRunner.emit('room:notify', roomId, `${target} 님이 강퇴당했습니다.`);
@@ -651,12 +651,12 @@ export default class ChatroomsController {
    * @returns 방 정보를 반환합니다.
    */
   @ApiOperation({ summary: '방 정보 조회', description: '방 정보를 조회합니다.' })
-  @ApiResponse({ status: 200, type: ChatRoomResultDto, description: '방 정보 조회 성공' })
+  @ApiResponse({ status: 200, type: ChatResponseDto, description: '방 정보 조회 성공' })
   @ApiParam({
     name: 'roomId', type: Number, example: 1, description: '방 ID',
   })
   @Get('room/:roomId')
-  async getRoom(@Param('roomId', ParseIntPipe) roomId: number): Promise<ChatRoomResultDto> {
+  async getRoom(@Param('roomId', ParseIntPipe) roomId: number): Promise<ChatResponseDto> {
     await this.chatroomsService.checkRooms([roomId]);
     this.logger.debug(`getRoom: ${roomId}`);
     const room = await this.chatroomsService.getRoomInfo(Number(roomId));
@@ -669,9 +669,9 @@ export default class ChatroomsController {
    * @returns 입장할 수 있는 방 목록을 반환합니다.
    */
   @ApiOperation({ summary: '방 둘러보기', description: 'DM과 비공개 방을 제외한 방들을 출력해 줍니다.' })
-  @ApiResponse({ status: 200, type: [ChatRoomResultDto], description: '방 목록' })
+  @ApiResponse({ status: 200, type: [ChatResponseDto], description: '방 목록' })
   @Get('search')
-  async searchChatroom(): Promise<Array<ChatRoomResultDto>> {
+  async searchChatroom(): Promise<Array<ChatResponseDto>> {
     const result = await this.chatroomsService.searchChatroom();
     return result;
   }

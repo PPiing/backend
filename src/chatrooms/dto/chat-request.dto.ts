@@ -4,7 +4,7 @@ import {
 import ChatType from 'src/enums/mastercode/chat-type.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ChatRoomDto {
+export class ChatRequestDto {
   /**
    * CHTP10 : 개인 채팅방 (DM)
    * CHTP20 : 단체 채팅방 (public)
@@ -26,7 +26,7 @@ export class ChatRoomDto {
   })
   @IsString()
   @IsNotEmpty()
-    chatName: string; // NOTE: dm인 경우는 없어도 될 듯...
+    chatName: string;
 
   @ApiProperty({
     description: '채팅방 비밀번호',
