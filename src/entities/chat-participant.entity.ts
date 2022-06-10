@@ -22,12 +22,6 @@ export default class ChatParticipant {
   @Column()
     partcAuth: PartcAuth;
 
-  @Column()
-    mutedUntil: Date;
-
-  @Column({ default: false })
-    isBaned: boolean;
-
   @CreateDateColumn()
     enteredAt: Date;
 

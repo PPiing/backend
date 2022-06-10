@@ -4,7 +4,9 @@ import {
   OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
 import ChatroomsService from './chatrooms.service';
+import ISocketRecv from './interface/socket-recv';
 import ISocketSend from './interface/socket-send';
 
 /**
@@ -47,10 +49,14 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
     await this.chatroomsService.onlineUserAdd(client, userID);
 
     // 본인이 속한 룸에 조인시킵니다. 그리고 본인이 속한 룸의 리스트를 리턴합니다.
-    const roomList = this.chatroomsService.roomJoin(client, userID);
+    const roomList = await this.chatroomsService.roomJoin(client, userID);
+
+    const data: ISocketSend = {
+      rooms: roomList,
+    };
 
     // 룸 리스트를 클라이언트에 전송합니다.
-    client.emit('chat:init', roomList); // TODO ISocketSend 적용 예정
+    client.emit('chat:init', data);
   }
 
   /**
@@ -63,7 +69,7 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
   async handleDisconnect(client: Socket) {
     this.logger.debug(`handleDisconnect: ${client.id} disconnected`);
     // 본인이 속한 룸에서 나갑니다.
-    this.chatroomsService.roomLeave(client);
+    await this.chatroomsService.roomLeave(client);
 
     // 클라이언트와 채팅 소켓 연결이 끊어지면 정보를 제거합니다.
     await this.chatroomsService.onlineUserRemove(client);
@@ -75,32 +81,59 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
    * @param client 클라이언트 소켓 객체
    */
   @SubscribeMessage('chat')
-  async handleChat(client: Socket, message: any) {
+  async handleChat(client: Socket, message: ISocketRecv) {
     this.logger.debug(`handleChat: ${client.id} sent message: ${message.content}`);
     // client.rooms은 클라이언트가 속한 룸 리스트를 담고 있습니다.
+    const adminId = 0;
     const { rooms } = client;
-    const name = await this.chatroomsService.whoAmI(client);
+    const name = await this.chatroomsService.whoAmI(client.id);
+    const muted = await this.chatroomsService.isMuted(message.at, name);
     if (rooms.has(message.at.toString()) && name !== undefined) {
-      const seq = await this.chatroomsService.newChat(name, message.at, message.content);
-      const data: ISocketSend = {
-        chatSeq: message.at,
-        userIDs: [name],
-        msg: message.content,
-        id: seq,
-      };
-      this.server.to(message.at.toString()).emit('chat', data);
+      if (muted === 0) {
+        const seq = await this.chatroomsService.newChat(name, message.at, message.content);
+        const exceptUsers = await this.chatroomsService.getBlockedSocketIdList(
+          name,
+          message.at,
+          this.server,
+        );
+        const data: ISocketSend = {
+          chatSeq: message.at,
+          userIDs: [name],
+          msg: message.content,
+          id: seq,
+        };
+        this.server.to(message.at.toString()).except(exceptUsers).emit('chat', data);
+      } else {
+        const data: ISocketSend = {
+          chatSeq: message.at,
+          userIDs: [adminId],
+          msg: `현재 mute 상태입니다. ${Math.ceil(muted)} 초 뒤 차단이 풀립니다.`,
+          id: -1,
+        };
+        client.emit('chat', data);
+      }
     }
   }
 
   /**
-   * 알림성 메시지들을 방에 속한 클라이언트에게 송신합니다.
+   * 서버에서 생성되는 알림 메시지를 클라이언트에 보내고자 할 때 호출되는 콜백함수입니다.
    *
    * @param chatSeq 방 ID
-   * @param client 클라이언트 소켓 객체
    * @param message 알림성 메시지
-   * @param data 알림성 메시지에 대한 추가 정보
-   * @param userID 사용자 ID
    */
+  @OnEvent('room:notify')
+  async onRoomNotify(chatSeq: number, message: string) {
+    this.logger.debug(`onRoomNotify: ${chatSeq} sent message: ${message}`);
+    const adminId = 0;
+    const seq = await this.chatroomsService.newChat(adminId, chatSeq, message);
+    const data: ISocketSend = {
+      chatSeq,
+      userIDs: [adminId],
+      msg: message,
+      id: seq,
+    };
+    this.server.to(chatSeq.toString()).emit('chat', data);
+  }
 
   /**
    * 방에 합류하는 HTTP 요청을 받을 때 호출되는 콜백함수입니다.
@@ -139,5 +172,24 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
     this.server.to(chatSeq.toString()).emit('room:leave', data);
     // 유저를 룸에서 내보냅니다 (나갑니다).
     await this.chatroomsService.roomLeaveUser(this.server, chatSeq, user);
+  }
+
+  /**
+   * 방의 유저의 권한이 변경될 때 호출되는 콜백함수입니다.
+   *
+   * @param chatSeq 방 ID
+   * @param user 유저 ID
+   * @param role 권한
+   */
+  @OnEvent('room:grant')
+  async onRoomGrant(chatSeq: number, user: number, role: PartcAuth) {
+    this.logger.debug(`onRoomGrant: ${chatSeq}, user: ${user} to ${role}`);
+    // 본인 포함 방에서 내보낸 (나간) 유저가 나갔다고 해당 룸에 들어가 있는 클라이언트들에게 알립니다.
+    const data: ISocketSend = {
+      chatSeq,
+      userIDs: [user],
+      role,
+    };
+    this.server.to(chatSeq.toString()).emit('room:grant', data);
   }
 }

@@ -18,20 +18,10 @@ export class ChatParticipantDto {
     chatSeq: number;
 
   @ApiProperty({
-    description: '유저 ID',
+    description: '유저 권한',
     type: PartcAuth,
   })
     partcAuth: PartcAuth;
-
-  @ApiProperty({
-    description: '뮤트 종료시간',
-  })
-    mutedUntil: Date;
-
-  @ApiProperty({
-    description: '강퇴 여부',
-  })
-    isBaned: boolean;
 
   @ApiProperty({
     description: '채팅 참여일자',
