@@ -65,7 +65,7 @@ describe('Chatrooms 테스트', () => {
     chatroomsService = app.get<ChatroomsService>(ChatroomsService);
     schedulerRegistry = app.get<SchedulerRegistry>(SchedulerRegistry);
     await chatroomsService.onModuleInit();
-  })
+  });
 
   afterEach(async () => {
     // 스케쥴러가 남아있으면 테스트가 비정상적으로 종료되므로 남아있는 스케쥴러를 모두 제거한다.
@@ -849,5 +849,4 @@ describe('Chatrooms 테스트', () => {
       it.todo('읽어오는 동작이 없어 테스트하지 않음.');
     });
   });
-
 });
