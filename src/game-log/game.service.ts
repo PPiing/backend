@@ -26,7 +26,7 @@ export class GameService {
     private simulator: SimulationService,
   ) {}
 
-  async handleEnqueue(client: GameSession, isLadder: GameType) {
+  async handleEnqueue(client: GameSession, isLadder: GameType) : Promise<GameSession[] | void> {
     const ret = await this.gameQueue.enQueue(client, isLadder);
     if (typeof ret === 'object') {
       const newGame = new GameData();
@@ -37,6 +37,7 @@ export class GameService {
         isLadder,
       );
       newGame.ruleData = new RuleData();
+      newGame.inGameData = new InGameData();
       this.games.set(newGame.metaData.roomId, newGame);
       this.readyCheck.set(newGame.metaData.roomId, false);
       ret[0].roomId = newGame.metaData.roomId;
@@ -45,7 +46,7 @@ export class GameService {
     }
   }
 
-  handleDequeue(client: GameSession, isLadder: boolean) {
+  handleDequeue(client: GameSession, isLadder: GameType) {
     return this.gameQueue.deQueue(client, isLadder);
   }
 
@@ -71,7 +72,7 @@ export class GameService {
     const ready = this.readyCheck.get(roomId);
     if (ready && isReady) {
       const game = this.games.get(roomId);
-      this.eventRunner.emit('game:start', game);
+      this.eventRunner.emit('game:ready', game);
     } else {
       this.readyCheck.set(roomId, isReady);
     }
