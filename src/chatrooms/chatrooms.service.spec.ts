@@ -1,6 +1,6 @@
 import { BadRequestException, CacheModule } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { ScheduleModule } from '@nestjs/schedule';
+import { ScheduleModule, SchedulerRegistry } from '@nestjs/schedule';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import ChatType from 'src/enums/mastercode/chat-type.enum';
@@ -47,6 +47,7 @@ const repositories = [
 
 describe('Chatrooms 테스트', () => {
   let chatroomsService: ChatroomsService;
+  let schedulerRegistry: SchedulerRegistry;
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
@@ -62,7 +63,37 @@ describe('Chatrooms 테스트', () => {
     }).compile();
 
     chatroomsService = app.get<ChatroomsService>(ChatroomsService);
+    schedulerRegistry = app.get<SchedulerRegistry>(SchedulerRegistry);
     await chatroomsService.onModuleInit();
+  })
+
+  afterEach(async () => {
+    // 스케쥴러가 남아있으면 테스트가 비정상적으로 종료되므로 남아있는 스케쥴러를 모두 제거한다.
+    const cronJobs = schedulerRegistry.getCronJobs();
+    const timeouts = schedulerRegistry.getTimeouts();
+    const intervals = schedulerRegistry.getIntervals();
+    cronJobs.forEach((_, name) => {
+      schedulerRegistry.deleteCronJob(name);
+    });
+    timeouts.forEach((name) => {
+      schedulerRegistry.deleteTimeout(name);
+    });
+    intervals.forEach((name) => {
+      schedulerRegistry.deleteInterval(name);
+    });
+  });
+
+  describe('cron 스케쥴러 테스트', () => {
+    it.todo('현재 사용하는 스케쥴러 등록 방식이 모킹 모듈을 만들 때 적용이 안되는듯... 추후 재검토 필요');
+  });
+
+  describe('캐시 테스트', () => {
+    describe('cacheChatRead', () => {
+      it.todo('cacheChatRead 검증 추가 예정');
+    });
+    describe('cacheChatWrite', () => {
+      it.todo('cacheChatWrite 검증 추가 예정');
+    });
   });
 
   describe('onModuleInit', () => {
@@ -163,7 +194,6 @@ describe('Chatrooms 테스트', () => {
         expect(mutedUser3).toBeFalsy();
       });
       test('시간 지날시 뮤트 풀리는지 체크', async () => {
-        jest.useFakeTimers(); // using mock timers https://jestjs.io/docs/timer-mocks
         // given
         const chatSeq = 0;
         const to = 10;
@@ -177,6 +207,7 @@ describe('Chatrooms 테스트', () => {
           admin,
           time,
         );
+        jest.useFakeTimers(); // 타이머를 추가하고 제거하는 과정 중 mock 타이머를 적용하면 문제 생김
         jest.advanceTimersByTime(time * 1000); // timer fast-forward
         const mutedUser = await chatroomsService.isMuted(chatSeq, to);
         // then
@@ -818,4 +849,5 @@ describe('Chatrooms 테스트', () => {
       it.todo('읽어오는 동작이 없어 테스트하지 않음.');
     });
   });
+
 });
