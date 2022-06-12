@@ -1,6 +1,9 @@
-import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  CACHE_MANAGER, Inject, Injectable, Logger,
+} from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Socket } from 'socket.io';
+import UserStatus from 'src/enums/mastercode/user-status.enum';
 import StatusRepository from './status.repository';
 
 @Injectable()
@@ -18,10 +21,10 @@ export class StatusService {
    *
    * @param client 접속된 client socket
    */
-  saveClient(client: Socket) {
-    // cache에 저장
+  async saveClient(client: Socket, userSeq: number) {
+    this.cacheManager.set(client.id, userSeq, { ttl: 0 });
 
-    // NOTE: 만약 로그인할때 status를 별도로 저장하지 않는다면 updateStatus를 호출해야 된다.
+    await this.statusRepository.updateStatus(userSeq, UserStatus.USST10);
   }
 
   /**
@@ -31,8 +34,13 @@ export class StatusService {
    * @param client 접속된 client socket
    */
   async removeClient(client: Socket) {
+    // userSeq 저장
+    const userSeq: number = await this.cacheManager.get(client.id);
+
     // cache에서 삭제
-    // await repository의 updateStatus 호출
+    this.cacheManager.del(client.id);
+
+    await this.statusRepository.updateStatus(userSeq, UserStatus.USST20);
   }
 
   /**
@@ -41,10 +49,11 @@ export class StatusService {
    * @param client 접속된 client socket
    * @param status 상태 (enum으로 변경 예정)
    */
-  async updateStatus(client: Socket, status: string) {
+  async updateStatus(client: Socket, status: UserStatus) {
     // cache에 저장되어 있는 정보 UPDATE
+    const userSeq: number = await this.cacheManager.get(client.id);
 
     // await repository의 updateStatus 호출
+    await this.statusRepository.updateStatus(userSeq, status);
   }
-
 }
