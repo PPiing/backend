@@ -66,7 +66,10 @@ export class SimulationService {
           break;
         }
         case GameStatus.End: {
-          this.eventRunner.emit('game:end', roomId, metaData, inGameData);
+          this.eventRunner.emit('game:end', roomId, {
+            metaData,
+            inGameData,
+          });
           break;
         }
         default: {
@@ -167,9 +170,13 @@ export class SimulationService {
 
   private countReadyAndStart(roomId: string, inGameData: InGameData): boolean {
     if (inGameData.frame === 1) {
-      this.eventRunner.emit('game:ready', roomId, 'ready');
+      this.eventRunner.emit('game:start', roomId, {
+        status: 'ready',
+      });
     } else if (inGameData.frame === 1200) {
-      this.eventRunner.emit('game:ready', roomId, 'start');
+      this.eventRunner.emit('game:start', roomId, {
+        status: 'start',
+      });
     } else if (inGameData.frame > 1200) {
       return true;
     }

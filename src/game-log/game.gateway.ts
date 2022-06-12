@@ -47,7 +47,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     client.join(client.session.userId.toString());
     if (client.session.inGame) { // 게임중에 나갔을 경우 재접.
       client.join(client.session.roomId);
-      this.server.to(client.session.roomId).emit('playerJoin', client.session.userId);
+      this.server.to(client.session.roomId).emit('player:join', client.session.userId);
       // client.to(client.session.roomId).emit('playerJoin', client.session.userId);
     }
   }
@@ -63,7 +63,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const isDisconnected = matchingSocket.size === 0;
     if (isDisconnected) {
       if (client.session.roomId !== null) {
-        client.to(client.session.roomId).emit('playerLeave', client.session.userId);
+        client.to(client.session.roomId).emit('player:leave', client.session.userId);
       }
     }
   }
@@ -75,7 +75,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('deQ')
-  handleDequeue(client: GameSocket, data: any) {
+  handleDequeue(client: GameSocket, data: { isLadder: GameType }) {
     this.logger.debug(`user ${client.session.userId} request dequeued`);
     return this.gameService.handleDequeue(client.session, data.isLadder);
   }
@@ -87,8 +87,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       data[0].userId.toString(),
       data[1].userId.toString(),
     ];
-    this.server.to(players[0]).to(players[1]).emit('rule', data);
-    this.server.in(players[0]).in(players[1]).socketsJoin(data[0].roomId);
+    this.server.to(players).emit('game:match', {
+      top: players[0],
+      btm: players[1],
+    });
+    this.server.in(players).socketsJoin(data[0].roomId);
     // socket의 session data update를 해줌.
     this.socketSession.saveSession(data[0].sessionId, data[0]);
     this.socketSession.saveSession(data[1].sessionId, data[1]);
@@ -112,13 +115,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * 주어진 메타 데이터로 게임을 생성하고 게임을 시작한다.
    * @param data game의 metadata
    */
-  @OnEvent('game:start')
+  @OnEvent('game:ready')
   handleGameReady(data: GameData) {
     const roomId = data?.metaData?.roomId;
     this.logger.debug(`game ${roomId} started`);
     if (roomId) {
       this.gameService.createGame(data.metaData.roomId);
-      this.server.to(data.metaData.roomId).emit('gameStart', data.metaData, data.ruleData);
+      this.server.to(data.metaData.roomId).emit('game:ready', data);
       this.socketSession.saveSession(data.metaData.playerTop.sessionId, {
         ...data.metaData.playerTop,
         inGame: true,
@@ -135,10 +138,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param roomId 방 아이디
    * @param data 게임 상태
    */
-  @OnEvent('game:ready')
-  handleGamestart(roomId: string, data: any) {
+  @OnEvent('game:start')
+  handleGamestart(roomId: string, data: { status: string }) {
     this.logger.debug(`game ${roomId} is ${data}`);
-    this.server.to(roomId).emit('game:ready', data);
+    this.server.to(roomId).emit('game:start', data);
   }
 
   /**
@@ -146,10 +149,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param client 유저 소켓
    * @param data paddle의 움직임 방향
    */
-  @SubscribeMessage('paddle')
-  handlePaddleControl(client: GameSocket, data: PaddleDirective) {
+  @SubscribeMessage('game:paddle')
+  handlePaddleControl(client: GameSocket, data: { direction: PaddleDirective }) {
     this.logger.debug(`user ${client.session.userId} moved paddle ${data}`);
-    this.gameService.handlePaddle(client.session.roomId, client.session.userId, data);
+    this.gameService.handlePaddle(client.session.roomId, client.session.userId, data.direction);
   }
 
   /**
@@ -159,7 +162,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   @OnEvent('game:render')
   handleGameData(roomId: string, data: RenderData) {
-    this.server.to(roomId).emit('gameData', data);
+    this.server.to(roomId).emit('game:render', data);
   }
 
   /**
@@ -169,7 +172,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   @OnEvent('game:score')
   handleGaemtScore(roomId: string, data: ScoreData) {
-    this.server.to(roomId).emit('gameScore', data);
+    this.server.to(roomId).emit('game:score', data);
   }
 
   /**
@@ -177,19 +180,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param roomId 게임의 roomId
    */
   @OnEvent('game:end')
-  handleGameEnd(roomId: string, data: MetaData) {
+  handleGameEnd(roomId: string, data: GameData) {
+    const { metaData } = data;
     this.gameService.endGame(roomId);
-    this.socketSession.saveSession(data.playerTop.sessionId, {
-      ...data.playerTop,
+    this.socketSession.saveSession(metaData.playerTop.sessionId, {
+      ...metaData.playerTop,
       roomId: null,
       inGame: false,
     });
-    this.socketSession.saveSession(data.playerBtm.sessionId, {
-      ...data.playerBtm,
+    this.socketSession.saveSession(metaData.playerBtm.sessionId, {
+      ...metaData.playerBtm,
       roomId: null,
       inGame: false,
     });
-    this.server.to(roomId).emit('gameEnd');
+    this.server.to(roomId).emit('game:end', data);
     this.server.in(roomId).socketsLeave(roomId);
   }
 
