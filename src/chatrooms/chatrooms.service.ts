@@ -16,7 +16,7 @@ import MessageRepository from './repository/message.repository';
 import ChatEventRepository from './repository/chat-event.repository';
 import FriendsRepository from './repository/friends.repository';
 import { ChatRequestDto } from './dto/chat-request.dto';
-import { ChatResponseDto } from './dto/chat-response..dto';
+import { ChatResponseDto } from './dto/chat-response.dto';
 
 @Injectable()
 export default class ChatroomsService implements OnModuleInit {

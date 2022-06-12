@@ -13,7 +13,7 @@ import ChatType from 'src/enums/mastercode/chat-type.enum';
 import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
 import ChatroomsService from './chatrooms.service';
 import { ChatRequestDto } from './dto/chat-request.dto';
-import { ChatResponseDto } from './dto/chat-response..dto';
+import { ChatResponseDto } from './dto/chat-response.dto';
 import { JoinRoomDto } from './dto/join-room.dto';
 import { MessageDataDto } from './dto/message-data.dto';
 
