@@ -35,6 +35,14 @@ export default class MockChatParticipantRepository {
       enteredAt: new Date(),
       leavedAt: new Date(),
     });
+    this.MockEntity.push({
+      partcSeq: 3,
+      userSeq: 11,
+      chatSeq: 1,
+      partcAuth: PartcAuth.CPAU20,
+      enteredAt: new Date(),
+      leavedAt: new Date(),
+    });
   }
 
   async saveChatParticipants(userid: number, roomid: number, auth: PartcAuth): Promise<void> {

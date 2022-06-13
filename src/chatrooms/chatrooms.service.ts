@@ -16,7 +16,7 @@ import MessageRepository from './repository/message.repository';
 import ChatEventRepository from './repository/chat-event.repository';
 import FriendsRepository from './repository/friends.repository';
 import { ChatRequestDto } from './dto/chat-request.dto';
-import { ChatResponseDto } from './dto/chat-response..dto';
+import { ChatResponseDto } from './dto/chat-response.dto';
 
 @Injectable()
 export default class ChatroomsService implements OnModuleInit {
@@ -613,7 +613,6 @@ export default class ChatroomsService implements OnModuleInit {
     await this.chatEventRepository.delChatEvent(find.eventSeq);
   }
 
-  // TODO 여기까지 테스트케이스 완료
   /**
    * 특정 사용자를 뮤트합니다.
    *
@@ -664,7 +663,7 @@ export default class ChatroomsService implements OnModuleInit {
     if (rtn === undefined) {
       return 0;
     }
-    return getRemainTimeSec(rtn, now);
+    return Math.floor(getRemainTimeSec(rtn, now));
   }
 
   /**
@@ -873,7 +872,7 @@ export default class ChatroomsService implements OnModuleInit {
    * 매니저가 있는 방이라면 매니저에게 우선권을 부여하며 매니저가 없는 방이라면 일반 유저를 매니저로 지정합니다.
    *
    * @param chatSeq 방 ID
-   * @returns 다음 관리자 식별자
+   * @returns 다음 관리자 식별자 (실패하면 -1)
    */
   async getNextAdmin(chatSeq: number): Promise<number> {
     const participants = await this.chatParticipantRepository.getChatParticipantsByRoomid(chatSeq);

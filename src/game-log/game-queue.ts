@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import GameType from 'src/enums/mastercode/game-type.enum';
 import { GameSession } from './interface/game-session';
 
 @Injectable()
@@ -12,14 +13,15 @@ export class GameQueue {
   enQueue(client: GameSession, isLadder: string): Promise<GameSession[] | boolean> {
     this.logger.debug(client);
     // TODO: check duplicates
-    if (isLadder) {
+    if (isLadder === GameType.LADDER) {
       return this.addToLadder(client);
     }
     return this.addToNormal(client);
   }
 
-  deQueue(client:GameSession, isLadder:boolean): void {
-    if (isLadder) {
+  deQueue(client:GameSession, isLadder: string): void {
+    this.logger.debug(client);
+    if (isLadder === GameType.LADDER) {
       return this.removeFromLadder(client);
     }
     return this.removeFromNormal(client);
