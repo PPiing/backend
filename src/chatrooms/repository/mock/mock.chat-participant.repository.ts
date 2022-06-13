@@ -6,6 +6,7 @@ import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
  * - 0번 채팅방에 유저 10번이 있으며 방장 권한임
  * - 1번 채팅방에 유저 10번이 있으며 방장 권한임
  * - 0번 채팅방에 유저 11번이 있으며 참가자 권한임
+ * - 1번 채팅방에 유저 11번이 있으며 부방장 권한임
  */
 export default class MockChatParticipantRepository {
   MockEntity: any[] = [];

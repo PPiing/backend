@@ -102,7 +102,7 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
           msg: message.content,
           id: seq,
         };
-        this.server.to(message.at.toString()).except(exceptUsers).emit('chat', data);
+        this.server.to(message.at.toString()).except(exceptUsers).emit('room:chat', data);
       } else {
         const data: ISocketSend = {
           chatSeq: message.at,
@@ -110,7 +110,7 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
           msg: `현재 mute 상태입니다. ${Math.ceil(muted)} 초 뒤 차단이 풀립니다.`,
           id: -1,
         };
-        client.emit('chat', data);
+        client.emit('room:chat', data);
       }
     }
   }
@@ -132,7 +132,7 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
       msg: message,
       id: seq,
     };
-    this.server.to(chatSeq.toString()).emit('chat', data);
+    this.server.to(chatSeq.toString()).emit('room:chat', data);
   }
 
   /**
