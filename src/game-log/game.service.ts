@@ -18,6 +18,11 @@ export class GameService {
 
   private games: Map<string, GameData> = new Map();
 
+  /**
+   * To quickly get roomId which is participanted by the userSeq
+   */
+  private users: Map<number, string> = new Map();
+
   private readyCheck: Map<string, Ready> = new Map();
 
   constructor(
@@ -26,7 +31,12 @@ export class GameService {
     private simulator: SimulationService,
   ) {}
 
-  async handleEnqueue(client: GameSession, isLadder: GameType) : Promise<GameSession[] | void> {
+  findCurrentGame(userSeq: number): GameData | undefined {
+    const roomId = this.users.get(userSeq);
+    return this.games.get(roomId);
+  }
+
+  async handleEnqueue(client: GameSession, isLadder: GameType) {
     const ret = await this.gameQueue.enQueue(client, isLadder);
     if (typeof ret === 'object') {
       const newGame = new GameData();
@@ -39,6 +49,8 @@ export class GameService {
       newGame.ruleData = new RuleData();
       newGame.inGameData = new InGameData();
       this.games.set(newGame.metaData.roomId, newGame);
+      this.users.set(ret[0].userId, ret[0].roomId);
+      this.users.set(ret[1].userId, ret[1].roomId);
       this.readyCheck.set(newGame.metaData.roomId, false);
       ret[0].roomId = newGame.metaData.roomId;
       ret[1].roomId = newGame.metaData.roomId;
@@ -86,11 +98,14 @@ export class GameService {
     const game = this.games.get(roomId);
     game.inGameData = new InGameData();
     this.readyCheck.delete(roomId);
-    this.games.delete(roomId);
     this.simulator.startGame(game);
   }
 
   async endGame(roomId: string) {
+    const { playerTop, playerBtm } = this.games.get(roomId).metaData;
+    this.games.delete(roomId);
+    this.users.delete(playerBtm.userId);
+    this.users.delete(playerTop.userId);
     this.simulator.endGame(roomId);
   }
 

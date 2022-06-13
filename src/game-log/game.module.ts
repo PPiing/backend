@@ -8,6 +8,8 @@ import { GameLogRepository, MockGameLogRepository } from './game-log.repository'
 import { GameQueue } from './game-queue';
 import { SimulationService } from './simulation.service';
 import { GameSocketSession } from './game-socket-session';
+import { GameLogController } from './game-log.controller';
+import { GameLogService } from './game-log.service';
 
 const GameRepositories = [
   {
@@ -31,9 +33,10 @@ const GameRepositories = [
     GameQueue,
     SimulationService,
     GameSocketSession,
+    GameLogService,
     ...GameRepositories,
   ],
-  controllers: [],
+  controllers: [GameLogController],
   exports: [GameGateway],
 })
 export class GameModule {}
