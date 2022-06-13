@@ -12,10 +12,6 @@ export default class GameLog {
   @PrimaryGeneratedColumn()
     gameLogSeq: number;
 
-  // [
-  //   { name: 'topUser', referencedColumnName: 'topUserSeq' },
-  //   { name: 'btmUser', referencedColumnName: 'btmUserSeq' },
-  // ] 이렇게 하고 싶은데 안되요 ㅜㅜ
   @OneToOne(() => Game)
   @JoinColumn()
     gameSeq: number;
@@ -33,13 +29,13 @@ export default class GameLog {
     btmSideScore: number;
 
   @Column()
-    option1: GameOption; // matchScore
+    option1: GameOption; // racket size
 
   @Column()
-    option2: GameOption; // racket size
+    option2: GameOption; // ball speed
 
   @Column()
-    option3: GameOption; // ball speed
+    option3: GameOption; // match score
 
   @CreateDateColumn()
     createdAt: Date;

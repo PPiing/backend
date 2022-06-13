@@ -20,11 +20,11 @@ export class Game {
 
   @ManyToOne(() => User)
   @JoinColumn()
-    topUserSeq: string;
+    topUserSeq: number;
 
   @ManyToOne(() => User)
   @JoinColumn()
-    btmUserSeq: string;
+    btmUserSeq: number;
 
   @CreateDateColumn()
     createdAt: Date;
