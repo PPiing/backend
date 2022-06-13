@@ -12,9 +12,22 @@ export default class GameLog {
   @PrimaryGeneratedColumn()
     gameLogSeq: number;
 
-  @OneToOne(() => Game)
+  @Column()
+    roomId: string;
+
+  @Column()
+    topUserName: string;
+
+  @Column()
+    btmUserName: string;
+
+  @ManyToOne(() => User)
   @JoinColumn()
-    gameSeq: number;
+    topUserSeq: number;
+
+  @ManyToOne(() => User)
+  @JoinColumn()
+    btmUserSeq: number;
 
   @Column()
     gameType: GameType;

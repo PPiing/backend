@@ -12,7 +12,11 @@ export class MockGameLogRepository {
     this.logs.push(
       {
         gameLogSeq: 1,
-        gameSeq: 1,
+        roomId: '1',
+        topUserName: 'user1',
+        btmUserName: 'user2',
+        topUserSeq: 1,
+        btmUserSeq: 2,
         gameType: GameType.NORMAL,
         winnerSeq: 1,
         topSideScore: 5,
@@ -25,7 +29,11 @@ export class MockGameLogRepository {
       },
       {
         gameLogSeq: 2,
-        gameSeq: 2,
+        roomId: '2',
+        topUserName: 'user2',
+        btmUserName: 'user3',
+        topUserSeq: 2,
+        btmUserSeq: 3,
         gameType: GameType.NORMAL,
         winnerSeq: 2,
         topSideScore: 3,
@@ -38,7 +46,11 @@ export class MockGameLogRepository {
       },
       {
         gameLogSeq: 3,
-        gameSeq: 3,
+        roomId: '3',
+        topUserName: 'user3',
+        btmUserName: 'user4',
+        topUserSeq: 3,
+        btmUserSeq: 4,
         gameType: GameType.NORMAL,
         winnerSeq: 4,
         topSideScore: 1,
@@ -62,8 +74,8 @@ export class MockGameLogRepository {
   /**
    * @return game log
    */
-  async findOneBySeq(seq: number): Promise<GameLog> {
-    return this.logs.find((val) => val.gameSeq === seq);
+  async findOne(seq: number): Promise<GameLog> {
+    return this.logs.find((val) => val.gameLogSeq === seq);
   }
 
   async save(log: GameLog): Promise<GameLog | void> {
