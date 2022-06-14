@@ -1,24 +1,32 @@
 import {
   Column, CreateDateColumn,
-  Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn,
+  Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn,
 } from 'typeorm';
 import GameOption from 'src/enums/mastercode/game-option.enum';
 import GameType from 'src/enums/mastercode/game-type.enum';
 import User from './user.entity';
-import { Game } from './game.entity';
 
 @Entity()
 export default class GameLog {
   @PrimaryGeneratedColumn()
     gameLogSeq: number;
 
-  // [
-  //   { name: 'topUser', referencedColumnName: 'topUserSeq' },
-  //   { name: 'btmUser', referencedColumnName: 'btmUserSeq' },
-  // ] 이렇게 하고 싶은데 안되요 ㅜㅜ
-  @OneToOne(() => Game)
+  @Column()
+    roomId: string;
+
+  @Column()
+    topUserName: string;
+
+  @Column()
+    btmUserName: string;
+
+  @ManyToOne(() => User)
   @JoinColumn()
-    gameSeq: number;
+    topUserSeq: number;
+
+  @ManyToOne(() => User)
+  @JoinColumn()
+    btmUserSeq: number;
 
   @Column()
     gameType: GameType;
@@ -33,13 +41,13 @@ export default class GameLog {
     btmSideScore: number;
 
   @Column()
-    option1: GameOption; // matchScore
+    option1: GameOption; // racket size
 
   @Column()
-    option2: GameOption; // racket size
+    option2: GameOption; // ball speed
 
   @Column()
-    option3: GameOption; // ball speed
+    option3: GameOption; // match score
 
   @CreateDateColumn()
     createdAt: Date;
