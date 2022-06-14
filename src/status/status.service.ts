@@ -68,7 +68,7 @@ export class StatusService {
 
   async getFriends(userSeq: number): Promise<string[]> {
     const friends: number[] = await this.friendRepository.findFriends(userSeq);
-    const friendsList: string[]= [];
+    const friendsList: string[] = [];
     friends.forEach(async (friend) => {
       const friendId: string = await this.cacheManager.get(String(friend));
       friendsList.push(friendId);

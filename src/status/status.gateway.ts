@@ -43,7 +43,7 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const friendsList: string[] = await this.statusService.getFriends(userSeq);
     friendsList.forEach((friend) => {
       client.to(friend).emit('status_update', {
-        userSeq: userSeq,
+        userSeq,
         status: UserStatus.USST10,
       });
     });
@@ -83,7 +83,7 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const friendsList: string[] = await this.statusService.getFriends(userSeq);
     friendsList.forEach((friend) => {
       client.to(friend).emit('status_update', {
-        userSeq: userSeq,
+        userSeq,
         status: UserStatus.USST10,
       });
     });
@@ -107,7 +107,7 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const friendsList: string[] = await this.statusService.getFriends(userSeq);
     friendsList.forEach((friend) => {
       client.to(friend).emit('status_update', {
-        userSeq: userSeq,
+        userSeq,
         status: UserStatus.USST10,
       });
     });
