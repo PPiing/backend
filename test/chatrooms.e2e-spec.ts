@@ -612,6 +612,168 @@ describe('Chatrooms 테스트 (e2e)', () => {
     });
   });
 
+  describe('사용자 뮤트 / 뮤트 해제', () => {
+    describe('PUT /chatrooms/mute/{target}/{roomId}/{time}/{by}', () => {
+      test('정상적인 요청', (done) => {
+        // given
+        const target = 11;
+        const roomId = 0;
+        const time = 10;
+        const by = 10; // NOTE 추후에 세션으로 변경 필요합니다.
+
+        // when
+        const req = request(app.getHttpServer())
+          .put(`/chatrooms/mute/${target}/${roomId}/${time}/${by}`);
+
+        // then
+        const quit = exec(3, done);
+        clientSockets.get(target).on('room:chat', (data) => {
+          expect(data.chatSeq).toBe(roomId);
+          expect(data.userIDs).toContain(0);
+          expect(data.msg).toBeDefined();
+          expect(data.id).toBeDefined();
+          quit();
+        });
+        clientSockets.get(by).on('room:chat', (data) => {
+          expect(data.chatSeq).toBe(roomId);
+          expect(data.userIDs).toContain(0);
+          expect(data.msg).toBeDefined();
+          expect(data.id).toBeDefined();
+          quit();
+        });
+        req.end((_, res) => {
+          expect(res.status).toBe(204);
+          quit();
+        });
+      });
+    });
+
+    describe('DELETE /chatrooms/mute/{target}/{roomId}/{by}', () => {
+      test('정상적인 요청', (done) => {
+        // given
+        const target = 11;
+        const roomId = 1;
+        const by = 10; // NOTE 추후에 세션으로 변경 필요합니다.
+
+        // when
+        const req = request(app.getHttpServer())
+          .delete(`/chatrooms/mute/${target}/${roomId}/${by}`);
+
+        // then
+        const quit = exec(3, done);
+        clientSockets.get(target).on('room:chat', (data) => {
+          expect(data.chatSeq).toBe(roomId);
+          expect(data.userIDs).toContain(0);
+          expect(data.msg).toBeDefined();
+          expect(data.id).toBeDefined();
+          quit();
+        });
+        clientSockets.get(by).on('room:chat', (data) => {
+          expect(data.chatSeq).toBe(roomId);
+          expect(data.userIDs).toContain(0);
+          expect(data.msg).toBeDefined();
+          expect(data.id).toBeDefined();
+          quit();
+        });
+        req.end((_, res) => {
+          expect(res.status).toBe(204);
+          quit();
+        });
+      });
+    });
+  });
+
+  describe('사용자 차단 / 차단 해제', () => {
+    describe('PUT /chatrooms/block/{target}/{by}', () => {
+      test('정상적인 요청', (done) => {
+        // given
+        const target = 10;
+        const by = 11; // NOTE 추후에 세션으로 변경 필요합니다.
+
+        // when
+        const req = request(app.getHttpServer())
+          .put(`/chatrooms/block/${target}/${by}`);
+
+        // then
+        const quit = exec(1, done);
+        req.end((_, res) => {
+          expect(res.status).toBe(204);
+          quit();
+        });
+      });
+    });
+
+    describe('DELETE /chatrooms/block/{target}/{by}', () => {
+      test('정상적인 요청', (done) => {
+        // given
+        const target = 11;
+        const by = 10; // NOTE 추후에 세션으로 변경 필요합니다.
+
+        // when
+        const req = request(app.getHttpServer())
+          .delete(`/chatrooms/block/${target}/${by}`);
+
+        // then
+        const quit = exec(1, done);
+        req.end((_, res) => {
+          expect(res.status).toBe(204);
+          quit();
+        });
+      });
+    });
+  });
+
+  describe('채팅 메시지 조회', () => {
+    describe('GET /chatrooms/message/{roomId}/{msgID}/{count}/{by}', () => {
+      test('정상적인 요청', (done) => {
+        // given
+        const roomId = 0;
+        const msgID = -1;
+        const count = 10;
+        const by = 10; // NOTE 추후에 세션으로 변경 필요합니다.
+
+        // when
+        const req = request(app.getHttpServer())
+          .get(`/chatrooms/message/${roomId}/${msgID}/${count}/${by}`);
+
+        // then
+        const quit = exec(1, done);
+        req.end((_, res) => {
+          expect(res.status).toBe(200);
+          expect(res.body).toBeInstanceOf(Array);
+          quit();
+        });
+      });
+    });
+  });
+
+  describe('방 정보 조회', () => {
+    describe('GET /chatrooms/room/{roomId}', () => {
+      test('정상적인 요청', (done) => {
+        // given
+        const roomId = 0;
+
+        // when
+        const req = request(app.getHttpServer())
+          .get(`/chatrooms/room/${roomId}`);
+
+        // then
+        const quit = exec(1, done);
+        req.end((_, res) => {
+          expect(res.status).toBe(200);
+          expect(res.body).toHaveProperty('chatSeq');
+          expect(res.body).toHaveProperty('chatName');
+          expect(res.body).toHaveProperty('chatType');
+          expect(res.body.chatType).not.toEqual(ChatType.CHTP10);
+          expect(res.body.chatType).not.toEqual(ChatType.CHTP40);
+          expect(res.body).toHaveProperty('isPassword');
+          expect(res.body).toHaveProperty('participants');
+          quit();
+        });
+      });
+    });
+  });
+
   describe('채팅방 검색', () => {
     test('GET /chatrooms/search', (done) => {
       // when
