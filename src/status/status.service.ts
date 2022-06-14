@@ -4,6 +4,7 @@ import {
 import { Cache } from 'cache-manager';
 import { Socket } from 'socket.io';
 import UserStatus from 'src/enums/mastercode/user-status.enum';
+import FriendsRepository from './friends.repository';
 import StatusRepository from './status.repository';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class StatusService {
 
   constructor(
     private statusRepository: StatusRepository,
+    private friendRepository: FriendsRepository,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
 
@@ -23,7 +25,7 @@ export class StatusService {
    */
   async saveClient(client: Socket, userSeq: number) {
     this.cacheManager.set(client.id, userSeq, { ttl: 0 });
-
+    this.cacheManager.set(String(userSeq), client.id, { ttl: 0 });
     await this.statusRepository.updateStatus(userSeq, UserStatus.USST10);
   }
 
@@ -39,6 +41,7 @@ export class StatusService {
 
     // cache에서 삭제
     this.cacheManager.del(client.id);
+    this.cacheManager.del(String(userSeq));
 
     await this.statusRepository.updateStatus(userSeq, UserStatus.USST20);
   }
@@ -55,5 +58,22 @@ export class StatusService {
 
     // await repository의 updateStatus 호출
     await this.statusRepository.updateStatus(userSeq, status);
+  }
+
+  async getUserSeq(client: Socket): Promise<number> {
+    const userSeq: number = await this.cacheManager.get(client.id);
+
+    return userSeq;
+  }
+
+  async getFriends(userSeq: number): Promise<string[]> {
+    const friends: number[] = await this.friendRepository.findFriends(userSeq);
+    const friendsList: string[]= [];
+    friends.forEach(async (friend) => {
+      const friendId: string = await this.cacheManager.get(String(friend));
+      friendsList.push(friendId);
+    });
+
+    return friendsList;
   }
 }

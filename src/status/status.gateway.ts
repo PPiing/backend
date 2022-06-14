@@ -7,7 +7,13 @@ import { Server, Socket } from 'socket.io';
 import UserStatus from 'src/enums/mastercode/user-status.enum';
 import { StatusService } from './status.service';
 
-@WebSocketGateway({ namespace: 'status' })
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+  },
+  namespace: '',
+})
+
 export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(StatusGateway.name);
 
@@ -33,15 +39,17 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.logger.error(`Client connected: ${client.id}`);
     }
 
-    // client.emit("users", 현재 저장된 자신의 socket 정보 전달);
-
-    // TODO: 자신의 친구들에게만
-    // client.broadcast.emit("user connected", 현재 저장된 자신의 socket 정보 전달);
+    // NOTE: 마소터코드로 보낼 것인가?
+    const friendsList: string[] = await this.statusService.getFriends(userSeq);
+    friendsList.forEach((friend) => {
+      client.to(friend).emit('status_update', {
+        userSeq: userSeq,
+        status: UserStatus.USST10,
+      });
+    });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
     this.statusService.saveClient(client, userSeq);
-
-    this.statusService.updateStatus(client, UserStatus.USST10);
   }
 
   /**
@@ -52,16 +60,14 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleDisconnect(client: Socket) {
     this.logger.debug(`Client disconnected: ${client.id}`);
 
-    // client.emit("users", 현재 저장된 자신의 socket 정보 전달);
-
     // TODO: 자신의 친구들에게만
-    // client.broadcast.emit("user connected", 현재 저장된 자신의 socket 정보 전달);
+    client.broadcast.emit('status_update', {
+      userSeq: this.statusService.getUserSeq(client),
+      status: UserStatus.USST30,
+    });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
     this.statusService.removeClient(client);
-
-    // 서버에 저장되어 있는 자신의 상태를 업데이트
-    this.statusService.updateStatus(client, UserStatus.USST10);
   }
 
   /**
@@ -71,13 +77,16 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
    * @param client 연결된 client socket
    */
   @OnEvent('game:start')
-  async onGameStart(client: Socket) {
+  async onGameStart(client: Socket, userSeq: number) {
     this.logger.debug(`Client start game: ${client.id}`);
 
-    // client.emit("users", 현재 저장된 자신의 socket 정보 전달);
-
-    // TODO: 자신의 친구들에게만
-    // client.broadcast.emit("user connected", 현재 저장된 자신의 socket 정보 전달);
+    const friendsList: string[] = await this.statusService.getFriends(userSeq);
+    friendsList.forEach((friend) => {
+      client.to(friend).emit('status_update', {
+        userSeq: userSeq,
+        status: UserStatus.USST10,
+      });
+    });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
     this.statusService.updateStatus(client, UserStatus.USST30);
@@ -90,13 +99,18 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
    * @param client 연결된 client socket
    */
   @OnEvent('game:finish')
-  async onGameFinish(client: Socket) {
+  async onGameFinish(client: Socket, userSeq: number) {
     this.logger.debug(`Client finish game: ${client.id}`);
 
     // client.emit("users", 현재 저장된 자신의 socket 정보 전달);
 
-    // TODO: 자신의 친구들에게만
-    // client.broadcast.emit("user connected", 현재 저장된 자신의 socket 정보 전달);
+    const friendsList: string[] = await this.statusService.getFriends(userSeq);
+    friendsList.forEach((friend) => {
+      client.to(friend).emit('status_update', {
+        userSeq: userSeq,
+        status: UserStatus.USST10,
+      });
+    });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
     this.statusService.updateStatus(client, UserStatus.USST10);
