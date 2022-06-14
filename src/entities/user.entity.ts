@@ -6,7 +6,6 @@ import Alarm from './alarm.entity';
 import Message from './message.entity';
 import Friends from './friends.entity';
 import GameLog from './game-log.entity';
-import { Game } from './game.entity';
 
 @Entity()
 export default class User {
@@ -55,9 +54,9 @@ export default class User {
   @OneToMany(() => GameLog, (gameLog) => gameLog.winnerSeq)
     winner: GameLog[];
 
-  @OneToMany(() => Game, (game) => game.topUserSeq)
-    topUser: Game[];
+  @OneToMany(() => GameLog, (gameLog) => gameLog.topUserSeq)
+    topUser: GameLog[];
 
-  @OneToMany(() => Game, (game) => game.btmUserSeq)
-    btmUser: Game[];
+  @OneToMany(() => GameLog, (gameLog) => gameLog.btmUserSeq)
+    btmUser: GameLog[];
 }

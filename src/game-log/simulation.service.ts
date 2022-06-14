@@ -5,7 +5,6 @@ import GameOption from 'src/enums/mastercode/game-option.enum';
 import { GameData } from './dto/game-data';
 import { GameStatus, InGameData, PaddleDirective } from './dto/in-game.dto';
 import { GameLogRepository } from './game-log.repository';
-import { GameRepository } from './game.repository';
 
 @Injectable()
 export class SimulationService {
@@ -15,7 +14,6 @@ export class SimulationService {
 
   constructor(
     private readonly eventRunner: EventEmitter2,
-    private gameRepository: GameRepository,
     private gameLogRepository: GameLogRepository,
   ) {}
 
@@ -215,7 +213,6 @@ export class SimulationService {
     const game = this.games.get(roomId);
     if (game && game.inGameData.status === GameStatus.End) {
       const gameLog = this.gameLogRepository.create({
-        gameSeq: game.metaData.gameSeq,
         gameType: game.metaData.gameType,
         topSideScore: game.inGameData.scoreTop,
         btmSideScore: game.inGameData.scoreBtm,

@@ -17,8 +17,6 @@ export class MetaData {
     this.gameType = gameType;
   }
 
-  gameSeq: number;
-
   @IsString()
     roomId: string;
 

@@ -46,7 +46,7 @@ export class GameLogController {
   }
 
   @Get('user/:userSeq')
-  findUserGameLog(@Param('userSeq') userSeq: number) : { total: number, win: number } {
+  findUserGameLog(@Param('userSeq') userSeq: number) : Promise<{ total: number, win: number }> {
     return this.gameLogService.findUserGameLog(userSeq);
   }
 

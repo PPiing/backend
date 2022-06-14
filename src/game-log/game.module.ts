@@ -3,7 +3,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GameGateway } from './game.gateway';
 import { GameService } from './game.service';
-import { GameRepository, MockGameRepository } from './game.repository';
 import { GameLogRepository, MockGameLogRepository } from './game-log.repository';
 import { GameQueue } from './game-queue';
 import { SimulationService } from './simulation.service';
@@ -15,10 +14,6 @@ const GameRepositories = [
   {
     provide: GameLogRepository,
     useValue: MockGameLogRepository,
-  },
-  {
-    provide: GameRepository,
-    useValue: MockGameRepository,
   },
 ];
 

@@ -1,11 +1,10 @@
 import {
   Column, CreateDateColumn,
-  Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn,
+  Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn,
 } from 'typeorm';
 import GameOption from 'src/enums/mastercode/game-option.enum';
 import GameType from 'src/enums/mastercode/game-type.enum';
 import User from './user.entity';
-import { Game } from './game.entity';
 
 @Entity()
 export default class GameLog {
