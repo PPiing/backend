@@ -1,4 +1,5 @@
 /* eslint-disable max-classes-per-file */
+import { Logger } from '@nestjs/common';
 import GameLog from 'src/entities/game-log.entity';
 import GameOption from 'src/enums/mastercode/game-option.enum';
 import GameType from 'src/enums/mastercode/game-type.enum';
@@ -8,7 +9,12 @@ import { EntityRepository, Repository } from 'typeorm';
 export class GameLogRepository extends Repository<GameLog> {}
 
 export class MockGameLogRepository {
-  constructor(private logs: GameLog[]) {
+  private readonly logger: Logger = new Logger('MockGameLogRepository');
+
+  logs: GameLog[] = [];
+
+  constructor() {
+    this.logger.debug('MockGameLogRepository constructor');
     this.logs.push(
       {
         gameLogSeq: 1,
@@ -68,6 +74,7 @@ export class MockGameLogRepository {
    * @return all game logs
    */
   async find(): Promise<GameLog[]> {
+    this.logger.debug('find');
     return this.logs;
   }
 
@@ -75,7 +82,14 @@ export class MockGameLogRepository {
    * @return game log
    */
   async findOne(seq: number): Promise<GameLog> {
-    return this.logs.find((val) => val.gameLogSeq === seq);
+    this.logger.debug('findOne seq: ', seq);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const [key, val] of Object.entries(this.logs)) {
+      if (val.gameLogSeq === seq) {
+        return this.logs[key];
+      }
+    }
+    return this.logs[0];
   }
 
   async save(log: GameLog): Promise<GameLog | void> {

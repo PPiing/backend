@@ -14,7 +14,7 @@ export class SimulationService {
 
   constructor(
     private readonly eventRunner: EventEmitter2,
-    private gameLogRepository: GameLogRepository,
+    private readonly gameLogRepository: GameLogRepository,
   ) {}
 
   /**

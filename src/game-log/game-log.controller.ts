@@ -22,6 +22,7 @@ export class GameLogController {
    */
   @Get(':seq')
   findGameLogBySeq(@Param('seq') seq:number): Promise<GameLog> {
+    this.logger.debug('/game-log/:seq', seq);
     return this.gameLogService.findGameLogBySeq(seq);
   }
 
@@ -40,6 +41,7 @@ export class GameLogController {
     return this.gameLogService.findRecentGameLog(userSeq, limit);
   }
 
+  // NOTE: cannot
   @Get('current/user/:userSeq')
   findCurrentGame(@Param('userSeq') userSeq: number): GameData {
     return this.gameService.findCurrentGame(userSeq);
