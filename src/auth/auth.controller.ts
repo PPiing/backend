@@ -20,9 +20,15 @@ export class AuthController {
   callback(@Req() req: any) {
     // sign up user
     const [userId, email] = [req.user.userId, req.user.email];
-    const result = this.userService.createByUserId(userId, email);
-    Logger.debug(result);
-    return result;
+    const result = this.userService.findByUserId(userId);
+
+    if (result) {
+      return result;
+    } else {
+      const newResult = this.userService.createByUserId(userId, email);
+      Logger.debug(newResult);
+      return newResult;
+    }
   }
 
   @Get('logout')
