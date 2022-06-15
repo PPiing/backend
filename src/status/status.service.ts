@@ -60,12 +60,22 @@ export class StatusService {
     await this.statusRepository.updateStatus(userSeq, status);
   }
 
+  /**
+   *
+   * @param client 접속된 client socket
+   * @returns 접속 된 소켓의 userSeq
+   */
   async getUserSeq(client: Socket): Promise<number> {
     const userSeq: number = await this.cacheManager.get(client.id);
 
     return userSeq;
   }
 
+  /**
+   *
+   * @param userSeq 유저의 seq
+   * @returns 해당 유저의 친구 목록
+   */
   async getFriends(userSeq: number): Promise<string[]> {
     const friends: number[] = await this.friendRepository.findFriends(userSeq);
     const friendsList: string[] = [];

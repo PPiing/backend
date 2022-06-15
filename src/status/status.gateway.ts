@@ -41,11 +41,9 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // NOTE: 마소터코드로 보낼 것인가?
     const friendsList: string[] = await this.statusService.getFriends(userSeq);
-    friendsList.forEach((friend) => {
-      client.to(friend).emit('status_update', {
-        userSeq,
-        status: UserStatus.USST10,
-      });
+    client.to(friendsList).emit('status_update', {
+      userSeq,
+      status: UserStatus.USST10,
     });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
@@ -60,9 +58,10 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleDisconnect(client: Socket) {
     this.logger.debug(`Client disconnected: ${client.id}`);
 
-    // TODO: 자신의 친구들에게만
-    client.broadcast.emit('status_update', {
-      userSeq: this.statusService.getUserSeq(client),
+    const userSeq: number = await this.statusService.getUserSeq(client);
+    const friendsList: string[] = await this.statusService.getFriends(userSeq);
+    client.to(friendsList).emit('status_update', {
+      userSeq,
       status: UserStatus.USST30,
     });
 
@@ -81,11 +80,9 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.debug(`Client start game: ${client.id}`);
 
     const friendsList: string[] = await this.statusService.getFriends(userSeq);
-    friendsList.forEach((friend) => {
-      client.to(friend).emit('status_update', {
-        userSeq,
-        status: UserStatus.USST10,
-      });
+    client.to(friendsList).emit('status_update', {
+      userSeq,
+      status: UserStatus.USST10,
     });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
@@ -102,13 +99,10 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async onGameFinish(client: Socket, userSeq: number) {
     this.logger.debug(`Client finish game: ${client.id}`);
 
-    // client.emit("users", 현재 저장된 자신의 socket 정보 전달);
-
     const friendsList: string[] = await this.statusService.getFriends(userSeq);
-      client.to(friendsList).emit('status_update', {
-        userSeq,
-        status: UserStatus.USST10,
-      });
+    client.to(friendsList).emit('status_update', {
+      userSeq,
+      status: UserStatus.USST10,
     });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
