@@ -507,6 +507,16 @@ export default class ChatroomsService implements OnModuleInit {
   }
 
   /**
+   * 방의 특정 유저를 방장으로 임명합니다.
+   *
+   * @param chatSeq 방 식별자
+   * @param user 임명할 유저 고유 ID
+   */
+  async setAdmin(chatSeq: number, user: number): Promise<void> {
+    await this.chatParticipantRepository.changeUserAuth(chatSeq, user, PartcAuth.CPAU30);
+  }
+
+  /**
    * 방의 특정 유저를 매니저로 임명합니다.
    *
    * @param chatSeq 방 식별자
@@ -554,7 +564,11 @@ export default class ChatroomsService implements OnModuleInit {
    * @returns 제거 성공 여부
    */
   async leftUser(chatSeq: any, user: any): Promise<boolean> {
-    return this.chatParticipantRepository.removeUser(chatSeq, user);
+    const exist = await this.isParticipant(chatSeq, user);
+    if (exist) {
+      return this.chatParticipantRepository.removeUser(chatSeq, user);
+    }
+    return exist;
   }
 
   /**

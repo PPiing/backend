@@ -80,6 +80,9 @@ export default class ChatroomsController {
   ): Promise<void> {
     this.logger.debug(`addDM: ${by}`);
     await this.chatroomsService.checkUsers([target, by]);
+    if (target === by) {
+      throw new BadRequestException('자신과의 DM방을 만들 수 없습니다.');
+    }
     const roomno = await this.chatroomsService.addDM(target, by);
     await this.chatroomsService.addNormalUsers(roomno, [target, by]);
     this.eventRunner.emit('room:join', roomno, [target, by]);
@@ -156,19 +159,20 @@ export default class ChatroomsController {
     await this.chatroomsService.checkRooms([roomId]);
     const isMaster = await this.chatroomsService.isMaster(roomId, by);
     const result = await this.chatroomsService.leftUser(roomId, by);
-    if (result) {
-      this.chatroomsService.userOutSave(roomId, by);
-      this.eventRunner.emit('room:leave', roomId, by, false);
-      this.eventRunner.emit('room:notify', roomId, `${by} 님이 방을 나갔습니다.`);
-      const peoples = await this.chatroomsService.getRoomParticipantsCount(roomId);
-      if (peoples === 0) {
-        await this.chatroomsService.deleteRoom(roomId);
-      } else if (isMaster) {
-        const nextAdmin = await this.chatroomsService.getNextAdmin(roomId);
-        await this.chatroomsService.addOwner(roomId, nextAdmin);
-        this.eventRunner.emit('room:notify', roomId, `방장이 나가 ${nextAdmin} 님이 방장이 되었습니다.`);
-        this.eventRunner.emit('room:grant', roomId, nextAdmin, PartcAuth.CPAU30);
-      }
+    if (!result) {
+      throw new BadRequestException('방에 존재하지 않는 유저입니다.');
+    }
+    this.chatroomsService.userOutSave(roomId, by);
+    this.eventRunner.emit('room:leave', roomId, by, false);
+    this.eventRunner.emit('room:notify', roomId, `${by} 님이 방을 나갔습니다.`);
+    const peoples = await this.chatroomsService.getRoomParticipantsCount(roomId);
+    if (peoples === 0) {
+      await this.chatroomsService.deleteRoom(roomId);
+    } else if (isMaster) {
+      const nextAdmin = await this.chatroomsService.getNextAdmin(roomId);
+      await this.chatroomsService.setAdmin(roomId, nextAdmin);
+      this.eventRunner.emit('room:notify', roomId, `방장이 나가 ${nextAdmin} 님이 방장이 되었습니다.`);
+      this.eventRunner.emit('room:grant', roomId, nextAdmin, PartcAuth.CPAU30);
     }
   }
 
@@ -265,7 +269,7 @@ export default class ChatroomsController {
     }
     await this.chatroomsService.leftUser(roomId, target);
     await this.chatroomsService.kickUserSave(roomId, target, by);
-    this.eventRunner.emit('room:leave', roomId, [target], true);
+    this.eventRunner.emit('room:leave', roomId, target, true);
     this.eventRunner.emit('room:notify', roomId, `${target} 님이 강퇴당했습니다.`);
   }
 
@@ -291,11 +295,11 @@ export default class ChatroomsController {
   @ApiParam({
     name: 'by', type: Number, example: 1, description: '요청한 사람의 ID (제거 예정)',
   })
-  @Put('manager/:roomId/:target/:by')
+  @Put('manager/:target/:roomId/:by')
   @HttpCode(204)
   async setManager(
-    @Param('roomId', ParseIntPipe) roomId: number,
-      @Param('target', ParseIntPipe) target: number,
+    @Param('target', ParseIntPipe) target: number,
+      @Param('roomId', ParseIntPipe) roomId: number,
       @Param('by', ParseIntPipe) by: number,
   ): Promise<void> {
     await this.chatroomsService.checkUsers([target, by]);
@@ -332,11 +336,11 @@ export default class ChatroomsController {
   @ApiParam({
     name: 'by', type: Number, example: 1, description: '요청한 사람의 ID (제거 예정)',
   })
-  @Delete('manager/:roomId/:target/:by')
+  @Delete('manager/:target/:roomId/:by')
   @HttpCode(204)
   async unsetManager(
-    @Param('roomId', ParseIntPipe) roomId: number,
-      @Param('target', ParseIntPipe) target: number,
+    @Param('target', ParseIntPipe) target: number,
+      @Param('roomId', ParseIntPipe) roomId: number,
       @Param('by', ParseIntPipe) by: number,
   ): Promise<void> {
     await this.chatroomsService.checkUsers([target, by]);

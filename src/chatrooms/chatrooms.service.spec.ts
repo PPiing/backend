@@ -98,8 +98,10 @@ describe('Chatrooms 테스트', () => {
 
   describe('onModuleInit', () => {
     describe('muteStopper', () => {
-      test('뮤트가 만료될 경우 만료된 유저는 뮤트를 해제해야 함.', async () => {
+      beforeAll(async () => {
         jest.useFakeTimers(); // using mock timers https://jestjs.io/docs/timer-mocks
+      });
+      test('뮤트가 만료될 경우 만료된 유저는 뮤트를 해제해야 함.', async () => {
         // given
         // 0번 채팅방에서 유저 10번이 유저 1번에게 1분동안 뮤트 당함
         // 1번 채팅방에서 유저 11번이 유저 10번에게 5분동안 뮤트 당함
@@ -122,6 +124,8 @@ describe('Chatrooms 테스트', () => {
         jest.advanceTimersByTime(4 * 60 * 1000); // timer fast-forward
         expect(await chatroomsService.isMuted(room0, user10)).toBeFalsy();
         expect(await chatroomsService.isMuted(room1, user11)).toBeFalsy();
+      });
+      afterAll(() => {
         jest.runOnlyPendingTimers();
         jest.useRealTimers();
       });
@@ -167,6 +171,9 @@ describe('Chatrooms 테스트', () => {
 
   describe('뮤트 테스트', () => {
     describe('muteUser / isMuted', () => {
+      beforeAll(async () => {
+        jest.useFakeTimers(); // using mock timers https://jestjs.io/docs/timer-mocks
+      });
       test('뮤트 유저 추가/뮤트 체크', async () => {
         // given
         const chatSeq = 0;
@@ -207,11 +214,12 @@ describe('Chatrooms 테스트', () => {
           admin,
           time,
         );
-        jest.useFakeTimers(); // 타이머를 추가하고 제거하는 과정 중 mock 타이머를 적용하면 문제 생김
         jest.advanceTimersByTime(time * 1000); // timer fast-forward
         const mutedUser = await chatroomsService.isMuted(chatSeq, to);
         // then
         expect(mutedUser).toBeFalsy();
+      });
+      afterAll(() => {
         jest.runOnlyPendingTimers();
         jest.useRealTimers();
       });
