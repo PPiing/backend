@@ -35,8 +35,7 @@ export class AuthController {
 
   @Get('data') // NOTE: 로그인 확인용
   @UseGuards(AuthGuard)
-  data(@Req() req: any, @Session() session: any) {
+  data(@Session() session: any) {
     return session;
   }
-
 }
