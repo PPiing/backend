@@ -105,10 +105,10 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // client.emit("users", 현재 저장된 자신의 socket 정보 전달);
 
     const friendsList: string[] = await this.statusService.getFriends(userSeq);
-client.to(friendsList).emit('status_update', {
-userSeq,
-status: UserStatus.USST10,
-});
+      client.to(friendsList).emit('status_update', {
+        userSeq,
+        status: UserStatus.USST10,
+      });
     });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
