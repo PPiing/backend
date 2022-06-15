@@ -24,11 +24,10 @@ export class AuthController {
 
     if (result) {
       return result;
-    } else {
-      const newResult = this.userService.createByUserId(userId, email);
-      Logger.debug(newResult);
-      return newResult;
     }
+    const newResult = this.userService.createByUserId(userId, email);
+    Logger.debug(newResult);
+    return newResult;
   }
 
   @Get('logout')
