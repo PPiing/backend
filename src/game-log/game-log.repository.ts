@@ -36,10 +36,42 @@ export class GameLogRepository extends Repository<GameLog> {
   }
 }
 
+class MockGameLog {
+  gameLogSeq: number;
+
+  roomId: string;
+
+  topUserName: string;
+
+  btmUserName: string;
+
+  topUserSeq: number;
+
+  btmUserSeq: number;
+
+  gameType: GameType;
+
+  winnerSeq: number;
+
+  topSideScore: number;
+
+  btmSideScore: number;
+
+  option1: GameOption;
+
+  option2: GameOption;
+
+  option3: GameOption;
+
+  createdAt: string;
+
+  updatedAt: string;
+}
+
 export class MockGameLogRepository {
   private readonly logger: Logger = new Logger('MockGameLogRepository');
 
-  logs: GameLog[] = [];
+  logs: MockGameLog[] = [];
 
   constructor() {
     this.logger.debug('MockGameLogRepository constructor');
@@ -58,8 +90,8 @@ export class MockGameLogRepository {
         option1: GameOption.GLOP10,
         option2: GameOption.GLOP20,
         option3: GameOption.GLOP40,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: '2022-06-16T00:26:58.205Z',
+        updatedAt: '2022-06-16T00:26:58.205Z',
       },
       {
         gameLogSeq: 2,
@@ -75,8 +107,8 @@ export class MockGameLogRepository {
         option1: GameOption.GLOP10,
         option2: GameOption.GLOP20,
         option3: GameOption.GLOP40,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: '2022-06-16T00:26:58.205Z',
+        updatedAt: '2022-06-16T00:26:58.205Z',
       },
       {
         gameLogSeq: 3,
@@ -92,8 +124,8 @@ export class MockGameLogRepository {
         option1: GameOption.GLOP10,
         option2: GameOption.GLOP20,
         option3: GameOption.GLOP40,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: '2022-06-16T00:26:58.205Z',
+        updatedAt: '2022-06-16T00:26:58.205Z',
       },
     );
   }
@@ -101,16 +133,18 @@ export class MockGameLogRepository {
   /**
    * @return all game logs
    */
-  async find(): Promise<GameLog[]> {
+  async find(): Promise<MockGameLog[]> {
     this.logger.debug('find');
     return this.logs;
   }
 
-  async findRecentGameLog(userSeq: number): Promise<GameLog[] | GameLog> {
+  async findRecentGameLog(userSeq: number): Promise<MockGameLog[] | MockGameLog> {
+    this.logger.debug('findRecentGameLog');
     return this.logs[0];
   }
 
-  async findUserGameLog(userSeq:number): Promise<GameRecordDto> {
+  async fundUserGameLog(userSeq:number): Promise<GameRecordDto> {
+    this.logger.debug('fundUserGameLog');
     return {
       total: 30,
       win: 15,
@@ -120,7 +154,7 @@ export class MockGameLogRepository {
   /**
    * @return game log
    */
-  async findOne(seq: number): Promise<GameLog> {
+  async findOne(seq: number): Promise<MockGameLog> {
     this.logger.debug('findOne seq: ', seq);
     // eslint-disable-next-line no-restricted-syntax
     for (const [key, val] of Object.entries(this.logs)) {
@@ -131,7 +165,7 @@ export class MockGameLogRepository {
     return this.logs[0];
   }
 
-  async save(log: GameLog): Promise<GameLog | void> {
+  async save(log: MockGameLog): Promise<MockGameLog | void> {
     this.logs.push(log);
     return log;
   }
