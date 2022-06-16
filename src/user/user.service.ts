@@ -8,6 +8,14 @@ export class UserService {
 
   constructor(private readonly userRepository: UserRepository) {}
 
+  async findByUserId(userId: number) {
+    this.logger.debug(`UserService.findByUserId: ${userId}`);
+
+    const user = await this.userRepository.findOne({ userId });
+
+    return user;
+  }
+
   async createByUserId(userId: number, email: string) {
     this.logger.debug(`UserService.createByUserId: ${userId} ${email}`);
     try {
