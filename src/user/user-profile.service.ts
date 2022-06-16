@@ -1,14 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GetUserDto } from './dto/get-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import MockUserProfileRepository from './mock.user-profile.repository';
+import { UserProfileRepository } from './user-profile.repository';
 
 @Injectable()
 export class UserProfileService {
   private readonly logger = new Logger(UserProfileService.name);
 
   constructor(
-    private readonly userProfileRepository: MockUserProfileRepository,
+    private readonly userProfileRepository: UserProfileRepository,
   ) {}
 
   /**

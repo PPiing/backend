@@ -11,7 +11,7 @@ export class UserService {
   async findByUserId(userId: number) {
     this.logger.debug(`UserService.findByUserId: ${userId}`);
 
-    const user = await this.userRepository.findOne({ userId });
+    const user = await this.userRepository.findOne(userId);
 
     return user;
   }

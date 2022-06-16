@@ -5,6 +5,7 @@ import AppController from './app.controller';
 import AppService from './app.service';
 import { ChatroomsModule } from './chatrooms/chatrooms.module.e2e-spec';
 import configuration from './configs/configuration';
+import { UserModule } from './user/user.module.e2e-spec';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import configuration from './configs/configuration';
       load: [configuration],
     }),
     ChatroomsModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
