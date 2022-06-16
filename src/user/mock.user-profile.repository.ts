@@ -54,7 +54,7 @@ export default class MockUserProfileRepository {
     const userIdx = await this.MockEntity.findIndex((u) => u.userSeq === userSeq);
     this.MockEntity[userIdx].nickName = userData.nickName;
     this.MockEntity[userIdx].email = userData.email;
-    this.MockEntity[userIdx].status = userData.status;
+    this.MockEntity[userIdx].secAuthStatus = userData.secAuthStatus;
     this.MockEntity[userIdx].avatarImgUri = userData.avatarImgUri;
 
     return ({
