@@ -4,7 +4,7 @@ import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
-  private readonly logger = new Logger('UserService');
+  private readonly logger = new Logger(UserService.name);
 
   constructor(private readonly userRepository: UserRepository) {}
 
