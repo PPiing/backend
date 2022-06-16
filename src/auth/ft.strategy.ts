@@ -9,7 +9,7 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
     super({
       clientID: configService.get('auth.clientid'),
       clientSecret: configService.get('auth.clientsecret'),
-      callbackURL: configService.get('auth.callbackurl'),
+      callbackURL: '/api/auth/42/callback',
       passReqToCallback: true,
       profileFields: {
         userId: 'id',

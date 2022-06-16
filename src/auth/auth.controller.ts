@@ -35,7 +35,6 @@ export class AuthController {
   @Redirect('../../../', 302)
   logout(@Req() req: any) {
     req.logout();
-    return 'logout';
   }
 
   @Get('data') // NOTE: 로그인 확인용

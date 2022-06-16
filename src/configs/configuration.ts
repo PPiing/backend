@@ -12,6 +12,5 @@ export default () => ({
     secret: process.env.AUTH_SECRET,
     clientid: process.env.AUTH_CLIENTID,
     clientsecret: process.env.AUTH_CLIENTSECRET,
-    callbackurl: process.env.AUTH_CALLBACKURL || '/api/auth/42/callback',
   },
 });
