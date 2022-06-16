@@ -24,11 +24,11 @@ describe('User E2E Test', () => {
     describe('/users/:user_seq/profile', () => {
       test('정상적인 요청', async () => {
         // given
-        const user_seq = 1;
+        const userSeq = 1;
 
         // when
         const response = await request(app.getHttpServer())
-          .get(`/users/${user_seq}/profile`);
+          .get(`/users/${userSeq}/profile`);
 
         // then
         expect(response.status).toBe(200);
@@ -44,11 +44,11 @@ describe('User E2E Test', () => {
 
       test('비정상적인 요청 - 어드민 계정 조회', async () => {
         // given
-        const user_seq = 0; // 어드민 계정 조회 요청
+        const userSeq = 0; // 어드민 계정 조회 요청
 
         // when
         const response = await request(app.getHttpServer())
-          .get(`/users/${user_seq}/profile`);
+          .get(`/users/${userSeq}/profile`);
 
         // then
         expect(response.status).toBe(403); // 어드민 계정 조회 금지
@@ -56,11 +56,11 @@ describe('User E2E Test', () => {
 
       test('비정상적인 요청 - 잘못된 인자', async () => {
         // given
-        const user_seq = 'string'; // 문자열 들어가면 에러
+        const userSeq = 'string'; // 문자열 들어가면 에러
 
         // when
         const response = await request(app.getHttpServer())
-          .get(`/users/${user_seq}/profile`);
+          .get(`/users/${userSeq}/profile`);
 
         // then
         expect(response.status).toBe(400);
@@ -71,12 +71,12 @@ describe('User E2E Test', () => {
       test('정상적인 요청', async () => {
         // given
         // TODO: 추후에 사용자에 대한 세션 쿠키를 삽입해야 함
-        const user_cookie = 'user_cookie';
+        const userCookie = 'user_cookie';
 
         // when
         const response = await request(app.getHttpServer())
           .get('/users/me/profile')
-          .set('Cookie', `connect.sid=${user_cookie}`);
+          .set('Cookie', `connect.sid=${userCookie}`);
 
         // then
         expect(response.status).toBe(200);
@@ -90,12 +90,12 @@ describe('User E2E Test', () => {
       test('비정상적인 요청 - 잘못된 세션', async () => {
         // given
         // TODO: 추후에 사용자에 대한 세션 쿠키를 삽입해야 함
-        const user_cookie = 'user_cookie';
+        const userCookie = 'user_cookie';
 
         // when
         const response = await request(app.getHttpServer())
           .get('/users/me/profile')
-          .set('Cookie', `connect.sid=${user_cookie}`);
+          .set('Cookie', `connect.sid=${userCookie}`);
           // TODO: 세션 정보 조회
 
         // then
@@ -109,12 +109,12 @@ describe('User E2E Test', () => {
       test('정상적인 요청', async () => {
         // given
         // TODO: 추후에 사용자에 대한 세션 쿠키를 삽입해야 함
-        const user_cookie = 'user_cookie';
+        const userCookie = 'user_cookie';
 
         // when
         const response = await request(app.getHttpServer())
           .patch('/users/me/profile')
-          .set('Cookie', `connect.sid=${user_cookie}`);
+          .set('Cookie', `connect.sid=${userCookie}`);
 
         // then
         expect(response.status).toBe(200);
@@ -127,12 +127,12 @@ describe('User E2E Test', () => {
 
       test('비정상적인 요청', async () => {
         // given
-        const user_cookie = 'user_cookie'; // NOTE: 잘못된 쿠키
+        const userCookie = 'user_cookie'; // NOTE: 잘못된 쿠키
 
         // when
         const response = await request(app.getHttpServer())
           .patch('/users/me/profile')
-          .set('Cookie', `connect.sid=${user_cookie}`);
+          .set('Cookie', `connect.sid=${userCookie}`);
 
         // then
         expect(response.status).toBe(400);
@@ -145,12 +145,12 @@ describe('User E2E Test', () => {
     test('정상적인 요청', async () => {
       // given
       // TOD: 추후에 사용자에 대한 세션 쿠키를 삽입해야 함
-      const user_cookie = 'user_cookie';
+      const userCookie = 'user_cookie';
 
       // when
       const response = await request(app.getHttpServer())
         .delete('/users/me/profile')
-        .set('Cookie', `connect.sid=${user_cookie}`);
+        .set('Cookie', `connect.sid=${userCookie}`);
       // TODO: 추후에 세션 쿠키로 검증하도록 해야 함.
 
       // then
@@ -160,12 +160,12 @@ describe('User E2E Test', () => {
     test('비정상적인 요청 - 어드민 계정 삭제', async () => {
       // given
       // TOD: 추후에 사용자에 대한 세션 쿠키를 삽입해야 함
-      const user_cookie = 'user_cookie';
+      const userCookie = 'user_cookie';
 
       // when
       const response = await request(app.getHttpServer())
         .delete('/users/me/profile')
-        .set('Cookie', `connect.sid=${user_cookie}`);
+        .set('Cookie', `connect.sid=${userCookie}`);
       // TODO: 추후에 세션 쿠키로 검증하도록 해야 함.
 
       // then
@@ -175,12 +175,12 @@ describe('User E2E Test', () => {
     test('비정상적인 요청 - 세션 만료', async () => {
       // given
       // TOD: 추후에 사용자에 대한 세션 쿠키를 삽입해야 함
-      const user_cookie = 'user_cookie';
+      const userCookie = 'user_cookie';
 
       // when
       const response = await request(app.getHttpServer())
         .delete('/users/me}/profile')
-        .set('Cookie', `connect.sid=${user_cookie}`);
+        .set('Cookie', `connect.sid=${userCookie}`);
       // TODO: 추후에 세션 쿠키로 검증하도록 해야 함.
 
       // then
