@@ -1,6 +1,6 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { PostgresErrorCode } from 'src/enums/postgres-error-code.enum';
-import { UserRepository } from './user.repository';
+import { UserRepository } from './repository/user.repository';
 
 @Injectable()
 export class UserService {

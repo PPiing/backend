@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GetUserDto } from './dto/get-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserProfileRepository } from './user-profile.repository';
+import { UserProfileRepository } from './repository/user-profile.repository';
 
 @Injectable()
 export class UserProfileService {

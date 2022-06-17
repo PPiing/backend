@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
-import MockUserProfileRepository from './mock.user-profile.repository';
 import { UserProfileService } from './user-profile.service';
-import { UserProfileRepository } from './user-profile.repository';
-import { UserRepository } from './user.repository';
+import MockUserProfileRepository from './repository/mock/mock.user-profile.repository';
+import { UserProfileRepository } from './repository/user-profile.repository';
+import { UserRepository } from './repository/user.repository';
 
 const repositories = [
   {

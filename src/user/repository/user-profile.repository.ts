@@ -1,7 +1,7 @@
 import User from 'src/entities/user.entity';
 import { EntityRepository, Repository } from 'typeorm';
-import { GetUserDto } from './dto/get-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { GetUserDto } from '../dto/get-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
 
 @EntityRepository(User)
 export class UserProfileRepository extends Repository<User> {
