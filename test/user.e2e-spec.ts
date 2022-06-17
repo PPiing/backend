@@ -9,26 +9,31 @@ import { FtGuard } from 'src/auth/guards/ft.guard';
 describe('User E2E Test', () => {
   let app: INestApplication;
   let cookie: string;
-  let user = 1; // NOTE: 사용자 아이디
+  const user = 1; // NOTE: 사용자 아이디
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
     // AuthGuard (로그인 확인) Mock 생성
-    .overrideGuard(AuthGuard).useValue({ canActivate: (context: any) => {
-      if (context.switchToHttp().getRequest().session.user) {
-        return true;
-      }
-      throw new HttpException('로그인이 필요합니다.', 401);
-    } })
+      .overrideGuard(AuthGuard).useValue({
+        canActivate: (context: any) => {
+          if (context.switchToHttp().getRequest().session.user) {
+            return true;
+          }
+          throw new HttpException('로그인이 필요합니다.', 401);
+        },
+      })
     // FtGuard (42-passport) Mock 생성
-    .overrideGuard(FtGuard).useValue({ canActivate: (context: any) => {
-      // FIXME: 세션의 어느 프로퍼티에 사용자 키 값을 저장하는지 현재는 알 수 없음
-      context.switchToHttp().getRequest().session.user = user;
-      return true;
-    } })
-    .compile();
+      .overrideGuard(FtGuard)
+      .useValue({
+        canActivate: (context: any) => {
+          // FIXME: 세션의 어느 프로퍼티에 사용자 키 값을 저장하는지 현재는 알 수 없음
+          context.switchToHttp().getRequest().session.user = user;
+          return true;
+        },
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
 
@@ -204,7 +209,6 @@ describe('User E2E Test', () => {
       const response = await request(app.getHttpServer())
         .delete('/users/me/profile')
         .set('Cookie', userCookie);
-      
 
       // then
       expect(response.status).toBe(403);
