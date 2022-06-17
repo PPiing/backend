@@ -30,9 +30,11 @@ export default class MockUserProfileRepository {
     });
   }
 
-  async getUser(userSeq: number): Promise<GetUserDto> {
+  async getUser(userSeq: number): Promise<GetUserDto | undefined> {
     const user = await this.MockEntity.find((u) => u.userSeq === userSeq);
-
+    if (!user) {
+      return undefined;
+    }
     return ({
       userName: user.nickName,
       userEmail: user.email,

@@ -15,12 +15,11 @@ export class UserProfileService {
    * 사용자 정보 가져오기
    *
    * @param userSeq
-   * @return 유저 정보
+   * @return 유저 정보 or undefined
    */
-  async getUserInfo(userSeq: number): Promise<GetUserDto> {
+  async getUserInfo(userSeq: number): Promise<GetUserDto | undefined> {
     this.logger.log(`유저 정보 조회 요청: ${userSeq}`);
-    const user:GetUserDto = await this.userProfileRepository.getUser(userSeq);
-    return user;
+    return this.userProfileRepository.getUser(userSeq);
   }
 
   /**

@@ -39,4 +39,23 @@ export default class MockUserRepository {
   async save(userData: any) {
     this.MockEntity.push(userData);
   }
+
+  async createUser(oauthId: number, email: string) {
+    const user = {
+      userSeq: this.MockEntity.length + 1,
+      userId: oauthId,
+      nickName: email,
+      email,
+      sedAuthStatus: false,
+      avatarImgUri: './img/defaultProfile.jpg',
+      status: UserStatus.USST10,
+      deleteStatus: false,
+      createdAt: new Date(),
+    };
+    this.MockEntity.push(user);
+  }
+
+  async findByOAuthId(oauthId: number) {
+    return this.MockEntity.find((v) => v.userId === oauthId);
+  }
 }

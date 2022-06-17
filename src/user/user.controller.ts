@@ -26,8 +26,9 @@ export class UserController {
    */
   @ApiOperation({ summary: '유저 정보 조회', description: '유저 정보를 조회합니다.' })
   @ApiResponse({ status: 200, type: GetUserDto, description: '유저 정보 조회 성공' })
+  @ApiResponse({ status: 400, description: '유저 정보 조회 실패' })
   @ApiParam({
-    name: 'userSeq', type: Number, example: 1, description: '유저 시퀀스',
+    name: 'user_seq', type: Number, example: 1, description: '유저 시퀀스',
   })
   @Get('/:user_seq/profile')
   async getUser(@Param('user_seq') userSeq: number): Promise<GetUserDto> {
@@ -62,13 +63,13 @@ export class UserController {
   }
 
   /**
-   * 유저 정보를 변경합니다.
+   * 나의 정보를 변경합니다.
    *
    * @param userSeq 유저 시퀀스
    * @returns 수정된 유저 정보
    */
-  @ApiOperation({ summary: '유저 정보 조회', description: '유저 정보를 변경합니다.' })
-  @ApiResponse({ status: 200, type: GetUserDto, description: '유저 정보 변경 성공' })
+  @ApiOperation({ summary: '나의 정보 변경', description: '나의 정보를 변경합니다.' })
+  @ApiResponse({ status: 200, type: GetUserDto, description: '나의 정보 변경 성공' })
   @ApiParam({
     name: 'userData', type: UpdateUserDto, example: 1, description: '유저 정보',
   })

@@ -5,8 +5,11 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 
 @EntityRepository(User)
 export class UserProfileRepository extends Repository<User> {
-  async getUser(userSeq: number): Promise<GetUserDto> {
+  async getUser(userSeq: number): Promise<GetUserDto | undefined> {
     const user = await this.findOne(userSeq);
+    if (!user) {
+      return undefined;
+    }
     return ({
       userName: user.nickName,
       userEmail: user.email,
