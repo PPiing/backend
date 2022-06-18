@@ -1,21 +1,21 @@
 import {
-  IsBoolean, IsEmail, IsString, IsUrl,
+  IsBoolean, IsEmail, IsNotEmpty, IsString, IsUrl,
 } from 'class-validator';
-import UserStatus from 'src/enums/mastercode/user-status.enum';
 
 export class UpdateUserDto {
   @IsString()
+  @IsNotEmpty()
     nickName: string;
 
   @IsEmail()
+  @IsNotEmpty()
     email: string;
 
   @IsBoolean()
-    secAuthStatuc: boolean;
-
-  @IsString()
-    status: UserStatus; // mastercode -> string
+  @IsNotEmpty()
+    secAuthStatus: boolean;
 
   @IsUrl()
+  @IsNotEmpty()
     avatarImgUri: string;
 }
