@@ -59,6 +59,9 @@ export class UserService {
    */
   async findByOAuthId(userId:number): Promise<number | undefined> {
     const user = await this.userRepository.findByOAuthId(userId);
-    return user.userSeq;
+    if (user) {
+      return user.userSeq;
+    }
+    return undefined;
   }
 }
