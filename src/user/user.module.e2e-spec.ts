@@ -6,6 +6,7 @@ import { UserProfileService } from './user-profile.service';
 import MockUserProfileRepository from './repository/mock/mock.user-profile.repository';
 import { UserProfileRepository } from './repository/user-profile.repository';
 import { UserRepository } from './repository/user.repository';
+import MockUserRepository from './repository/mock/mock.user.repository';
 
 const repositories = [
   {
@@ -14,7 +15,7 @@ const repositories = [
   },
   {
     provide: getRepositoryToken(UserRepository),
-    useClass: MockUserProfileRepository,
+    useClass: MockUserRepository,
   },
 ];
 

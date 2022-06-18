@@ -40,11 +40,11 @@ export default class MockUserRepository {
     this.MockEntity.push(userData);
   }
 
-  async createUser(oauthId: number, email: string) {
+  async createUser(oauthId: number, email: string, name: string) {
     const user = {
       userSeq: this.MockEntity.length + 1,
       userId: oauthId,
-      nickName: email,
+      nickName: name,
       email,
       sedAuthStatus: false,
       avatarImgUri: './img/defaultProfile.jpg',

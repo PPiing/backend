@@ -37,17 +37,16 @@ export class UserService {
   }
 
   /**
-   * OAuth를 통해 받은 유저 ID와 이메일을 이용해 신규 계정을 만듭니다. 계정이 이미 존재한다면 아무 동작도 하지 않습니다.
-   * NOTE 추후에 확장 가능성 있음
+   * OAuth를 통해 받은 유저 ID와 이메일, 이름을 이용해 신규 계정을 만듭니다. 계정이 이미 존재한다면 아무 동작도 하지 않습니다.
    *
    * @param userId OAuth를 통해 받은 유저 ID
    * @param email 유저 이메일
    * @returns 저장 여부
    */
-  async createByUserId(userId: number, email: string): Promise<void> {
-    this.logger.debug(`UserService.createByUserId: ${userId} ${email}`);
+  async createByUserId(userId: number, email: string, name: string): Promise<void> {
+    this.logger.debug(`UserService.createByUserId: ${userId} ${email} ${name}`);
     if (!await this.userRepository.findByOAuthId(userId)) {
-      await this.userRepository.createUser(userId, email);
+      await this.userRepository.createUser(userId, email, name);
     }
   }
 
