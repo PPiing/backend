@@ -24,10 +24,13 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
 
   async validate(req, at, rt, profile, cb) {
     try {
-      const result = await this.userService.findByUserId(profile.userId)
+      const result = await this.userService.findByOAuthId(profile.userId)
       ?? await this.userService.createByUserId(profile.userId, profile.email);
+      if (result === undefined) {
+        throw new Error('User not found');
+      }
       cb(null, {
-        seq: result.userSeq,
+        seq: result,
       });
     } catch (err) {
       cb(err);

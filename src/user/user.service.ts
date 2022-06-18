@@ -52,13 +52,13 @@ export class UserService {
   }
 
   /**
-   * OAuth ID가 기존에 존재하는지 확인합니다.
+   * OAuth ID가 기존에 존재하는지 확인합니다. 존재할 경우 유저 고유 ID를 반환합니다.
    *
    * @param userId OAuth ID
    * @returns 존재 여부
    */
-  async findByOAuthId(userId:number): Promise<boolean> {
+  async findByOAuthId(userId:number): Promise<number | undefined> {
     const user = await this.userRepository.findByOAuthId(userId);
-    return !!user;
+    return user.userSeq;
   }
 }
