@@ -1,7 +1,6 @@
 import {
-  BadRequestException,
-  Body,
-  Controller, Delete, ForbiddenException, Get, Logger, Param, Patch, Session, UseGuards, UsePipes, ValidationPipe,
+  BadRequestException, Body, Controller, Delete, ForbiddenException,
+  Get, Logger, Param, Patch, Session, UsePipes, ValidationPipe,
 } from '@nestjs/common';
 import {
   ApiOperation, ApiParam, ApiResponse, ApiTags,
@@ -82,9 +81,8 @@ export class UserController {
   @Patch('/profile')
   async updateUser(
     @Session() session: Record<string, any>,
-    @Body() userData: UpdateUserDto,
+      @Body() userData: UpdateUserDto,
   ): Promise<UpdateUserDto> {
-    console.log(userData);
     const userSeq = session?.passport?.user?.seq;
     this.logger.log(`나의 정보 수정 요청: ${userSeq}`);
 
@@ -106,7 +104,7 @@ export class UserController {
   @ApiResponse({ status: 200, type: GetUserDto, description: '나의 정보 삭제 성공' })
   @Delete('/profile')
   async deleteUser(
-    @Session() session: Record<string, any>,
+  @Session() session: Record<string, any>,
   ) {
     const userSeq = session?.passport?.user?.seq;
     this.logger.log(`유저 정보 삭제 요청: ${userSeq}`);

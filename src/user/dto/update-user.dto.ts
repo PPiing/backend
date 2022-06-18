@@ -12,26 +12,26 @@ export class UpdateUserDto {
   @IsNotEmpty()
     nickName: string;
 
-    @ApiProperty({
-      description: '유저 이메일',
-      example: 'skim@student.42seoul.kr',
-    })
+  @ApiProperty({
+    description: '유저 이메일',
+    example: 'skim@student.42seoul.kr',
+  })
   @IsEmail()
   @IsNotEmpty()
     email: string;
 
-    @ApiProperty({
-      description: '2차 인증 여부',
-      example: false,
-    })
+  @ApiProperty({
+    description: '2차 인증 여부',
+    example: false,
+  })
   @IsBoolean()
   @IsNotEmpty()
     secAuthStatus: boolean;
 
-    @ApiProperty({
-      description: '유저 프로필 사진',
-      example: './img/defaultProfile.jpg',
-    })
+  @ApiProperty({
+    description: '유저 프로필 사진',
+    example: './img/defaultProfile.jpg',
+  })
   @IsString()
   @IsNotEmpty()
     avatarImgUri: string;

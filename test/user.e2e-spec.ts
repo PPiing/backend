@@ -28,10 +28,10 @@ describe('User E2E Test', () => {
       .overrideGuard(FtGuard)
       .useValue({
         canActivate: (context: any) => {
-          let o = {
+          const o = {
             user: {
               seq: user,
-            }
+            },
           };
           context.switchToHttp().getRequest().session.passport = o;
           return true;
@@ -172,7 +172,6 @@ describe('User E2E Test', () => {
           .set('Cookie', userCookie);
 
         // then
-        console.log(response.body);
         expect(response.status).toBe(200);
         expect(response.body).toBeDefined();
         expect(response.body.nickName).toEqual(newUserData.nickName);

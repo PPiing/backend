@@ -55,9 +55,10 @@ describe('UserService 테스트', () => {
       // given
       const authId = 123;
       const email = 'test@gmail.com';
+      const name = 'puju';
 
       // when
-      await userService.createByUserId(authId, email);
+      await userService.createByUserId(authId, email, name);
     });
   });
 
