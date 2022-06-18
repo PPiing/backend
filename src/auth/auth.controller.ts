@@ -18,16 +18,6 @@ export class AuthController {
   @UseGuards(FtGuard)
   @Redirect('../../../', 302)
   callback(@Req() req: any) {
-    // sign up user
-    const [userId, email] = [req.user.userId, req.user.email];
-    const result = this.userService.findByUserId(userId);
-
-    if (result) {
-      return result;
-    }
-    const newResult = this.userService.createByUserId(userId, email);
-    Logger.debug(newResult);
-    return newResult;
   }
 
   @Get('logout')

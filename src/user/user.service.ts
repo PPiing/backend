@@ -1,4 +1,5 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
+import User from 'src/entities/user.entity';
 import { PostgresErrorCode } from 'src/enums/postgres-error-code.enum';
 import { UserRepository } from './user.repository';
 
@@ -8,7 +9,14 @@ export class UserService {
 
   constructor(private readonly userRepository: UserRepository) {}
 
-  async findByUserId(userId: number) {
+  async findByUserSeq(userSeq: number): Promise<User | undefined> {
+    this.logger.debug(`UserService.findByUserSeq: ${userSeq}`);
+
+    const user = await this.userRepository.findOne(userSeq);
+    return user;
+  }
+
+  async findByUserId(userId: number) : Promise<User | undefined> {
     this.logger.debug(`UserService.findByUserId: ${userId}`);
 
     const user = await this.userRepository.findOne({ userId });
