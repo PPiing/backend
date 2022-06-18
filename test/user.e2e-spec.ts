@@ -221,7 +221,7 @@ describe('User E2E Test', () => {
 
       // when
       const response = await request(app.getHttpServer())
-        .delete('/users/me}/profile')
+        .delete('/users/me/profile')
         .set('Cookie', userCookie);
 
       // then
