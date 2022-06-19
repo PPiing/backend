@@ -8,14 +8,12 @@ import { FtGuard } from './guards/ft.guard';
 export class AuthController {
   @Get('42')
   @UseGuards(FtGuard)
-  login() {
-  }
+  login() { }
 
   @Get('42/callback')
   @UseGuards(FtGuard)
   @Redirect('../../../', 302)
-  callback(@Req() req: any) {
-  }
+  callback() { }
 
   @Get('logout')
   @UseGuards(AuthGuard)

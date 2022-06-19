@@ -7,11 +7,11 @@ export class UserRepository extends Repository<User> {
     return this.findOne({ userId: oauthId });
   }
 
-  async createUser(oauthId: number, email: string): Promise<User> {
+  async createUser(oauthId: number, email: string, name: string): Promise<User> {
     const user = new User();
     user.userId = oauthId;
     user.email = email;
-    user.nickName = email;
+    user.nickName = name;
     return this.save(user);
   }
 }

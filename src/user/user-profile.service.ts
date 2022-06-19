@@ -41,9 +41,9 @@ export class UserProfileService {
    * @param userData 수정된 유저 정보
    * @return 수정된 유저 정보
    */
-  async updateUser(userSeq: number, userData: UpdateUserDto): Promise<GetUserDto> {
+  async updateUser(userSeq: number, userData: UpdateUserDto): Promise<UpdateUserDto> {
     this.logger.log(`유저 정보 수정 요청: ${userSeq}`);
-    const user:GetUserDto = await this.userProfileRepository.updateUser(userSeq, userData);
+    const user:UpdateUserDto = await this.userProfileRepository.updateUser(userSeq, userData);
     return user;
   }
 

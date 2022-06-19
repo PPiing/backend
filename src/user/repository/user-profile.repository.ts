@@ -26,7 +26,7 @@ export class UserProfileRepository extends Repository<User> {
     return true;
   }
 
-  async updateUser(userSeq: number, userData: UpdateUserDto): Promise<GetUserDto> {
+  async updateUser(userSeq: number, userData: UpdateUserDto): Promise<UpdateUserDto> {
     const user = await this.findOne(userSeq);
     user.nickName = userData.nickName;
     user.email = userData.email;
@@ -34,10 +34,10 @@ export class UserProfileRepository extends Repository<User> {
     user.avatarImgUri = userData.avatarImgUri;
     await this.save(user);
     return ({
-      userName: user.nickName,
-      userEmail: user.email,
-      userStatus: user.status,
-      userImage: user.avatarImgUri,
+      nickName: user.nickName,
+      email: user.email,
+      secAuthStatus: user.secAuthStatuc,
+      avatarImgUri: user.avatarImgUri,
     });
   }
 
