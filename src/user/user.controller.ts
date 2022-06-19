@@ -1,11 +1,12 @@
 import {
   BadRequestException, Body, Controller, Delete, ForbiddenException,
-  Get, Logger, Param, Patch, UsePipes, ValidationPipe,
+  Get, Logger, Param, Patch, UseGuards, UsePipes, ValidationPipe,
 } from '@nestjs/common';
 import {
   ApiOperation, ApiParam, ApiResponse, ApiTags,
 } from '@nestjs/swagger';
 import { User } from 'src/auth/user.decorator';
+import { CheckLogin } from 'src/guards/check-login.guard';
 import { GetUserDto } from './dto/get-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDto } from './dto/user.dto';
@@ -54,9 +55,10 @@ export class UserController {
    */
   @ApiOperation({ summary: '나의 정보 조회', description: '나의 정보를 조회합니다.' })
   @ApiResponse({ status: 200, type: GetUserDto, description: '나의 정보 조회 성공' })
+  @UseGuards(CheckLogin)
   @Get('/profile')
   async getMe(
-    @User() user: UserDto,
+    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<GetUserDto> {
     this.logger.log(`나의 정보 조회 요청: ${user.userSeq}`);
 
@@ -78,9 +80,10 @@ export class UserController {
   @ApiParam({
     name: 'userData', type: UpdateUserDto, example: 1, description: '유저 정보',
   })
+  @UseGuards(CheckLogin)
   @Patch('/profile')
   async updateUser(
-    @User() user: UserDto,
+    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
       @Body() userData: UpdateUserDto,
   ): Promise<UpdateUserDto> {
     const { userSeq } = user;
@@ -101,9 +104,10 @@ export class UserController {
    */
   @ApiOperation({ summary: '나의 정보 삭제', description: '나의 정보를 삭제합니다.' })
   @ApiResponse({ status: 200, type: GetUserDto, description: '나의 정보 삭제 성공' })
+  @UseGuards(CheckLogin)
   @Delete('/profile')
   async deleteUser(
-  @User() user: UserDto,
+  @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ) {
     const { userSeq } = user;
     this.logger.log(`유저 정보 삭제 요청: ${userSeq}`);
