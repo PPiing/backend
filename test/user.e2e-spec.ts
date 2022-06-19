@@ -3,8 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import AppModule from 'src/app.module.e2e-spec';
 import * as session from 'express-session';
 import * as request from 'supertest';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { FtGuard } from 'src/auth/guards/ft.guard';
+import { FtGuard } from 'src/guards/ft.guard';
+import { CheckLogin } from 'src/guards/check-login.guard';
 
 describe('User E2E Test', () => {
   let app: INestApplication;
@@ -15,8 +15,8 @@ describe('User E2E Test', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-    // AuthGuard (로그인 확인) Mock 생성
-      .overrideGuard(AuthGuard).useValue({
+    // CheckLogin (로그인 확인) Mock 생성
+      .overrideGuard(CheckLogin).useValue({
         canActivate: (context: any) => {
           if (context.switchToHttp().getRequest().session.passport.user.seq) {
             return true;
