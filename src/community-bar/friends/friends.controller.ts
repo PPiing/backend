@@ -12,8 +12,8 @@ import { UserService } from 'src/user/user.service';
 import { GetFriendsDto } from './dto/get-friends.dto';
 import { FriendsService } from './friends.service';
 
-@ApiTags('유저')
-@Controller('friends')
+@ApiTags('친구')
+@Controller('/community/friends')
 @UsePipes(new ValidationPipe({ transform: true }))
 export class FriendsController {
   private readonly logger = new Logger(FriendsController.name);
