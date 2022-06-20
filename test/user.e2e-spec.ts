@@ -121,6 +121,22 @@ describe('User E2E Test', () => {
         expect(response.status).toBe(401); // 401 Unauthorized
       });
     });
+
+    describe('/users/search/:nickname', () => {
+      test('유저 닉네임 검색', async () => {
+        // given
+        const nickname = 'kim';
+
+        // when
+        const response = await request(app.getHttpServer())
+          .get(`/users/search/${nickname}`);
+
+        // then (skim, kkim)
+        expect(response.status).toBe(200);
+        expect(response.body).toBeDefined();
+        expect(response.body.length).toBe(2);
+      });
+    });
   });
 
   describe('유저 정보 변경', () => {

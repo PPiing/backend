@@ -46,4 +46,18 @@ export class UserProfileRepository extends Repository<User> {
     user.deleteStatus = true;
     await this.save(user);
   }
+
+  async searchUsersByNickname(nickname: string): Promise<GetUserDto[]> {
+    const users = await this.find({
+      where: {
+        nickName: `%${nickname}%`,
+      },
+    });
+    return users.map((user) => ({
+      userName: user.nickName,
+      userEmail: user.email,
+      userStatus: user.status,
+      userImage: user.avatarImgUri,
+    }));
+  }
 }
