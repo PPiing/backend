@@ -1,5 +1,5 @@
 import User from 'src/entities/user.entity';
-import { EntityRepository, Repository } from 'typeorm';
+import { EntityRepository, Repository, Like } from 'typeorm';
 import { GetUserDto } from '../dto/get-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
@@ -48,9 +48,12 @@ export class UserProfileRepository extends Repository<User> {
   }
 
   async searchUsersByNickname(nickname: string): Promise<GetUserDto[]> {
+    if (nickname === '') {
+      return [];
+    }
     const users = await this.find({
       where: {
-        nickName: `%${nickname}%`,
+        nickName: Like(`%${nickname}%`),
       },
     });
     return users.map((user) => ({
