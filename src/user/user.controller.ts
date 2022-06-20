@@ -1,12 +1,15 @@
 import {
   BadRequestException, Body, Controller, Delete, ForbiddenException,
-  Get, Logger, Param, Patch, Session, UsePipes, ValidationPipe,
+  Get, Logger, Param, Patch, UseGuards, UsePipes, ValidationPipe,
 } from '@nestjs/common';
 import {
   ApiOperation, ApiParam, ApiResponse, ApiTags,
 } from '@nestjs/swagger';
+import { User } from 'src/auth/user.decorator';
+import { CheckLogin } from 'src/guards/check-login.guard';
 import { GetUserDto } from './dto/get-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserDto } from './dto/user.dto';
 import { UserProfileService } from './user-profile.service';
 
 @ApiTags('유저')
@@ -52,19 +55,18 @@ export class UserController {
    */
   @ApiOperation({ summary: '나의 정보 조회', description: '나의 정보를 조회합니다.' })
   @ApiResponse({ status: 200, type: GetUserDto, description: '나의 정보 조회 성공' })
+  @UseGuards(CheckLogin)
   @Get('/profile')
   async getMe(
-    @Session() session: Record<string, any>,
+    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<GetUserDto> {
-    const userSeq = session?.passport?.user?.seq;
-    this.logger.log(`나의 정보 조회 요청: ${userSeq}`);
+    this.logger.log(`나의 정보 조회 요청: ${user.userSeq}`);
 
-    const check = await this.userProfileService.checkUser(userSeq);
+    const check = await this.userProfileService.checkUser(user.userSeq);
     if (!check) {
       throw new BadRequestException('유저 정보가 존재하지 않습니다.');
     }
-    const user = await this.userProfileService.getUserInfo(userSeq);
-    return user;
+    return this.userProfileService.getUserInfo(user.userSeq);
   }
 
   /**
@@ -78,12 +80,13 @@ export class UserController {
   @ApiParam({
     name: 'userData', type: UpdateUserDto, example: 1, description: '유저 정보',
   })
+  @UseGuards(CheckLogin)
   @Patch('/profile')
   async updateUser(
-    @Session() session: Record<string, any>,
+    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
       @Body() userData: UpdateUserDto,
   ): Promise<UpdateUserDto> {
-    const userSeq = session?.passport?.user?.seq;
+    const { userSeq } = user;
     this.logger.log(`나의 정보 수정 요청: ${userSeq}`);
 
     const check = await this.userProfileService.checkUser(userSeq);
@@ -91,8 +94,7 @@ export class UserController {
       throw new BadRequestException('유저 정보가 존재하지 않습니다.');
     }
 
-    const user = await this.userProfileService.updateUser(userSeq, userData);
-    return user;
+    return this.userProfileService.updateUser(userSeq, userData);
   }
 
   /**
@@ -102,11 +104,12 @@ export class UserController {
    */
   @ApiOperation({ summary: '나의 정보 삭제', description: '나의 정보를 삭제합니다.' })
   @ApiResponse({ status: 200, type: GetUserDto, description: '나의 정보 삭제 성공' })
+  @UseGuards(CheckLogin)
   @Delete('/profile')
   async deleteUser(
-  @Session() session: Record<string, any>,
+  @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ) {
-    const userSeq = session?.passport?.user?.seq;
+    const { userSeq } = user;
     this.logger.log(`유저 정보 삭제 요청: ${userSeq}`);
 
     const check = await this.userProfileService.checkUser(userSeq);

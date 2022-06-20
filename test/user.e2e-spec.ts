@@ -1,43 +1,18 @@
-import { HttpException, INestApplication } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import AppModule from 'src/app.module.e2e-spec';
 import * as session from 'express-session';
+import * as passport from 'passport';
 import * as request from 'supertest';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { FtGuard } from 'src/auth/guards/ft.guard';
 
 describe('User E2E Test', () => {
   let app: INestApplication;
   let cookie: string;
-  const user = 1; // NOTE: 사용자 아이디
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    })
-    // AuthGuard (로그인 확인) Mock 생성
-      .overrideGuard(AuthGuard).useValue({
-        canActivate: (context: any) => {
-          if (context.switchToHttp().getRequest().session.passport.user.seq) {
-            return true;
-          }
-          throw new HttpException('로그인이 필요합니다.', 401);
-        },
-      })
-    // FtGuard (42-passport) Mock 생성
-      .overrideGuard(FtGuard)
-      .useValue({
-        canActivate: (context: any) => {
-          const o = {
-            user: {
-              seq: user,
-            },
-          };
-          context.switchToHttp().getRequest().session.passport = o;
-          return true;
-        },
-      })
-      .compile();
+    }).compile();
 
     app = moduleFixture.createNestApplication();
 
@@ -49,23 +24,19 @@ describe('User E2E Test', () => {
       }),
     );
 
+    app.use(passport.initialize());
+    app.use(passport.session());
+
     await app.init();
 
     // 세션을 설정하고 쿠키를 받기 위한 로그인 요청
     const response = await request(app.getHttpServer())
-      .get('/auth/42');
+      .get('/auth/login');
     cookie = response.headers['set-cookie'];
   });
 
   afterEach(async () => {
     await app.close();
-  });
-
-  test('(임시 테스트) 쿠키-세션 유효성 확인', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/auth/data')
-      .set('Cookie', cookie);
-    expect(response.statusCode).toBe(200);
   });
 
   describe('유저 조회', () => {
@@ -147,7 +118,7 @@ describe('User E2E Test', () => {
           // TODO: 세션 정보 조회
 
         // then
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(401); // 401 Unauthorized
       });
     });
   });
@@ -190,7 +161,7 @@ describe('User E2E Test', () => {
           .set('Cookie', userCookie);
 
         // then
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(401); // 401 Unauthorized
       });
     });
   });
@@ -222,7 +193,7 @@ describe('User E2E Test', () => {
         .set('Cookie', userCookie);
 
       // then
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(401); // 401 Unauthorized
     });
   });
 });
