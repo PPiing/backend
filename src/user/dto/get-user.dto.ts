@@ -12,7 +12,7 @@ export class GetUserDto {
     userName: string;
 
   @ApiProperty({
-    description: '유저 닉네임',
+    description: '유저 이메일',
     example: 'skim@student.42seoul.kr',
   })
   @IsString()
@@ -20,7 +20,7 @@ export class GetUserDto {
     userEmail: string;
 
   @ApiProperty({
-    description: '유저 닉네임',
+    description: '유저 상태',
     enum: ['USST10', 'USST20', 'USST30', 'USST40'],
     example: 'skim',
   })
@@ -28,7 +28,7 @@ export class GetUserDto {
     userStatus: UserStatus;
 
   @ApiProperty({
-    description: '유저 닉네임',
+    description: '유저 프로필 사진',
     example: './img/defaultProfile.jpg',
   })
   @IsString()

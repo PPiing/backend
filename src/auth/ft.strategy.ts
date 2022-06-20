@@ -13,27 +13,25 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
     super({
       clientID: configService.get('auth.clientid'),
       clientSecret: configService.get('auth.clientsecret'),
-      callbackURL: '/auth/42/callback',
+      callbackURL: '/api/auth/login/callback',
       passReqToCallback: true,
       profileFields: {
         userId: 'id',
         email: 'email',
+        login: 'login',
       },
     });
   }
 
   async validate(req, at, rt, profile, cb) {
-    try {
-      const result = await this.userService.findByOAuthId(profile.userId)
-      ?? await this.userService.createByUserId(profile.userId, profile.email);
-      if (result === undefined) {
-        throw new Error('User not found');
-      }
-      cb(null, {
-        seq: result,
-      });
-    } catch (err) {
-      cb(err);
-    }
+    await this.userService.createByUserId(
+      profile.userId,
+      profile.email,
+      profile.login,
+    );
+    const result = await this.userService.findByOAuthId(profile.userId);
+    cb(null, {
+      seq: result,
+    });
   }
 }

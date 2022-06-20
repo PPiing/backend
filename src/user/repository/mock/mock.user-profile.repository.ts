@@ -11,7 +11,7 @@ export default class MockUserProfileRepository {
       userId: 10,
       nickName: 'skim',
       email: 'skim@student.42seoul.kr',
-      sedAuthStatus: false,
+      secAuthStatus: false,
       avatarImgUri: './img/defaultProfile.jpg',
       status: UserStatus.USST10,
       deleteStatus: false,
@@ -22,7 +22,7 @@ export default class MockUserProfileRepository {
       userId: 20,
       nickName: 'kkim',
       email: 'kkim@student.42seoul.kr',
-      sedAuthStatus: false,
+      secAuthStatus: false,
       avatarImgUri: './img/defaultProfile.jpg',
       status: UserStatus.USST10,
       deleteStatus: false,
@@ -52,7 +52,7 @@ export default class MockUserProfileRepository {
     return true;
   }
 
-  async updateUser(userSeq: number, userData: UpdateUserDto): Promise<GetUserDto> {
+  async updateUser(userSeq: number, userData: UpdateUserDto): Promise<UpdateUserDto> {
     const userIdx = await this.MockEntity.findIndex((u) => u.userSeq === userSeq);
     this.MockEntity[userIdx].nickName = userData.nickName;
     this.MockEntity[userIdx].email = userData.email;
@@ -60,10 +60,10 @@ export default class MockUserProfileRepository {
     this.MockEntity[userIdx].avatarImgUri = userData.avatarImgUri;
 
     return ({
-      userName: this.MockEntity[userIdx].nickName,
-      userEmail: this.MockEntity[userIdx].email,
-      userStatus: this.MockEntity[userIdx].status,
-      userImage: this.MockEntity[userIdx].avatarImgUri,
+      nickName: this.MockEntity[userIdx].nickName,
+      email: this.MockEntity[userIdx].email,
+      secAuthStatus: this.MockEntity[userIdx].secAuthStatus,
+      avatarImgUri: this.MockEntity[userIdx].avatarImgUri,
     });
   }
 

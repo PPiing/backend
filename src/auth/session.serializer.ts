@@ -17,7 +17,7 @@ export class SessionSerializer extends PassportSerializer {
       const userInfo = await this.userService.findByUserId(payload.seq);
       done(null, userInfo);
     } catch (err) {
-      done(err, payload);
+      done(err);
     }
   }
 }

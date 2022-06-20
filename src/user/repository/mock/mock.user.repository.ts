@@ -9,7 +9,7 @@ export default class MockUserRepository {
       userId: 10,
       nickName: 'skim',
       email: 'skim@student.42seoul.kr',
-      sedAuthStatus: false,
+      secAuthStatus: false,
       avatarImgUri: './img/defaultProfile.jpg',
       status: UserStatus.USST10,
       deleteStatus: false,
@@ -20,7 +20,7 @@ export default class MockUserRepository {
       userId: 20,
       nickName: 'kkim',
       email: 'kkim@student.42seoul.kr',
-      sedAuthStatus: false,
+      secAuthStatus: false,
       avatarImgUri: './img/defaultProfile.jpg',
       status: UserStatus.USST10,
       deleteStatus: false,
@@ -40,13 +40,13 @@ export default class MockUserRepository {
     this.MockEntity.push(userData);
   }
 
-  async createUser(oauthId: number, email: string) {
+  async createUser(oauthId: number, email: string, name: string) {
     const user = {
       userSeq: this.MockEntity.length + 1,
       userId: oauthId,
-      nickName: email,
+      nickName: name,
       email,
-      sedAuthStatus: false,
+      secAuthStatus: false,
       avatarImgUri: './img/defaultProfile.jpg',
       status: UserStatus.USST10,
       deleteStatus: false,
