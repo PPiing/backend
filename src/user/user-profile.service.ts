@@ -56,4 +56,15 @@ export class UserProfileService {
     this.logger.log(`유저 정보 삭제 요청: ${userSeq}`);
     await this.userProfileRepository.deleteUser(userSeq);
   }
+
+  /**
+   * 사용자 닉네임으로 사용자 검색
+   *
+   * @param nickname 닉네임
+   * @return 사용자 정보
+   */
+  async getUserByNickname(nickname: string): Promise<Array<GetUserDto>> {
+    this.logger.log(`유저 닉네임 조회 요청: ${nickname}`);
+    return this.userProfileRepository.searchUsersByNickname(nickname);
+  }
 }

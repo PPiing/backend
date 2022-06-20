@@ -119,4 +119,19 @@ export class UserController {
 
     await this.userProfileService.deleteUser(userSeq);
   }
+
+  /**
+   * 유저를 닉네임으로 검색합니다.
+   *
+   * @param nickname 닉네임
+   */
+  @ApiOperation({ summary: '닉네임 검색', description: '닉네임으로 유저를 검색합니다.' })
+  @ApiResponse({ status: 200, type: Array<GetUserDto>, description: '닉네임 검색 성공' })
+  @Get('/search/:nickname')
+  async searchUser(
+    @Param('nickname') nickname: string,
+  ): Promise<Array<GetUserDto>> {
+    this.logger.log(`닉네임 검색 요청: ${nickname}`);
+    return this.userProfileService.getUserByNickname(nickname);
+  }
 }
