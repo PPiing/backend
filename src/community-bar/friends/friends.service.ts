@@ -1,8 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GetFriendsDto } from './dto/get-friends.dto';
-import { UserRepository } from 'src/user/repository/user.repository';
 import { FriendsRepository } from './repository/friends.repository';
-import MockUserRepository from 'src/user/repository/mock/mock.user.repository';
 
 @Injectable()
 export class FriendsService {
@@ -10,7 +7,6 @@ export class FriendsService {
 
   constructor(
     private readonly friendsRepository: FriendsRepository,
-    private readonly userRepository: MockUserRepository,
   ) {}
 
   /**
@@ -19,11 +15,10 @@ export class FriendsService {
    * @param userSeq
    * @return 친구 목록
    */
-  async getFriends(userSeq: number): Promise<GetFriendsDto[]> {
+  async getFriends(userSeq: number): Promise<number[]> {
     this.logger.log(`친구 목록 조회 요청: ${userSeq}`);
     const friends:number[] = await this.friendsRepository.getFriends(userSeq);
-    const friendsInfo: GetFriendsDto[] = await this.userRepository.getFriendsInfo(friends);
-    return friendsInfo;
+    return friends;
   }
 
   /**

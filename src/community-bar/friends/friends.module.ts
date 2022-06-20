@@ -1,21 +1,20 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModule } from 'src/user/user.module';
 import { FriendsService } from './friends.service';
 import { FriendsController } from './friends.controller';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import FriendsRepository from 'src/status/friends.repository';
-import MockChatRepository from 'src/chatrooms/repository/mock/mock.chat.repository';
+import { FriendsRepository } from './repository/friends.repository';
 
-const repositories = [
-  {
-    provide: getRepositoryToken(FriendsRepository),
-    useClass: MockChatRepository,
-  }
-]
 @Module({
+  imports: [
+    UserModule,
+    TypeOrmModule.forFeature([
+      FriendsRepository,
+    ]),
+  ],
   controllers: [FriendsController],
   providers: [
     FriendsService,
-    ...repositories,
   ],
 })
 export class FriendsModule {}

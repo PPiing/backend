@@ -8,6 +8,7 @@ import { CheckLogin } from 'src/guards/check-login.guard';
 import { UserDto } from 'src/user/dto/user.dto';
 import { User } from 'src/auth/user.decorator';
 import { UserProfileService } from 'src/user/user-profile.service';
+import { UserService } from 'src/user/user.service';
 import { GetFriendsDto } from './dto/get-friends.dto';
 import { FriendsService } from './friends.service';
 
@@ -20,6 +21,7 @@ export class FriendsController {
   constructor(
     private readonly friendsService: FriendsService,
     private readonly userProfileService: UserProfileService,
+    private readonly userService: UserService,
   ) {}
 
   /**
@@ -42,7 +44,10 @@ export class FriendsController {
       throw new Error('유저 정보가 존재하지 않습니다.');
     }
 
-    return this.friendsService.getFriends(user.userSeq);
+    const friendSeq: number[] = await this.friendsService.getFriends(user.userSeq);
+    const friends: GetFriendsDto[] = await this.userService.getFriendsInfo(friendSeq);
+
+    return friends;
   }
 
   /**

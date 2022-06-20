@@ -2,9 +2,9 @@ import { HttpException, INestApplication } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Test, TestingModule } from '@nestjs/testing';
 import AppModule from 'src/app.module.e2e-spec';
-import { FtGuard } from 'src/auth/guards/ft.guard';
 import * as session from 'express-session';
 import * as request from 'supertest';
+import { FtGuard } from 'src/guards/ft.guard';
 
 describe('Friends E2E Test', () => {
   let app: INestApplication;

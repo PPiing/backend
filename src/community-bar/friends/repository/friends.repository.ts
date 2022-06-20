@@ -19,7 +19,7 @@ export class FriendsRepository extends Repository<Friends> {
     const friends = await this.find({
       where: {
         followerSeq: userSeq,
-        status,
+        status: RelationStatus.FRST10,
       },
     });
     return friends.map((friend) => friend.followeeSeq);

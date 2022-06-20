@@ -1,3 +1,4 @@
+import { GetFriendsDto } from 'src/community-bar/friends/dto/get-friends.dto';
 import User from 'src/entities/user.entity';
 import { EntityRepository, Repository } from 'typeorm';
 
@@ -15,5 +16,17 @@ export class UserRepository extends Repository<User> {
     return this.save(user);
   }
 
-  
+  async getFriendsInfo(userList: number[]): Promise<GetFriendsDto[]> {
+    const friendsInfo: GetFriendsDto[] = [];
+    userList.map(async (user) => {
+      const findUser = await this.findOne({ userSeq: user });
+      friendsInfo.push({
+        userSeq: findUser.userSeq,
+        userName: findUser.nickName,
+        avatarImgUri: findUser.avatarImgUri,
+        status: findUser.status,
+      });
+    });
+    return friendsInfo;
+  }
 }
