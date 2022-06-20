@@ -1,3 +1,4 @@
+import { GetFriendsDto } from 'src/community-bar/friends/dto/get-friends.dto';
 import UserStatus from 'src/enums/mastercode/user-status.enum';
 
 export default class MockUserRepository {
@@ -57,5 +58,19 @@ export default class MockUserRepository {
 
   async findByOAuthId(oauthId: number) {
     return this.MockEntity.find((v) => v.userId === oauthId);
+  }
+
+  async getFriendsInfo(userList: number[]): Promise<GetFriendsDto[]> {
+    const friendsInfo: GetFriendsDto[] = [];
+    userList.map(async (user) => {
+      const findUser = await this.MockEntity.find((entity) => entity.userSeq === user);
+      friendsInfo.push({
+        userSeq: findUser.userSeq,
+        userName: findUser.nickName,
+        avatarImgUri: findUser.avatarImgUri,
+        status: findUser.status,
+      });
+    });
+    return friendsInfo;
   }
 }

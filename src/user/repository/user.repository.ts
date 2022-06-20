@@ -14,4 +14,6 @@ export class UserRepository extends Repository<User> {
     user.nickName = name;
     return this.save(user);
   }
+
+  
 }
