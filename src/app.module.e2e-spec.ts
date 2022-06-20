@@ -6,6 +6,7 @@ import AppService from './app.service';
 import { AuthModule } from './auth/auth.module.e2e-spec';
 import { ChatroomsModule } from './chatrooms/chatrooms.module.e2e-spec';
 import { CommunityBarModule } from './community-bar/community-bar.module.e2e-spec';
+import { FriendsModule } from './community-bar/friends/friends.module.e2e-spec';
 import configuration from './configs/configuration';
 import { UserModule } from './user/user.module.e2e-spec';
 
@@ -20,6 +21,7 @@ import { UserModule } from './user/user.module.e2e-spec';
     ChatroomsModule,
     UserModule,
     AuthModule,
+    FriendsModule
   ],
   controllers: [AppController],
   providers: [AppService],
