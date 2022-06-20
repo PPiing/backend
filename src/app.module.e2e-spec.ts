@@ -21,7 +21,7 @@ import { UserModule } from './user/user.module.e2e-spec';
     ChatroomsModule,
     UserModule,
     AuthModule,
-    FriendsModule
+    FriendsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
