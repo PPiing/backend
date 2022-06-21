@@ -85,7 +85,7 @@ export class FriendsController {
    * 친구 요청  - 수락
    *
    * @param alarm_seq 알람 시퀀스
-   * @param target 수학된 대상 유저
+   * @param target 수락된 대상 유저
    */
   @ApiOperation({ summary: '친구 요청 - 수락', description: '친구 요청을 수락합니다.' })
   @ApiResponse({ status: 200, description: '친구 요청 수락 성공' })
