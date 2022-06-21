@@ -10,6 +10,7 @@ import TypeOrmConfigService from './configs/typeorm.config';
 import { AuthModule } from './auth/auth.module';
 import { GameModule } from './game-log/game.module';
 import { ChatroomsModule } from './chatrooms/chatrooms.module';
+import { CommunityBarModule } from './community-bar/community-bar.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ChatroomsModule } from './chatrooms/chatrooms.module';
     GameModule,
     AuthModule,
     ChatroomsModule,
+    CommunityBarModule,
   ],
   controllers: [AppController],
   providers: [AppService],

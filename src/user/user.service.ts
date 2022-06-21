@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { GetFriendsDto } from 'src/community-bar/friends/dto/get-friends.dto';
 import { UserDto } from './dto/user.dto';
 import { UserRepository } from './repository/user.repository';
 
@@ -62,5 +63,17 @@ export class UserService {
       return user.userSeq;
     }
     return undefined;
+  }
+
+  /**
+   * 유저 ID를 arrary로 주어졌을 때 유저 정보 리스트를 가져옵니다.
+   *
+   * @param userIds 유저 ID 배열
+   * @returns 유저 정보 리스트
+   */
+  async getFriendsInfo(userIds: number[]): Promise<GetFriendsDto[]> {
+    this.logger.debug(`UserService.getFriendsInfo: ${userIds}`);
+    const users = await this.userRepository.getFriendsInfo(userIds);
+    return users;
   }
 }
