@@ -5,7 +5,8 @@ import { Observable } from 'rxjs';
 @Injectable()
 export class SocketGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    if (context.switchToWs().getClient().isAuthenticated()) {
+    const isLogin = context.switchToWs().getClient().request.isAuthenticated();
+    if (isLogin) {
       return true;
     }
     throw new WsException('로그인이 필요합니다.');
