@@ -66,7 +66,7 @@ export default class MockUserRepository {
       const findUser = await this.MockEntity.find((entity) => entity.userSeq === user);
       friendsInfo.push({
         userSeq: findUser.userSeq,
-        userName: findUser.nickName,
+        nickname: findUser.nickName,
         avatarImgUri: findUser.avatarImgUri,
         status: findUser.status,
       });

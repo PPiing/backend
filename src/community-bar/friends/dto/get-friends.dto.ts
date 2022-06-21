@@ -17,7 +17,7 @@ export class GetFriendsDto {
   })
   @IsString()
   @IsNotEmpty()
-    userName: string;
+    nickname: string;
 
   @ApiProperty({
     description: '유저 프로필 사진',

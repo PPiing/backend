@@ -22,7 +22,7 @@ export class UserRepository extends Repository<User> {
       const findUser = await this.findOne({ userSeq: user });
       friendsInfo.push({
         userSeq: findUser.userSeq,
-        userName: findUser.nickName,
+        nickname: findUser.nickName,
         avatarImgUri: findUser.avatarImgUri,
         status: findUser.status,
       });

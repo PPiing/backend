@@ -31,6 +31,8 @@ export class FriendsRepository extends Repository<Friends> {
     friend.followeeSeq = target;
     friend.isBlocked = false;
     friend.status = RelationStatus.FRST40;
+
+    await this.save(friend);
   }
 
   async acceptFriend(userSeq: number, target: number) {
