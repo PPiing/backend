@@ -41,6 +41,11 @@ export class FriendsRepository extends Repository<Friends> {
       throw new Error('친구 요청이 없습니다.');
     }
     friend.status = RelationStatus.FRST10;
+    const newFriend = new Friends();
+    newFriend.followerSeq = target;
+    newFriend.followeeSeq = userSeq;
+    newFriend.isBlocked = false;
+    newFriend.status = RelationStatus.FRST10;
   }
 
   async rejectFriend(userSeq: number, target: number) {

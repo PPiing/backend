@@ -1,4 +1,5 @@
 import RelationStatus from 'src/enums/mastercode/relation-status.enum';
+import { threadId } from 'worker_threads';
 import { GetFriendsDto } from '../../dto/get-friends.dto';
 
 export default class MockFriendsRepository {
@@ -55,6 +56,13 @@ export default class MockFriendsRepository {
       throw new Error('친구 요청이 없습니다.');
     }
     friend.status = RelationStatus.FRST10;
+    this.MockEntity.push({
+      friendSeq: this.MockEntity.length + 1,
+      followerSeq: target,
+      followeeSeq: userSeq,
+      isBlocked: false,
+      status: RelationStatus.FRST10,
+    });
   }
 
   async rejectFriend(userSeq: number, target: number) {
