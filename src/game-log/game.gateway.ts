@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import {
   SubscribeMessage, WebSocketGateway,
@@ -6,8 +6,10 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import GameType from 'src/enums/mastercode/game-type.enum';
+import { SocketGuard } from 'src/guards/socket.guard';
+import { expressSession, passportInit, passportSession } from 'src/session-middleware';
 import {
-  PaddleDirective, RenderData, MetaData, PatchRule, ReadyData, GameData,
+  PaddleDirective, RenderData, PatchRule, ReadyData, GameData,
 } from './dto/game-data';
 import { ScoreData } from './dto/in-game.dto';
 import { GameSocketSession } from './game-socket-session';
@@ -31,10 +33,19 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     private readonly gameService: GameService,
   ) { }
 
+  /**
+   * Apply passport authentication.
+   * socketSession will be deprecated.
+   */
   afterInit(server: any) {
+    this.logger.debug('Initialize');
     server.use((socket, next) => {
       this.socketSession.joinSession(socket, next);
     });
+    const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next);
+    server.use(wrap(expressSession));
+    server.use(wrap(passportInit));
+    server.use(wrap(passportSession));
   }
 
   /**
@@ -48,7 +59,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     if (client.session.inGame) { // 게임중에 나갔을 경우 재접.
       client.join(client.session.roomId);
       this.server.to(client.session.roomId).emit('player:join', client.session.userId);
-      // client.to(client.session.roomId).emit('playerJoin', client.session.userId);
     }
   }
 
@@ -57,7 +67,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * 게임중(세팅 + 플레이)이면 플레이어가 나갔다고 알린다.
    * @param client 클라이언트 접속을 끊었을 때
    */
-  async handleDisconnect(client: GameSocket) {
+  async handleDisconnect(client: any) {
     this.logger.debug(`user ${client.session.userId} disconnected`);
     const matchingSocket = await this.server.in(client.session.userId.toString()).allSockets();
     const isDisconnected = matchingSocket.size === 0;
@@ -68,12 +78,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
   }
 
+  @UseGuards(SocketGuard)
   @SubscribeMessage('enQ')
   async handleEnqueue(client: GameSocket, data: { isLadder: GameType }) {
     this.logger.debug(`user ${client.session.userId} enqueued`);
     return this.gameService.handleEnqueue(client.session, data.isLadder);
   }
 
+  @UseGuards(SocketGuard)
   @SubscribeMessage('deQ')
   handleDequeue(client: GameSocket, data: { isLadder: GameType }) {
     this.logger.debug(`user ${client.session.userId} request dequeued`);
@@ -97,6 +109,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.socketSession.saveSession(data[1].sessionId, data[1]);
   }
 
+  @UseGuards(SocketGuard)
   @SubscribeMessage('rule')
   settingGameRule(client: GameSocket, data: PatchRule) {
     this.gameService.handleRule(client.session.roomId, data);
@@ -104,6 +117,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.logger.debug(`setting game rule ${JSON.stringify(data)}`);
   }
 
+  @UseGuards(SocketGuard)
   @SubscribeMessage('ready')
   handleReady(client: GameSocket, data: ReadyData) {
     this.gameService.handleReady(client.session.roomId, data.isReady);
@@ -149,6 +163,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param client 유저 소켓
    * @param data paddle의 움직임 방향
    */
+  @UseGuards(SocketGuard)
   @SubscribeMessage('game:paddle')
   handlePaddleControl(client: GameSocket, data: { direction: PaddleDirective }) {
     this.logger.debug(`user ${client.session.userId} moved paddle ${data}`);
@@ -202,6 +217,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param client 관전자의 소켓
    * @param roomId 참여하고자 하는 방 아이디
    */
+  @UseGuards(SocketGuard)
   @SubscribeMessage('watch')
   handleWatch(client: GameSocket, roomId: string) {
     client.join(roomId);
@@ -212,6 +228,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param client 관전자
    * @param roomId 관전하는 방
    */
+  @UseGuards(SocketGuard)
   @SubscribeMessage('unWatch')
   handleUnWatch(client: GameSocket, roomId: string) {
     client.leave(roomId);
