@@ -1,4 +1,4 @@
-import { ConsoleLogger, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { GetFriendsDto } from 'src/community-bar/friends/dto/get-friends.dto';
 import { UserDto } from './dto/user.dto';
 import { UserRepository } from './repository/user.repository';
@@ -107,6 +107,7 @@ export class UserService {
     }
     return undefined;
   }
+
   /**
    * 유저 ID를 arrary로 주어졌을 때 유저 정보 리스트를 가져옵니다.
    *
