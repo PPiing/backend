@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ConsoleLogger, Injectable, Logger } from '@nestjs/common';
 import { GetFriendsDto } from 'src/community-bar/friends/dto/get-friends.dto';
 import { UserDto } from './dto/user.dto';
 import { UserRepository } from './repository/user.repository';
@@ -61,6 +61,24 @@ export class UserService {
     const user = await this.userRepository.findByOAuthId(userId);
     if (user) {
       return user.userSeq;
+    }
+    return undefined;
+  }
+
+  async findUserByOAuthId(userId:number): Promise<UserDto | undefined> {
+    const user = await this.userRepository.findByOAuthId(userId);
+    if (user) {
+      return {
+        userSeq: user.userSeq,
+        userId: user.userId,
+        nickName: user.nickName,
+        email: user.email,
+        secAuthStatus: user.secAuthStatuc,
+        avatarImgUri: user.avatarImgUri,
+        status: user.status,
+        deleteStatus: user.deleteStatus,
+        createdAt: user.createdAt,
+      };
     }
     return undefined;
   }

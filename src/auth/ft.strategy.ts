@@ -29,9 +29,7 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
       profile.email,
       profile.login,
     );
-    const result = await this.userService.findByOAuthId(profile.userId);
-    cb(null, {
-      seq: result,
-    });
+    const userInstance = await this.userService.findUserByOAuthId(profile.userId);
+    cb(null, userInstance);
   }
 }

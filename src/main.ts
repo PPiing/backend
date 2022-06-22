@@ -3,6 +3,7 @@ import * as session from 'express-session';
 import * as passport from 'passport';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as sess from 'session-file-store';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -10,12 +11,13 @@ async function bootstrap() {
     logger: ['log', 'verbose', 'error', 'warn', 'debug'],
   });
   const configService = app.get(ConfigService);
-
+  const FileStore = sess(session);
   app.use(
     session({
       secret: configService.get('auth.secret'),
       resave: false,
       saveUninitialized: true,
+      store: new FileStore(),
     }),
   );
 
