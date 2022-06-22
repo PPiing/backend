@@ -26,6 +26,6 @@ const repositories = [
     UserProfileService,
     ...repositories,
   ],
-  exports: [UserService],
+  exports: [UserService, UserProfileService],
 })
 export class UserModule {}
