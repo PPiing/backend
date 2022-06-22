@@ -107,7 +107,6 @@ export class UserService {
     }
     return undefined;
   }
-
   /**
    * 유저 ID를 arrary로 주어졌을 때 유저 정보 리스트를 가져옵니다.
    *

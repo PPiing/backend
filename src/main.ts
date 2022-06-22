@@ -1,15 +1,14 @@
 import { NestFactory } from '@nestjs/core';
-import * as session from 'express-session';
-import * as passport from 'passport';
-import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as sess from 'session-file-store';
 import { AppModule } from './app.module';
+import { expressSession, passportInit, passportSession } from './session-middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['log', 'verbose', 'error', 'warn', 'debug'],
   });
+
   const configService = app.get(ConfigService);
   const FileStore = sess(session);
   app.use(
@@ -23,6 +22,7 @@ async function bootstrap() {
 
   app.use(passport.initialize());
   app.use(passport.session());
+
   app.enableCors({
     origin: '*',
     credentials: true,
