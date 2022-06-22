@@ -1,8 +1,10 @@
+import { ConfigService } from '@nestjs/config';
+import * as session from 'express-session';
+import * as passport from 'passport';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as sess from 'session-file-store';
 import { AppModule } from './app.module';
-import { expressSession, passportInit, passportSession } from './session-middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
