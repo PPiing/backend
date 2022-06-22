@@ -19,7 +19,7 @@ export class UserService {
   async findByUserId(userId: number): Promise<UserDto | undefined> {
     this.logger.debug(`UserService.findByUserId: ${userId}`);
 
-    const user = await this.userRepository.findOne(userId);
+    const user = await this.userRepository.findOneBy({ userId });
     if (user) {
       const userDto: UserDto = {
         userSeq: user.userSeq,

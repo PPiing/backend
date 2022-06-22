@@ -13,10 +13,11 @@ export class GameLogRepository extends Repository<GameLog> {
   async findRecentGameLog(userSeq: number, limit: number): Promise<GameLog[] | GameLog> {
     this.logger.debug('findRecentGameLog');
     const ret = await this.find({
-      where: {
-        userSeq,
-        limit,
-      },
+      where: [
+        { topSideScore: userSeq },
+        { btmSideScore: userSeq },
+      ],
+      take: limit,
     });
     return ret;
   }
