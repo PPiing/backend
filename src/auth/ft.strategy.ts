@@ -24,12 +24,11 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
   }
 
   async validate(req, at, rt, profile, cb) {
-    await this.userService.createByUserId(
+    const userInstance = await this.userService.findOrCreateByUserId(
       profile.userId,
       profile.email,
       profile.login,
     );
-    const userInstance = await this.userService.findUserByOAuthId(profile.userId);
     cb(null, userInstance);
   }
 }

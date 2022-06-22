@@ -52,6 +52,31 @@ export class UserService {
   }
 
   /**
+   * OAuth를 통해 받은 유저 ID와 이메일, 이름을 이용해 신규 계정을 만듭니다. 계정이 이미 존재한다면 아무 동작도 하지 않습니다.
+   *
+   * @param userId OAuth를 통해 받은 유저 ID
+   * @param email 유저 이메일
+   * @returns 저장 여부
+   */
+  async findOrCreateByUserId(userId: number, email: string, name: string): Promise<UserDto> {
+    let userInstance = await this.userRepository.findByOAuthId(userId);
+    if (userInstance === undefined) {
+      userInstance = await this.userRepository.createUser(userId, email, name);
+    }
+    return {
+      userSeq: userInstance.userSeq,
+      userId: userInstance.userId,
+      nickName: userInstance.nickName,
+      email: userInstance.email,
+      secAuthStatus: userInstance.secAuthStatuc,
+      avatarImgUri: userInstance.avatarImgUri,
+      status: userInstance.status,
+      deleteStatus: userInstance.deleteStatus,
+      createdAt: userInstance.createdAt,
+    };
+  }
+
+  /**
    * OAuth ID가 기존에 존재하는지 확인합니다. 존재할 경우 유저 고유 ID를 반환합니다.
    *
    * @param userId OAuth ID
