@@ -29,8 +29,8 @@ export default class MockUserRepository {
     });
   }
 
-  async findOne(userSeq: number) {
-    return this.MockEntity.find((v) => v.userSeq === userSeq);
+  async findOneBy(user: any) {
+    return this.MockEntity.find((v) => v.userSeq === user.userSeq);
   }
 
   async create(userData: any) {

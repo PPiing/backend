@@ -155,7 +155,7 @@ export class MockGameLogRepository {
   /**
    * @return game log
    */
-  async findOne(seq: number): Promise<MockGameLog> {
+  async findOneBy(seq: number): Promise<MockGameLog> {
     this.logger.debug('findOne seq: ', seq);
     // eslint-disable-next-line no-restricted-syntax
     for (const [key, val] of Object.entries(this.logs)) {
