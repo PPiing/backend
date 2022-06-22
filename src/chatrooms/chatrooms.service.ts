@@ -674,7 +674,6 @@ export default class ChatroomsService implements OnModuleInit {
     const now = new Date();
     const getRemainTimeSec = (t1: Date, t2: Date): number => (t1.getTime() - t2.getTime()) / 1000;
     const cache: undefined | Date = await this.cacheManager.get(key);
-    
     if (cache === undefined) {
       return 0;
     }
