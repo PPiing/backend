@@ -11,10 +11,12 @@ export class MyMockStrategy extends PassportStrategy(MockStrategy, '42') {
     super();
   }
 
-  async validate(mockId, cb) {
-    const result = await this.userService.findByOAuthId(mockId);
-    cb(null, {
-      seq: result,
-    });
+  async validate(userId, email, login, cb) {
+    const userInstance = await this.userService.findOrCreateByUserId(
+      userId,
+      email,
+      login,
+    );
+    cb(null, userInstance);
   }
 }
