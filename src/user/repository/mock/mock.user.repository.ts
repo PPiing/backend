@@ -54,6 +54,7 @@ export default class MockUserRepository {
       createdAt: new Date(),
     };
     this.MockEntity.push(user);
+    return this.MockEntity.at(this.MockEntity.length - 1);
   }
 
   async findByOAuthId(oauthId: number) {

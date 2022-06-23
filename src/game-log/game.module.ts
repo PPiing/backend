@@ -9,6 +9,7 @@ import { SimulationService } from './simulation.service';
 import { GameSocketSession } from './game-socket-session';
 import { GameLogController } from './game-log.controller';
 import { GameLogService } from './game-log.service';
+import { SessionMiddleware } from 'src/session-middleware';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { GameLogService } from './game-log.service';
     SimulationService,
     GameSocketSession,
     GameLogService,
+    SessionMiddleware,
   ],
   controllers: [GameLogController],
   exports: [GameGateway],
