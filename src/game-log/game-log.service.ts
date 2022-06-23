@@ -11,7 +11,7 @@ export class GameLogService {
 
   async findGameLogBySeq(seq: number): Promise<GameLog> {
     this.logger.debug('findGameLogBySeq');
-    const ret = await this.gameLogRepository.findOne(seq);
+    const ret = await this.gameLogRepository.findOneBy({ gameLogSeq: seq });
     return ret;
   }
 

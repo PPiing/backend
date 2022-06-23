@@ -5,7 +5,7 @@ import { EntityRepository, Repository } from 'typeorm';
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
   findByOAuthId(oauthId: number): Promise<User> {
-    return this.findOne({ userId: oauthId });
+    return this.findOneBy({ userId: oauthId });
   }
 
   async createUser(oauthId: number, email: string, name: string): Promise<User> {
@@ -19,7 +19,7 @@ export class UserRepository extends Repository<User> {
   async getFriendsInfo(userList: number[]): Promise<GetFriendsDto[]> {
     const friendsInfo: GetFriendsDto[] = [];
     userList.map(async (user) => {
-      const findUser = await this.findOne({ userSeq: user });
+      const findUser = await this.findOneBy({ userSeq: user });
       friendsInfo.push({
         userSeq: findUser.userSeq,
         nickname: findUser.nickName,

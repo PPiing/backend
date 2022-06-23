@@ -13,10 +13,11 @@ export class GameLogRepository extends Repository<GameLog> {
   async findRecentGameLog(userSeq: number, limit: number): Promise<GameLog[] | GameLog> {
     this.logger.debug('findRecentGameLog');
     const ret = await this.find({
-      where: {
-        userSeq,
-        limit,
-      },
+      where: [
+        { topSideScore: userSeq },
+        { btmSideScore: userSeq },
+      ],
+      take: limit,
     });
     return ret;
   }
@@ -154,7 +155,7 @@ export class MockGameLogRepository {
   /**
    * @return game log
    */
-  async findOne(seq: number): Promise<MockGameLog> {
+  async findOneBy(seq: number): Promise<MockGameLog> {
     this.logger.debug('findOne seq: ', seq);
     // eslint-disable-next-line no-restricted-syntax
     for (const [key, val] of Object.entries(this.logs)) {
