@@ -1,4 +1,6 @@
-import { CacheModule, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  CacheModule, MiddlewareConsumer, Module, NestModule,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -36,7 +38,6 @@ import { SessionMiddleware } from './session-middleware';
   exports: [SessionMiddleware],
 })
 export class AppModule implements NestModule {
-
   constructor(public sessionMiddleware: SessionMiddleware) {}
 
   configure(consumer: MiddlewareConsumer) {
@@ -46,5 +47,4 @@ export class AppModule implements NestModule {
       this.sessionMiddleware.passportSession,
     ).forRoutes('*');
   }
-  
 }
