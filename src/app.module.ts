@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { GameModule } from './game-log/game.module';
 import { ChatroomsModule } from './chatrooms/chatrooms.module';
 import { CommunityBarModule } from './community-bar/community-bar.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { CommunityBarModule } from './community-bar/community-bar.module';
     AuthModule,
     ChatroomsModule,
     CommunityBarModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],
