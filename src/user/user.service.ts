@@ -16,9 +16,10 @@ export class UserService {
    * @param userId 유저 ID (PK)
    * @returns 유저 DTO
    */
-  async findByUserId(userSeq: number): Promise<UserDto | undefined> {
-    this.logger.debug(`UserService.findByUserId: ${userSeq}`);
-    const user = await this.userRepository.findOneBy({ userSeq });
+  async findByUserId(userId: number): Promise<UserDto | undefined> {
+    this.logger.debug(`UserService.findByUserId: ${userId}`);
+
+    const user = await this.userRepository.findOne(userId);
     if (user) {
       const userDto: UserDto = {
         userSeq: user.userSeq,
