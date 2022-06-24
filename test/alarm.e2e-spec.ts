@@ -151,20 +151,40 @@ describe('Alarm 테스트 (e2e)', () => {
     });
   });
 
-  describe.skip('알람 조회', () => {
-    test('accept/rejece 처리되지 않은 알람 조회', async () => {
+  describe('알람 조회', () => {
+    test('특정 유저가 수신한 읽지 않은 알람 조회', async () => {
       // given
-      const receiver = 1;
       const userCookie = cookie;
 
       // when
       const res = await request(app.getHttpServer())
-        .get(`/alarm/alarms/${receiver}`)
+        .get(`/alarm/alarms`)
         .set('Cookie', userCookie);
 
       // then
       expect(res.status).toBe(200);
       expect(res.body).toBeInstanceOf(Array);
+      expect(res.body.length).toBe(2);
+      res.body.forEach((alarm) => {
+        expect(alarm).toHaveProperty('from');
+        expect(alarm).toHaveProperty('type');
+        expect(alarm).toHaveProperty('code');
+      });
+    });
+
+    test('특정 유저가 수신한 모든 알람 조회', async () => {
+      // given
+      const userCookie = cookie;
+
+      // when
+      const res = await request(app.getHttpServer())
+        .get(`/alarm/alarms/all`)
+        .set('Cookie', userCookie);
+
+      // then
+      expect(res.status).toBe(200);
+      expect(res.body).toBeInstanceOf(Array);
+      expect(res.body.length).toBe(2);
       res.body.forEach((alarm) => {
         expect(alarm).toHaveProperty('from');
         expect(alarm).toHaveProperty('type');
