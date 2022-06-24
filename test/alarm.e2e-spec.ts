@@ -193,19 +193,33 @@ describe('Alarm 테스트 (e2e)', () => {
     });
   });
 
-  describe.skip('알람 제거', () => {
-    test('알람 고유 ID를 이용한 제거', async () => {
+  describe('알람 읽음 / 제거', () => {
+    test('알람 고유 ID를 이용한 읽음 처리', async () => {
       // given
-      const id = 1;
+      const id = 3;
       const userCookie = cookie;
 
       // when
       const res = await request(app.getHttpServer())
-        .delete(`/alarm/${id}`)
+        .put(`/alarm/${id}`)
         .set('Cookie', userCookie);
 
       // then
       expect(res.status).toBe(204);
     });
+  });
+
+  test('알람 고유 ID를 이용한 제거', async () => {
+    // given
+    const id = 3;
+    const userCookie = cookie;
+
+    // when
+    const res = await request(app.getHttpServer())
+      .delete(`/alarm/${id}`)
+      .set('Cookie', userCookie);
+
+    // then
+    expect(res.status).toBe(204);
   });
 });

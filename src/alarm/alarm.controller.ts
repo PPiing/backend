@@ -1,4 +1,4 @@
-import { Controller, Get, Logger, ValidationPipe } from '@nestjs/common';
+import { Controller, Put, Get, Logger, Param, ValidationPipe, Delete, HttpCode } from '@nestjs/common';
 import { User } from 'src/auth/user.decorator';
 import { UserDto } from 'src/user/dto/user.dto';
 import { AlarmService } from './alarm.service';
@@ -11,6 +11,8 @@ export class AlarmController {
   constructor(
     private alarmService: AlarmService,
   ) { }
+
+  //TODO: Swagger 명세 추가해야 함.
 
   @Get('alarms')
   async getAlarms(
@@ -26,5 +28,21 @@ export class AlarmController {
   ): Promise<AlarmResponseDto[]> {
     this.logger.debug('getAlarms');
     return this.alarmService.getAllAlarms(user.userSeq);
+  }
+
+  @Put(':id')
+  @HttpCode(204)
+  async readAlarm(
+    @Param('id') id: number,
+  ): Promise<void> {
+    await this.alarmService.readAlarm(id);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async deleteAlarm(
+    @Param('id') id: number,
+  ): Promise<void> {
+    await this.alarmService.deleteAlarm(id);
   }
 }

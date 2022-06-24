@@ -32,4 +32,17 @@ export default class AlarmRepository extends Repository<Alarm> {
       code: alarm.alarmCode,
     }));
   }
+
+  async readAlarm(alarmSeq: number): Promise<void> {
+    const alarm = await this.findOne(alarmSeq);
+    alarm.read = true;
+    await this.save(alarm);
+  }
+
+  async deleteAlarm(alarmSeq: number): Promise<void> {
+    const alarm = await this.findOne(alarmSeq);
+    alarm.read = true;
+    alarm.delete = true;
+    await this.save(alarm);
+  }
 }
