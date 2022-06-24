@@ -97,7 +97,7 @@ export class FriendsController {
     name: 'target', type: Number, example: 1, description: '수학된 대상 유저',
   })
   @UseGuards(CheckLogin)
-  @Post('/accept:alarm_seq')
+  @Post('/accept/:alarm_seq')
   async acceptFriend(
   @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
     target: number,
@@ -131,7 +131,7 @@ export class FriendsController {
     name: 'target', type: Number, example: 1, description: '수학된 대상 유저',
   })
   @UseGuards(CheckLogin)
-  @Post('/reject:alarm_seq')
+  @Post('/reject/:alarm_seq')
   async rejectFriend(
   @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
     target: number,
