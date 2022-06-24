@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsNotEmptyObject, IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
 import AlarmCode from 'src/enums/mastercode/alarm-code.enum';
 import AlarmType from 'src/enums/mastercode/alarm-type.enum';
 
@@ -23,7 +23,7 @@ export class AlarmResponseDto {
 
   @ApiProperty({
     description: '알람 타입',
-    type: AlarmType,
+    enum: ['ALTP10', 'ALTP20', 'ALTP30'],
   })
   @IsEnum(AlarmType)
   @IsNotEmpty()
@@ -31,7 +31,7 @@ export class AlarmResponseDto {
 
   @ApiProperty({
     description: '알람 세부 타입',
-    type: AlarmCode,
+    enum: ['ALAM10', 'ALAM11', 'ALAM12', 'ALAM20', 'ALAM21'],
   })
   @IsEnum(AlarmCode)
   @IsNotEmpty()

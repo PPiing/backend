@@ -33,16 +33,24 @@ export default class AlarmRepository extends Repository<Alarm> {
     }));
   }
 
-  async readAlarm(alarmSeq: number): Promise<void> {
+  async readAlarm(alarmSeq: number, who: number): Promise<boolean> {
     const alarm = await this.findOne(alarmSeq);
+    if (alarm === undefined || alarm.receiverSeq !== who) {
+      return false;
+    }
     alarm.read = true;
     await this.save(alarm);
+    return true;
   }
 
-  async deleteAlarm(alarmSeq: number): Promise<void> {
+  async deleteAlarm(alarmSeq: number, who: number): Promise<boolean> {
     const alarm = await this.findOne(alarmSeq);
+    if (alarm === undefined || alarm.receiverSeq !== who) {
+      return false;
+    }
     alarm.read = true;
     alarm.delete = true;
     await this.save(alarm);
+    return true;
   }
 }

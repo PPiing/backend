@@ -62,18 +62,24 @@ export default class MockAlarmRepository {
     }));
   }
 
-  async readAlarm(alarmSeq: number): Promise<void> {
+  async readAlarm(alarmSeq: number, who: number): Promise<boolean> {
     const target = this.MockEntity.find(e => e.alarmSeq === alarmSeq);
-    if (target) {
-      target.read = true;
+    if (target === undefined || target.receiverSeq !== who) {
+      return false;
     }
+    target.read = true;
+    return true;
   }
 
-  async deleteAlarm(alarmSeq: number): Promise<void> {
+  async deleteAlarm(alarmSeq: number, who: number): Promise<boolean> {
     const target = this.MockEntity.find(e => e.alarmSeq === alarmSeq);
+    if (target === undefined || target.receiverSeq !== who) {
+      return false;
+    }
     if (target) {
       target.read = true;
       target.delete = true;
     }
+    return true;
   }
 }

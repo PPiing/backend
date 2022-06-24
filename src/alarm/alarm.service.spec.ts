@@ -65,9 +65,10 @@ describe('AlarmService 테스트', () => {
     test('readAlarm 테스트', async () => {
       // given
       const alarmSeq = 3;
+      const who = 1;
 
       // when
-      await alarmService.readAlarm(alarmSeq);
+      await alarmService.readAlarm(alarmSeq, who);
       const alarms = await alarmService.getAlarms(1);
       const alarmsAll = await alarmService.getAllAlarms(1);
 
@@ -81,9 +82,10 @@ describe('AlarmService 테스트', () => {
     test('deleteAlarm 테스트', async () => {
       // given
       const alarmSeq = 3;
+      const who = 1;
 
       // when
-      await alarmService.deleteAlarm(alarmSeq);
+      await alarmService.deleteAlarm(alarmSeq, who);
       const alarms = await alarmService.getAlarms(1);
       const alarmsAll = await alarmService.getAllAlarms(1);
 
