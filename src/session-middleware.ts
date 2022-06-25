@@ -15,12 +15,12 @@ export class SessionMiddleware {
   passportSession: Middleware;
 
   constructor(private configService: ConfigService) {
-    const store = new SessionFileStore(session)();
+    const SessFunc = SessionFileStore(session);
     this.expressSession = session({
       secret: this.configService.get('auth.secret'),
       resave: false,
       saveUninitialized: true,
-      store,
+      store: new SessFunc(),
     });
     this.passportInit = passport.initialize();
     this.passportSession = passport.session();

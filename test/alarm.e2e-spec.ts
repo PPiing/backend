@@ -8,14 +8,16 @@ import * as passport from 'passport';
 import AlarmCode from '../src/enums/mastercode/alarm-code.enum';
 import AppModule from '../src/app.module.e2e-spec';
 
-async function generateSocketClient(id: number, connect = true): Promise<Socket> {
+async function generateSocketClient(cookie: string, connect = true): Promise<Socket> {
   const rtn = new Manager(
     'http://localhost:3001',
     {
       transports: ['websocket'],
+      extraHeaders: {
+        'Cookie': cookie,
+      }
     },
   ).socket('/alarm');
-  rtn.auth = { username: id };
   if (connect) {
     await new Promise<void>((resolve) => {
       rtn.on('connect', () => {
@@ -78,14 +80,28 @@ describe('Alarm 테스트 (e2e)', () => {
     await app.close();
   });
 
+  describe.skip('소켓 연결 테스트', () => {
+    test('로그인 전 연결', async () => {
+      const socket = await generateSocketClient('cookie');
+      expect(socket.connected).toBe(false);
+      socket.close();
+    });
+
+    test('로그인 후 연결', async () => {
+      const socket = await generateSocketClient(cookie);
+      expect(socket.connected).toBe(true);
+      socket.close();
+    });
+  });
+
   describe.skip('eventRunner로 알람 생성', () => {
     const clientSockets: Map<number, Socket> = new Map();
     const client1 = 1;
     const client2 = 2;
 
     beforeEach(async () => {
-      clientSockets.set(client1, await generateSocketClient(client1));
-      clientSockets.set(client2, await generateSocketClient(client2));
+      clientSockets.set(client1, await generateSocketClient(cookie));
+      clientSockets.set(client2, await generateSocketClient(cookie));
     });
 
     afterEach(async () => {

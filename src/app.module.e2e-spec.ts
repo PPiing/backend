@@ -1,4 +1,4 @@
-import { CacheModule, Module } from '@nestjs/common';
+import { CacheModule, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import AppController from './app.controller';
@@ -8,6 +8,7 @@ import { ChatroomsModule } from './chatrooms/chatrooms.module.e2e-spec';
 import { FriendsModule } from './community-bar/friends/friends.module.e2e-spec';
 import configuration from './configs/configuration';
 import { UserProfileModule } from './profile/profile.module.e2e-spec';
+import { SessionMiddleware } from './session-middleware';
 import { UserModule } from './user/user.module.e2e-spec';
 
 @Module({
@@ -25,6 +26,17 @@ import { UserModule } from './user/user.module.e2e-spec';
     UserProfileModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, SessionMiddleware],
+  exports: [SessionMiddleware],
 })
-export default class AppModule {}
+export default class AppModule implements NestModule {
+  constructor(public sessionMiddleware: SessionMiddleware) {}
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(
+      this.sessionMiddleware.expressSession,
+      this.sessionMiddleware.passportInit,
+      this.sessionMiddleware.passportSession,
+    ).forRoutes('*');
+  }
+}
