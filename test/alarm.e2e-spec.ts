@@ -14,8 +14,8 @@ async function generateSocketClient(cookie: string, connect = true): Promise<Soc
     {
       transports: ['websocket'],
       extraHeaders: {
-        'Cookie': cookie,
-      }
+        Cookie: cookie,
+      },
     },
   ).socket('/alarm');
   if (connect) {
