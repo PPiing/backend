@@ -9,7 +9,7 @@ export default () => ({
     database: process.env.DATABASE_NAME || 'db',
   },
   auth: {
-    secret: process.env.AUTH_SECRET,
+    secret: process.env.AUTH_SECRET || 'secret',
     clientid: process.env.AUTH_CLIENTID,
     clientsecret: process.env.AUTH_CLIENTSECRET,
   },
