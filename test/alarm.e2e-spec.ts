@@ -158,7 +158,7 @@ describe('Alarm 테스트 (e2e)', () => {
 
       // when
       const res = await request(app.getHttpServer())
-        .get(`/alarm/alarms`)
+        .get('/alarm/alarms')
         .set('Cookie', userCookie);
 
       // then
@@ -178,7 +178,7 @@ describe('Alarm 테스트 (e2e)', () => {
 
       // when
       const res = await request(app.getHttpServer())
-        .get(`/alarm/alarms/all`)
+        .get('/alarm/alarms/all')
         .set('Cookie', userCookie);
 
       // then

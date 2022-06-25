@@ -10,7 +10,7 @@ export class AlarmService {
 
   /**
    * 특정 유저가 수신한 알람을 가져옵니다. 읽음 처리 된 알람은 가져오지 않습니다.
-   * 
+   *
    * @param userSeq 유저 ID
    * @returns 알람 응답 DTO 배열
    */
@@ -20,7 +20,7 @@ export class AlarmService {
 
   /**
    * 특정 유저가 수신한 알람을 가져옵니다. 읽은 알람도 가져옵니다.
-   * 
+   *
    * @param userSeq 유저 ID
    * @returns 알람 응답 DTO 배열
    */
@@ -30,7 +30,7 @@ export class AlarmService {
 
   /**
    * 알람을 읽음 처리합니다.
-   * 
+   *
    * @param alarmSeq 알람 ID
    */
   async readAlarm(alarmSeq: number, who: number): Promise<void> {
@@ -42,7 +42,7 @@ export class AlarmService {
 
   /**
    * 알람을 삭제 처리합니다.
-   * 
+   *
    * @param alarmSeq 알람 ID
    */
   async deleteAlarm(alarmSeq: number, who: number): Promise<void> {

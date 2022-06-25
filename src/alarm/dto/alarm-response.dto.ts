@@ -4,14 +4,13 @@ import AlarmCode from 'src/enums/mastercode/alarm-code.enum';
 import AlarmType from 'src/enums/mastercode/alarm-type.enum';
 
 export class AlarmResponseDto {
-
   @ApiProperty({
     description: '알람 고유 ID',
     example: 1,
   })
   @IsNumber()
   @IsNotEmpty()
-  alarmSeq: number;
+    alarmSeq: number;
 
   @ApiProperty({
     description: '알람을 보낸 유저 ID',
@@ -19,7 +18,7 @@ export class AlarmResponseDto {
   })
   @IsNumber()
   @IsNotEmpty()
-  from: number;
+    from: number;
 
   @ApiProperty({
     description: '알람 타입',
@@ -27,7 +26,7 @@ export class AlarmResponseDto {
   })
   @IsEnum(AlarmType)
   @IsNotEmpty()
-  type: AlarmType;
+    type: AlarmType;
 
   @ApiProperty({
     description: '알람 세부 타입',
@@ -35,5 +34,5 @@ export class AlarmResponseDto {
   })
   @IsEnum(AlarmCode)
   @IsNotEmpty()
-  code: AlarmCode;
+    code: AlarmCode;
 }
