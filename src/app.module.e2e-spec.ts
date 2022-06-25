@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module.e2e-spec';
 import { ChatroomsModule } from './chatrooms/chatrooms.module.e2e-spec';
 import { FriendsModule } from './community-bar/friends/friends.module.e2e-spec';
 import configuration from './configs/configuration';
+import { UserProfileModule } from './profile/profile.module.e2e-spec';
 import { UserModule } from './user/user.module.e2e-spec';
 
 @Module({
@@ -23,6 +24,7 @@ import { UserModule } from './user/user.module.e2e-spec';
     AuthModule,
     FriendsModule,
     AlarmModule,
+    UserProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],
