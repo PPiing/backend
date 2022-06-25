@@ -9,14 +9,14 @@ import { User } from 'src/auth/user.decorator';
 import { CheckLogin } from 'src/guards/check-login.guard';
 import { GetUserDto } from './dto/get-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserDto } from './dto/user.dto';
+import { UserDto } from '../user/dto/user.dto';
 import { UserProfileService } from './user-profile.service';
 
 @ApiTags('유저')
 @Controller('users')
 @UsePipes(new ValidationPipe({ transform: true }))
-export class UserController {
-  private readonly logger = new Logger(UserController.name);
+export class ProfileController {
+  private readonly logger = new Logger(ProfileController.name);
 
   constructor(
     private readonly userProfileService: UserProfileService,

@@ -1,6 +1,6 @@
 import UserStatus from 'src/enums/mastercode/user-status.enum';
-import { GetUserDto } from 'src/user/dto/get-user.dto';
-import { UpdateUserDto } from 'src/user/dto/update-user.dto';
+import { GetUserDto } from 'src/profile/dto/get-user.dto';
+import { UpdateUserDto } from 'src/profile/dto/update-user.dto';
 
 export default class MockUserProfileRepository {
   MockEntity: any[] = [];

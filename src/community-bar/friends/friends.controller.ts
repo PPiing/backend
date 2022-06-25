@@ -7,7 +7,7 @@ import {
 import { CheckLogin } from 'src/guards/check-login.guard';
 import { UserDto } from 'src/user/dto/user.dto';
 import { User } from 'src/auth/user.decorator';
-import { UserProfileService } from 'src/user/user-profile.service';
+import { UserProfileService } from 'src/profile/user-profile.service';
 import { UserService } from 'src/user/user.service';
 import { GetFriendsDto } from './dto/get-friends.dto';
 import { FriendsService } from './friends.service';
@@ -97,7 +97,7 @@ export class FriendsController {
     name: 'target', type: Number, example: 1, description: '수학된 대상 유저',
   })
   @UseGuards(CheckLogin)
-  @Post('/accept:alarm_seq')
+  @Post('/accept/:alarm_seq')
   async acceptFriend(
   @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
     target: number,
@@ -131,7 +131,7 @@ export class FriendsController {
     name: 'target', type: Number, example: 1, description: '수학된 대상 유저',
   })
   @UseGuards(CheckLogin)
-  @Post('/reject:alarm_seq')
+  @Post('/reject/:alarm_seq')
   async rejectFriend(
   @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
     target: number,
