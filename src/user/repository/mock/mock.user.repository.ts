@@ -29,8 +29,8 @@ export default class MockUserRepository {
     });
   }
 
-  async findOneBy(user: any) {
-    return this.MockEntity.find((v) => v.userSeq === user.userSeq);
+  async findOne(userSeq: number) {
+    return this.MockEntity.find((v) => v.userSeq === userSeq);
   }
 
   async create(userData: any) {
@@ -54,6 +54,7 @@ export default class MockUserRepository {
       createdAt: new Date(),
     };
     this.MockEntity.push(user);
+    return this.MockEntity.at(this.MockEntity.length - 1);
   }
 
   async findByOAuthId(oauthId: number) {

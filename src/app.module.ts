@@ -1,4 +1,6 @@
-import { CacheModule, Module } from '@nestjs/common';
+import {
+  CacheModule, MiddlewareConsumer, Module, NestModule,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -12,6 +14,7 @@ import { GameModule } from './game-log/game.module';
 import { ChatroomsModule } from './chatrooms/chatrooms.module';
 import { CommunityBarModule } from './community-bar/community-bar.module';
 import { ProfileModule } from './profile/profile.module';
+import { SessionMiddleware } from './session-middleware';
 
 @Module({
   imports: [
@@ -33,6 +36,17 @@ import { ProfileModule } from './profile/profile.module';
     ProfileModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, SessionMiddleware],
+  exports: [SessionMiddleware],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  constructor(public sessionMiddleware: SessionMiddleware) {}
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(
+      this.sessionMiddleware.expressSession,
+      this.sessionMiddleware.passportInit,
+      this.sessionMiddleware.passportSession,
+    ).forRoutes('*');
+  }
+}

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
+import { SessionMiddleware } from 'src/session-middleware';
 import { GameGateway } from './game.gateway';
 import { GameService } from './game.service';
 import { GameLogRepository, MockGameLogRepository } from './game-log.repository';
@@ -26,6 +27,7 @@ import { GameLogService } from './game-log.service';
     SimulationService,
     GameSocketSession,
     GameLogService,
+    SessionMiddleware,
   ],
   controllers: [GameLogController],
   exports: [GameGateway],

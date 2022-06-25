@@ -7,7 +7,7 @@ import {
 import { Server } from 'socket.io';
 import GameType from 'src/enums/mastercode/game-type.enum';
 import { SocketGuard } from 'src/guards/socket.guard';
-import { expressSession, passportInit, passportSession } from 'src/session-middleware';
+import { SessionMiddleware } from 'src/session-middleware';
 import {
   PaddleDirective, RenderData, PatchRule, ReadyData, GameData,
 } from './dto/game-data';
@@ -31,6 +31,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   constructor(
     private readonly socketSession: GameSocketSession,
     private readonly gameService: GameService,
+    private readonly sessionMiddleware: SessionMiddleware,
   ) { }
 
   /**
@@ -43,9 +44,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       this.socketSession.joinSession(socket, next);
     });
     const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next);
-    server.use(wrap(expressSession));
-    server.use(wrap(passportInit));
-    server.use(wrap(passportSession));
+    server.use(wrap(this.sessionMiddleware.expressSession));
+    server.use(wrap(this.sessionMiddleware.passportInit));
+    server.use(wrap(this.sessionMiddleware.passportSession));
   }
 
   /**

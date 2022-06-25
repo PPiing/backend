@@ -6,7 +6,7 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 @EntityRepository(User)
 export class UserProfileRepository extends Repository<User> {
   async getUser(userSeq: number): Promise<GetUserDto | undefined> {
-    const user = await this.findOneBy({ userSeq });
+    const user = await this.findOne(userSeq);
     if (!user) {
       return undefined;
     }
@@ -19,7 +19,7 @@ export class UserProfileRepository extends Repository<User> {
   }
 
   async checkUser(userSeq: number): Promise<boolean> {
-    const user = await this.findOneBy({ userSeq });
+    const user = await this.findOne(userSeq);
     if (!user) {
       return false;
     }
@@ -27,7 +27,7 @@ export class UserProfileRepository extends Repository<User> {
   }
 
   async updateUser(userSeq: number, userData: UpdateUserDto): Promise<UpdateUserDto> {
-    const user = await this.findOneBy({ userSeq });
+    const user = await this.findOne(userSeq);
     user.nickName = userData.nickName;
     user.email = userData.email;
     user.secAuthStatuc = userData.secAuthStatus;
@@ -42,7 +42,7 @@ export class UserProfileRepository extends Repository<User> {
   }
 
   async deleteUser(userSeq: number) {
-    const user = await this.findOneBy({ userSeq });
+    const user = await this.findOne(userSeq);
     user.deleteStatus = true;
     await this.save(user);
   }
