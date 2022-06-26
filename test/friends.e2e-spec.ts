@@ -14,36 +14,9 @@ describe('Friends E2E Test', () => {
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    })
-    // AuthGuard (로그인 확인) Mock 생성
-      .overrideGuard(AuthGuard).useValue({
-        canActivate: (context: any) => {
-          if (context.switchToHttp().getRequest().session.user) {
-            return true;
-          }
-          throw new HttpException('로그인이 필요합니다.', 401);
-        },
-      })
-    // FtGuard (42-passport) Mock 생성
-      .overrideGuard(FtGuard)
-      .useValue({
-        canActivate: (context: any) => {
-          // FIXME: 세션의 어느 프로퍼티에 사용자 키 값을 저장하는지 현재는 알 수 없음
-          context.switchToHttp().getRequest().session.user = user;
-          return true;
-        },
-      })
-      .compile();
+    }).compile();
 
     app = moduleFixture.createNestApplication();
-
-    app.use(
-      session({
-        secret: 'secret key',
-        resave: false,
-        saveUninitialized: true,
-      }),
-    );
 
     await app.init();
 

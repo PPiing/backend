@@ -1,3 +1,4 @@
+import { CacheModule } from '@nestjs/common';
 import { TestingModule, Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AlarmService } from './alarm.service';
@@ -16,6 +17,9 @@ describe('AlarmService 테스트', () => {
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
+      imports: [
+        CacheModule.register({ ttl: 0 }),
+      ],
       providers: [
         AlarmService,
         ...repositories,

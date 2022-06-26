@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CACHE_MANAGER, Inject, Injectable, UnauthorizedException,
+} from '@nestjs/common';
+import { Cache } from 'cache-manager';
+import { Socket } from 'socket.io';
 import { AlarmResponseDto } from './dto/alarm-response.dto';
 import AlarmRepository from './repository/alarm.repository';
 
@@ -6,7 +10,57 @@ import AlarmRepository from './repository/alarm.repository';
 export class AlarmService {
   constructor(
     private alarmRepository: AlarmRepository,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
+
+  /**
+   * 사용자가 접속하면 소켓 ID를 온라인 사용자 리스트에 추가합니다.
+   *
+   * @param user 접속한 사용자 소켓
+   * @param userID 접속한 사용자 식별자
+   */
+  async onlineUserAdd(user: Socket, userID: number): Promise<void> {
+    const key = `AlarmService-userID-${userID}`;
+    const value: undefined | Array<string> = await this.cacheManager.get(key);
+    if (value === undefined) {
+      await this.cacheManager.set(key, [user.id]);
+    } else {
+      await this.cacheManager.set(key, [...value, user.id]);
+    }
+  }
+
+  /**
+   * 사용자 연결이 해제되면 온라인 사용자 리스트에서 제거합니다.
+   *
+   * @param userID 접속한 사용자 식별자
+   */
+  async onlineUserRemove(user: Socket, userID: number): Promise<void> {
+    const key = `AlarmService-userID-${userID}`;
+    const value: undefined | Array<string> = await this.cacheManager.get(key);
+    if (value) {
+      const newValue = value.filter((v) => v !== user.id);
+      if (newValue.length > 0) {
+        await this.cacheManager.set(key, newValue);
+      } else {
+        await this.cacheManager.del(key);
+      }
+    }
+  }
+
+  /**
+   * 실사용자의 ID를 이용해 소켓 ID 배열을 가져옵니다.
+   *
+   * @param userID 접속한 사용자 식별자
+   * @returns 클라이언트 소켓 ID 배열
+   */
+  async getOnlineClients(userID: number): Promise<Array<string>> {
+    const key = `AlarmService-userID-${userID}`;
+    const value: undefined | Array<string> = await this.cacheManager.get(key);
+    if (value === undefined) {
+      return [];
+    }
+    return value;
+  }
 
   /**
    * 특정 유저가 수신한 알람을 가져옵니다. 읽음 처리 된 알람은 가져오지 않습니다.
