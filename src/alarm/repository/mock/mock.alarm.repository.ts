@@ -38,6 +38,24 @@ export default class MockAlarmRepository {
     });
   }
 
+  async createAlarm(
+    senderSeq: number,
+    receiverSeq: number,
+    alarmType: AlarmType,
+    alarmCode: AlarmCode,
+  ) : Promise<void> {
+    this.MockEntity.push({
+      alarmSeq: this.MockEntity.length + 1,
+      alarmType,
+      alarmCode,
+      read: false,
+      delete: false,
+      createdAt: new Date(),
+      receiverSeq,
+      senderSeq,
+    });
+  }
+
   async getAlarms(userSeq: number): Promise<AlarmResponseDto[]> {
     return this.MockEntity
       .filter((e) => e.receiverSeq === userSeq

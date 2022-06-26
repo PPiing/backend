@@ -3,6 +3,8 @@ import {
 } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Socket } from 'socket.io';
+import AlarmCode from 'src/enums/mastercode/alarm-code.enum';
+import AlarmType from 'src/enums/mastercode/alarm-type.enum';
 import { AlarmResponseDto } from './dto/alarm-response.dto';
 import AlarmRepository from './repository/alarm.repository';
 
@@ -60,6 +62,39 @@ export class AlarmService {
       return [];
     }
     return value;
+  }
+
+  /**
+   * 컨펌을 받아야 하는 알람의 경우, 해당 알람이 유효한지 확인합니다.
+   * 예를 들면 A가 B에게 친구 추가를 할 경우 실제 관계를 맺기 전 해당 함수를 호출해서 유효성을 판단해야 합니다.
+   *
+   * @param senderSeq 알람을 보내는 유저 ID
+   * @param receiverSeq 알람을 받는 유저 ID
+   * @param alarmCode 알람 코드
+   */
+  async confirmedAlarmCheck(
+    senderSeq: number,
+    receiverSeq: number,
+    alarmCode: AlarmCode,
+  ) : Promise<boolean> {
+    return this.alarmRepository.unresolvedAlarmCheck(senderSeq, receiverSeq, alarmCode);
+  }
+
+  /**
+   * 알람을 새로 추가합니다.
+   *
+   * @param senderSeq 알람을 보내는 유저 ID
+   * @param receiverSeq 알람을 받는 유저 ID
+   * @param alarmType 알람 타입
+   * @param alarmCode 알람 코드
+   */
+  async addAlarm(
+    senderSeq: number,
+    receiverSeq: number,
+    alarmType: AlarmType,
+    alarmCode: AlarmCode,
+  ) : Promise<void> {
+    await this.alarmRepository.createAlarm(senderSeq, receiverSeq, alarmType, alarmCode);
   }
 
   /**

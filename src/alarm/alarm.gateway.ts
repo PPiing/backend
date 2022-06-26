@@ -5,6 +5,7 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import AlarmCode from 'src/enums/mastercode/alarm-code.enum';
+import AlarmType from 'src/enums/mastercode/alarm-type.enum';
 import { SessionMiddleware } from 'src/session-middleware';
 import { AlarmService } from './alarm.service';
 import ISocketSend from './interface/socket-send';
@@ -50,13 +51,14 @@ export class AlarmGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
   /**
    * 서버에서 생성되는 알림 메시지를 클라이언트에 보내고자 할 때 호출되는 콜백함수입니다.
    *
-   * @param chatSeq 방 ID
-   * @param message 알림성 메시지
+   * @param receiverSeq 수신자 ID
+   * @param alarmCode 알람 코드
+   * @param message 알람 상세 메시지
    */
   @OnEvent('alarm:normal')
   async onNormalAlarm(receiverSeq: number, alarmCode: AlarmCode, message: string) {
     this.logger.debug(`onNormalAlarm: ${receiverSeq}: ${alarmCode}`);
-    // TODO: 알림 메시지 저장해야 함.
+    await this.alarmService.addAlarm(0, receiverSeq, AlarmType.ALTP10, alarmCode);
     const clients = await this.alarmService.getOnlineClients(receiverSeq);
     if (clients.length > 0) {
       const obj: ISocketSend = {
@@ -64,6 +66,27 @@ export class AlarmGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
         message,
       };
       this.server.to(clients).emit('alarm:normal', obj);
+    }
+  }
+
+  /**
+   * 서버에서 생성되는 컨펌 알림 메시지를 클라이언트에 보내고자 할 때 호출되는 콜백함수입니다.
+   *
+   * @param senderSeq 송신자 ID
+   * @param receiverSeq 수신자 ID
+   * @param alarmCode 알람 코드
+   */
+  @OnEvent('alarm:confirm')
+  async onConfirmAlarm(senderSeq: number, receiverSeq: number, alarmCode: AlarmCode) {
+    this.logger.debug(`onConfirmAlarm: ${receiverSeq}: ${alarmCode}`);
+    await this.alarmService.addAlarm(senderSeq, receiverSeq, AlarmType.ALTP20, alarmCode);
+    const clients = await this.alarmService.getOnlineClients(receiverSeq);
+    if (clients.length > 0) {
+      const obj: ISocketSend = {
+        senderSeq,
+        alarmCode,
+      };
+      this.server.to(clients).emit('alarm:confirm', obj);
     }
   }
 }

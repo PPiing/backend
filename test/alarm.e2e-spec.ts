@@ -120,22 +120,22 @@ describe('Alarm 테스트 (e2e)', () => {
     });
 
     describe('컨펌 알람 생성', () => {
-      test('서버 내부에서 친구 요청 이벤트 발생 시에 소켓 전송 확인 후 accept 처리 확인', (done) => {
+      test('서버 내부에서 친구 요청 이벤트 발생 시에 소켓 전송 확인', (done) => {
+        // NOTE: 컨펌 알람은 어떤 식으로 처리할지 추후에 재 논의. 일단 여기서 별도의 처리는 하지 않음.
         // given
         const senderSeq = 2;
         const receiverSeq = 1;
         const alarmCode = AlarmCode.ALAM20;
-        const acceptLink = 'http://localhost:3001/alarm/accept';
-        const rejectLink = 'http://localhost:3001/alarm/reject';
 
         // when
-        eventRunner.emit('alarm:confirm', senderSeq, receiverSeq, alarmCode, acceptLink, rejectLink);
+        eventRunner.emit('alarm:confirm', senderSeq, receiverSeq, alarmCode);
 
         // then
         const quit = exec(1, done);
         const client1Socket = clientSockets.get(client1);
-        client1Socket.on('alarm:confirm', (data) => {
-          expect(data.acceptLink).toBe(acceptLink);
+        client1Socket.on('alarm:confirm', (alarm) => {
+          expect(alarm.alarmCode).toEqual(alarmCode);
+          expect(alarm.senderSeq).toEqual(senderSeq);
           quit();
         });
       });
