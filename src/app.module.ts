@@ -15,6 +15,7 @@ import { ChatroomsModule } from './chatrooms/chatrooms.module';
 import { CommunityBarModule } from './community-bar/community-bar.module';
 import { ProfileModule } from './profile/profile.module';
 import { SessionMiddleware } from './session-middleware';
+import { AlarmModule } from './alarm/alarm.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { SessionMiddleware } from './session-middleware';
     AuthModule,
     ChatroomsModule,
     CommunityBarModule,
+    AlarmModule,
     ProfileModule,
   ],
   controllers: [AppController],

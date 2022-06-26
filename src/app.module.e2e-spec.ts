@@ -1,6 +1,7 @@
 import { CacheModule, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AlarmModule } from './alarm/alarm.module.e2e-spec';
 import AppController from './app.controller';
 import AppService from './app.service';
 import { AuthModule } from './auth/auth.module.e2e-spec';
@@ -22,6 +23,7 @@ import { UserModule } from './user/user.module.e2e-spec';
     UserModule,
     AuthModule,
     FriendsModule,
+    AlarmModule,
     UserProfileModule,
   ],
   controllers: [AppController],

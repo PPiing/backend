@@ -151,20 +151,40 @@ describe('Alarm 테스트 (e2e)', () => {
     });
   });
 
-  describe.skip('알람 조회', () => {
-    test('accept/rejece 처리되지 않은 알람 조회', async () => {
+  describe('알람 조회', () => {
+    test('특정 유저가 수신한 읽지 않은 알람 조회', async () => {
       // given
-      const receiver = 1;
       const userCookie = cookie;
 
       // when
       const res = await request(app.getHttpServer())
-        .get(`/alarm/alarms/${receiver}`)
+        .get('/alarm/alarms')
         .set('Cookie', userCookie);
 
       // then
       expect(res.status).toBe(200);
       expect(res.body).toBeInstanceOf(Array);
+      expect(res.body.length).toBe(2);
+      res.body.forEach((alarm) => {
+        expect(alarm).toHaveProperty('from');
+        expect(alarm).toHaveProperty('type');
+        expect(alarm).toHaveProperty('code');
+      });
+    });
+
+    test('특정 유저가 수신한 모든 알람 조회', async () => {
+      // given
+      const userCookie = cookie;
+
+      // when
+      const res = await request(app.getHttpServer())
+        .get('/alarm/alarms/all')
+        .set('Cookie', userCookie);
+
+      // then
+      expect(res.status).toBe(200);
+      expect(res.body).toBeInstanceOf(Array);
+      expect(res.body.length).toBe(2);
       res.body.forEach((alarm) => {
         expect(alarm).toHaveProperty('from');
         expect(alarm).toHaveProperty('type');
@@ -173,19 +193,33 @@ describe('Alarm 테스트 (e2e)', () => {
     });
   });
 
-  describe.skip('알람 제거', () => {
-    test('알람 고유 ID를 이용한 제거', async () => {
+  describe('알람 읽음 / 제거', () => {
+    test('알람 고유 ID를 이용한 읽음 처리', async () => {
       // given
-      const id = 1;
+      const id = 3;
       const userCookie = cookie;
 
       // when
       const res = await request(app.getHttpServer())
-        .delete(`/alarm/${id}`)
+        .put(`/alarm/${id}`)
         .set('Cookie', userCookie);
 
       // then
       expect(res.status).toBe(204);
     });
+  });
+
+  test('알람 고유 ID를 이용한 제거', async () => {
+    // given
+    const id = 3;
+    const userCookie = cookie;
+
+    // when
+    const res = await request(app.getHttpServer())
+      .delete(`/alarm/${id}`)
+      .set('Cookie', userCookie);
+
+    // then
+    expect(res.status).toBe(204);
   });
 });
