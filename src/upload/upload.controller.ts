@@ -70,9 +70,14 @@ export default class UploadController {
       @Response({ passthrough: true }) res,
   ): Promise<StreamableFile> {
     const [ext, fileName] = filename.split('.').reverse();
-    const regexExp = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
-    if (!fileName || !ext || regexExp.test(fileName) === false) {
+    if (!fileName || !ext) {
       throw new BadRequestException('잘못된 요청입니다.');
+    }
+    if (filename !== 'DefaultProfile.jpg') {
+      const regexExp = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
+      if (regexExp.test(fileName) === false) {
+        throw new BadRequestException('잘못된 요청입니다.');
+      }
     }
     const file = createReadStream(join(process.cwd(), `upload-file/${filename}`));
 
