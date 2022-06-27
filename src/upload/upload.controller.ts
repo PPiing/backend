@@ -1,10 +1,10 @@
 import {
-  BadRequestException, Controller, Get, Param, Post, StreamableFile, UploadedFile, UseInterceptors, Response,
+  BadRequestException, Controller, Get, Param, Post,
+  StreamableFile, UploadedFile, UseInterceptors, Response,
 } from '@nestjs/common';
 import {
-  ApiBody,
-  ApiConsumes,
-  ApiOperation, ApiParam, ApiResponse, ApiTags,
+  ApiBody, ApiConsumes,
+  ApiOperation, ApiResponse, ApiTags,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { randomUUID } from 'crypto';
@@ -12,7 +12,6 @@ import { createReadStream, existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 import { join } from 'path';
 import { contentType } from 'mime-types';
-import { NotFoundError } from 'rxjs';
 import FileDto from './dto/file.dto';
 
 @ApiTags('파일 업로드')
@@ -47,8 +46,8 @@ export default class UploadController {
         callback(null, path);
       },
       filename(req, file, cb) {
-        const [ext, ...fileName] = file.originalname.split('.').reverse();
-        cb(null, `${randomUUID()}.${ext}`);
+        const chop = file.originalname.split('.').reverse();
+        cb(null, `${randomUUID()}.${chop[0]}`);
       },
     }),
   }))
