@@ -16,6 +16,7 @@ import { CommunityBarModule } from './community-bar/community-bar.module';
 import { ProfileModule } from './profile/profile.module';
 import { SessionMiddleware } from './session-middleware';
 import { AlarmModule } from './alarm/alarm.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { AlarmModule } from './alarm/alarm.module';
     CommunityBarModule,
     AlarmModule,
     ProfileModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService, SessionMiddleware],
