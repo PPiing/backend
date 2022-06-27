@@ -11,6 +11,7 @@ export class UserProfileRepository extends Repository<User> {
       return undefined;
     }
     return ({
+      userSeq: user.userSeq,
       userName: user.nickName,
       userEmail: user.email,
       userStatus: user.status,
@@ -57,6 +58,7 @@ export class UserProfileRepository extends Repository<User> {
       },
     });
     return users.map((user) => ({
+      userSeq: user.userSeq,
       userName: user.nickName,
       userEmail: user.email,
       userStatus: user.status,

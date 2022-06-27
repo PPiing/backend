@@ -126,7 +126,7 @@ export class ProfileController {
    * @param nickname 닉네임
    */
   @ApiOperation({ summary: '닉네임 검색', description: '닉네임으로 유저를 검색합니다.' })
-  @ApiResponse({ status: 200, type: Array<GetUserDto>, description: '닉네임 검색 성공' })
+  @ApiResponse({ status: 200, type: [GetUserDto], description: '닉네임 검색 성공' })
   @Get('/search/:nickname')
   async searchUser(
     @Param('nickname') nickname: string,

@@ -36,6 +36,7 @@ export default class MockUserProfileRepository {
       return undefined;
     }
     return ({
+      userSeq: user.userSeq,
       userName: user.nickName,
       userEmail: user.email,
       userStatus: user.status,
@@ -75,6 +76,7 @@ export default class MockUserProfileRepository {
   async searchUsersByNickname(nickname: string): Promise<GetUserDto[]> {
     const users = this.MockEntity.filter((u) => u.nickName.indexOf(nickname) >= 0);
     return users.map((user) => ({
+      userSeq: user.nickName,
       userName: user.nickName,
       userEmail: user.email,
       userStatus: user.status,
