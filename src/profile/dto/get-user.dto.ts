@@ -1,8 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import UserStatus from 'src/enums/mastercode/user-status.enum';
 
 export class GetUserDto {
+  @ApiProperty({
+    description: '유저 시퀀스 (고유 ID)',
+    example: 1,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+    userSeq: number;
+
   @ApiProperty({
     description: '유저 닉네임',
     example: 'skim',
