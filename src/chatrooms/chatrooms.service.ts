@@ -673,11 +673,15 @@ export default class ChatroomsService implements OnModuleInit {
     const key = `${chatSeq}-${user}-mute`;
     const now = new Date();
     const getRemainTimeSec = (t1: Date, t2: Date): number => (t1.getTime() - t2.getTime()) / 1000;
-    const rtn: undefined | Date = await this.cacheManager.get(key);
-    if (rtn === undefined) {
+    const until: undefined | Date = await this.cacheManager.get(key);
+    if (until === undefined) {
       return 0;
     }
-    return Math.floor(getRemainTimeSec(rtn, now));
+    const rtn = Math.floor(getRemainTimeSec(until, now));
+    if (rtn < 0) {
+      return 0;
+    }
+    return rtn;
   }
 
   /**
