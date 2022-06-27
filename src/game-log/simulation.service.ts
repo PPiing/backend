@@ -53,10 +53,10 @@ export class SimulationService {
             else if (GameOption.GLOP42 === ruleData.option3) matchScore = 1;
             else this.logger.error('invalid option3');
 
-            if (matchScore === inGameData.score.scoreBtm) {
+            if (matchScore === inGameData.score.scoreRed) {
               inGameData.status = GameStatus.End;
               inGameData.winner = metaData.playerBtm.userId;
-            } else if (matchScore === inGameData.score.scoreTop) {
+            } else if (matchScore === inGameData.score.scoreBlue) {
               inGameData.status = GameStatus.End;
               inGameData.winner = metaData.playerTop.userId;
             }
@@ -81,11 +81,11 @@ export class SimulationService {
   private resetBallAndPaddle(game: GameData) {
     this.logger.debug('resetBallAndPaddle');
     const { inGameData } = game;
-    const { ball, paddleTop, paddleBtm } = inGameData;
+    const { ball, paddleBlue, paddleRed } = inGameData;
     ball.position.x = GameData.spec.arena.width / 2;
     ball.position.y = GameData.spec.arena.height / 2;
-    paddleTop.position.x = GameData.spec.arena.width / 2;
-    paddleBtm.position.x = GameData.spec.arena.width / 2;
+    paddleBlue.position.x = GameData.spec.arena.width / 2;
+    paddleRed.position.x = GameData.spec.arena.width / 2;
     ball.velocity.x = 0;
     ball.velocity.y = 1; // TODO: random 1 or -1
   }
@@ -95,10 +95,10 @@ export class SimulationService {
     const { ball } = inGameData;
 
     if (ball.position.y - GameData.spec.ball.radius < 0) {
-      inGameData.scoreTop += 1;
+      inGameData.scoreBlue += 1;
       return 1;
     } if (ball.position.y + GameData.spec.ball.radius > GameData.spec.arena.height) {
-      inGameData.scoreBtm += 1;
+      inGameData.scoreRed += 1;
       return 2;
     }
     return false;
@@ -106,25 +106,25 @@ export class SimulationService {
 
   private checkPaddleCollision(game: GameData) {
     const { inGameData, ruleData } = game; // TODO: ruleData 적용.
-    const { ball, paddleTop, paddleBtm } = inGameData;
+    const { ball, paddleBlue, paddleRed } = inGameData;
     const BALL = ball.position;
     const SPEC = GameData.spec;
     if (
-      BALL.x < paddleTop.position.x + SPEC.paddle.width / 2
-      && BALL.x > paddleTop.position.x - SPEC.paddle.width / 2
-      && BALL.y - SPEC.ball.radius < paddleTop.position.y + SPEC.paddle.height / 2
-      && BALL.y + SPEC.ball.radius > paddleTop.position.y - SPEC.paddle.height / 2
+      BALL.x < paddleBlue.position.x + SPEC.paddle.width / 2
+      && BALL.x > paddleBlue.position.x - SPEC.paddle.width / 2
+      && BALL.y - SPEC.ball.radius < paddleBlue.position.y + SPEC.paddle.height / 2
+      && BALL.y + SPEC.ball.radius > paddleBlue.position.y - SPEC.paddle.height / 2
     ) {
       ball.velocity.y *= -1;
-      BALL.y = paddleTop.position.y + SPEC.ball.radius + SPEC.paddle.height / 2;
+      BALL.y = paddleBlue.position.y + SPEC.ball.radius + SPEC.paddle.height / 2;
     } else if (
-      BALL.x - SPEC.ball.radius < paddleBtm.position.x + SPEC.paddle.width
-      && BALL.x + SPEC.ball.radius > paddleBtm.position.x
-      && BALL.y + SPEC.ball.radius > paddleBtm.position.y
-      && BALL.y - SPEC.ball.radius < paddleBtm.position.y + SPEC.paddle.height
+      BALL.x - SPEC.ball.radius < paddleRed.position.x + SPEC.paddle.width
+      && BALL.x + SPEC.ball.radius > paddleRed.position.x
+      && BALL.y + SPEC.ball.radius > paddleRed.position.y
+      && BALL.y - SPEC.ball.radius < paddleRed.position.y + SPEC.paddle.height
     ) {
       ball.velocity.y *= -1;
-      BALL.y = paddleBtm.position.y - SPEC.ball.radius - SPEC.paddle.height / 2;
+      BALL.y = paddleRed.position.y - SPEC.ball.radius - SPEC.paddle.height / 2;
     }
   }
 
@@ -149,20 +149,20 @@ export class SimulationService {
 
   private movePaddle(game: GameData) {
     const { inGameData, ruleData } = game; // TODO: ruleData 적용.
-    const { paddleTop, paddleBtm } = inGameData;
-    paddleTop.position.x += paddleTop.velocity.x * GameData.spec.paddle.speed;
-    paddleBtm.position.x += paddleBtm.velocity.x * GameData.spec.paddle.speed;
-    if (paddleBtm.position.x - GameData.spec.paddle.width < 0) {
-      paddleBtm.position.x = GameData.spec.paddle.width / 2;
+    const { paddleBlue, paddleRed } = inGameData;
+    paddleBlue.position.x += paddleBlue.velocity.x * GameData.spec.paddle.speed;
+    paddleRed.position.x += paddleRed.velocity.x * GameData.spec.paddle.speed;
+    if (paddleRed.position.x - GameData.spec.paddle.width < 0) {
+      paddleRed.position.x = GameData.spec.paddle.width / 2;
     }
-    if (paddleBtm.position.x + GameData.spec.paddle.width > GameData.spec.arena.width) {
-      paddleBtm.position.x = GameData.spec.arena.width - GameData.spec.paddle.width / 2;
+    if (paddleRed.position.x + GameData.spec.paddle.width > GameData.spec.arena.width) {
+      paddleRed.position.x = GameData.spec.arena.width - GameData.spec.paddle.width / 2;
     }
-    if (paddleTop.position.x - GameData.spec.paddle.width < 0) {
-      paddleTop.position.x = GameData.spec.paddle.width / 2;
+    if (paddleBlue.position.x - GameData.spec.paddle.width < 0) {
+      paddleBlue.position.x = GameData.spec.paddle.width / 2;
     }
-    if (paddleTop.position.x + GameData.spec.paddle.width > GameData.spec.arena.width) {
-      paddleTop.position.x = GameData.spec.arena.width - GameData.spec.paddle.width / 2;
+    if (paddleBlue.position.x + GameData.spec.paddle.width > GameData.spec.arena.width) {
+      paddleBlue.position.x = GameData.spec.arena.width - GameData.spec.paddle.width / 2;
     }
   }
 
@@ -214,8 +214,8 @@ export class SimulationService {
     if (game && game.inGameData.status === GameStatus.End) {
       const gameLog = this.gameLogRepository.create({
         gameType: game.metaData.gameType,
-        topSideScore: game.inGameData.scoreTop,
-        btmSideScore: game.inGameData.scoreBtm,
+        topSideScore: game.inGameData.scoreBlue,
+        btmSideScore: game.inGameData.scoreRed,
         winnerSeq: game.inGameData.winner,
         option1: game.ruleData.option1,
         option2: game.ruleData.option2,
@@ -237,10 +237,10 @@ export class SimulationService {
     const game = this.games.get(roomId);
     if (!game) return;
     if (game.metaData.playerTop.userId === userId) {
-      game.inGameData.paddleTop.velocity.x = direction;
+      game.inGameData.paddleBlue.velocity.x = direction;
     }
     if (game.metaData.playerBtm.userId === userId) {
-      game.inGameData.paddleBtm.velocity.x = direction;
+      game.inGameData.paddleRed.velocity.x = direction;
     }
   }
 }

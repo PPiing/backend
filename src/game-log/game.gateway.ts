@@ -102,8 +102,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       data[1].userId.toString(),
     ];
     this.server.to(players).emit('game:match', {
-      top: players[0],
-      btm: players[1],
+      blue: players[0],
+      red: players[1],
     });
     this.server.in(players).socketsJoin(data[0].roomId);
     // socket의 session data update를 해줌.

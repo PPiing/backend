@@ -5,15 +5,17 @@ export interface Position {
   x: number;
   y: number;
 }
+export type Vector = Position;
 
-export interface Objective extends Position {
-  velocity: Position;
+export interface MovementInfo {
+  position: Position;
+  velocity: Vector;
 }
 
 export const enum PaddleDirective {
-  LEFT = -1,
+  UP = 1,
   STOP = 0,
-  RIGHT = 1,
+  DOWN = -1,
 }
 
 export const enum GameStatus {
@@ -29,11 +31,11 @@ export class InGameData {
 
   winner: number = null;
 
-  scoreTop = 0;
+  scoreBlue = 0;
 
-  scoreBtm = 0;
+  scoreRed = 0;
 
-  paddleTop: { position: Position, velocity: Position } = {
+  paddleBlue: MovementInfo = {
     position: {
       x: GameData.spec.arena.width / 2,
       y: 10,
@@ -44,7 +46,7 @@ export class InGameData {
     },
   };
 
-  paddleBtm: { position: Position, velocity: Position } = {
+  paddleRed: MovementInfo = {
     position: {
       x: GameData.spec.arena.width / 2,
       y: GameData.spec.arena.height - 10,
@@ -55,7 +57,7 @@ export class InGameData {
     },
   };
 
-  ball: { position: Position, velocity: Position } = {
+  ball: MovementInfo = {
     position: {
       x: GameData.spec.arena.width / 2,
       y: GameData.spec.arena.height / 2,
@@ -69,15 +71,15 @@ export class InGameData {
   get renderData(): RenderData {
     return {
       ball: this.ball.position,
-      paddleTop: this.paddleTop.position,
-      paddleBtm: this.paddleBtm.position,
+      paddleBlue: this.paddleBlue.position,
+      paddleRed: this.paddleRed.position,
     };
   }
 
   get score(): ScoreData {
     return {
-      scoreTop: this.scoreTop,
-      scoreBtm: this.scoreBtm,
+      scoreBlue: this.scoreBlue,
+      scoreRed: this.scoreRed,
     };
   }
 }
@@ -85,12 +87,12 @@ export class InGameData {
 export class RenderData {
   ball: Position;
 
-  paddleTop: Position;
+  paddleBlue: Position;
 
-  paddleBtm: Position;
+  paddleRed: Position;
 }
 export class ScoreData {
-  scoreTop = 0;
+  scoreBlue = 0;
 
-  scoreBtm = 0;
+  scoreRed = 0;
 }
