@@ -11,8 +11,8 @@ const enum GameOption {
   GLOP30 = 'GLOP30', // 공속도 (느리게)
   GLOP31 = 'GLOP31', // 공속도 (보통)
   GLOP32 = 'GLOP32', // 공속도 (빠르게)
-  GLOP40 = 'GLOP40', // 승리점수 (5점)
-  GLOP41 = 'GLOP41', // 승리점수 (10점)
-  GLOP42 = 'GLOP42', // 승리점수 (15점)
+  GLOP40 = 'GLOP40', // 승리점수 (1점)
+  GLOP41 = 'GLOP41', // 승리점수 (3점)
+  GLOP42 = 'GLOP42', // 승리점수 (5점)
 }
 export default GameOption;

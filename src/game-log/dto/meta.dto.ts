@@ -2,7 +2,7 @@ import {
   IsObject, IsString,
 } from 'class-validator';
 import GameType from 'src/enums/mastercode/game-type.enum';
-import { GameSession } from '../interface/game-session';
+import { GameSession } from './game-session.dto';
 
 export class MetaData {
   constructor(

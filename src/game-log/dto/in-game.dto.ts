@@ -27,6 +27,12 @@ export const enum GameStatus {
 export class InGameData {
   frame = 0;
 
+  matchScore;
+
+  ballSpeed;
+
+  paddleSize;
+
   status: GameStatus = GameStatus.Ready;
 
   winner: number = null;
@@ -76,10 +82,10 @@ export class InGameData {
     };
   }
 
-  get score(): ScoreData {
+  get scoreData(): ScoreData {
     return {
-      scoreBlue: this.scoreBlue,
-      scoreRed: this.scoreRed,
+      blue: this.scoreBlue,
+      red: this.scoreRed,
     };
   }
 }
@@ -92,7 +98,7 @@ export class RenderData {
   paddleRed: Position;
 }
 export class ScoreData {
-  scoreBlue = 0;
+  blue = 0;
 
-  scoreRed = 0;
+  red = 0;
 }

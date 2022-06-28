@@ -25,7 +25,6 @@ export class SimulationService {
     this.games.forEach((data, roomId) => {
       const { inGameData, metaData, ruleData } = data;
       inGameData.frame += 1;
-      this.logger.debug(`frame: ${inGameData.frame}`);
       switch (inGameData.status) {
         case GameStatus.Ready: {
           const started = this.countReadyAndStart(roomId, inGameData);
@@ -45,7 +44,7 @@ export class SimulationService {
           const checker = this.checkScorePosition(data);
           if (checker) {
             this.resetBallAndPaddle(data);
-            this.eventRunner.emit('game:score', roomId, data.inGameData.score);
+            this.eventRunner.emit('game:score', roomId, data.inGameData.scoreData);
             let matchScore: number;
 
             if (GameOption.GLOP40 === ruleData.option3) matchScore = 5;
@@ -53,10 +52,10 @@ export class SimulationService {
             else if (GameOption.GLOP42 === ruleData.option3) matchScore = 1;
             else this.logger.error('invalid option3');
 
-            if (matchScore === inGameData.score.scoreRed) {
+            if (matchScore === inGameData.scoreData.red) {
               inGameData.status = GameStatus.End;
               inGameData.winner = metaData.playerBtm.userId;
-            } else if (matchScore === inGameData.score.scoreBlue) {
+            } else if (matchScore === inGameData.scoreData.blue) {
               inGameData.status = GameStatus.End;
               inGameData.winner = metaData.playerTop.userId;
             }
@@ -72,6 +71,7 @@ export class SimulationService {
         }
         default: {
           this.logger.error(`unknown status: ${inGameData.status}`);
+          // TODO: handling error
           break;
         }
       }
