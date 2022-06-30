@@ -4,8 +4,8 @@ import {
 } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { randomUUID } from 'crypto';
-import { GameSession } from './interface/game-session';
-import { GameSocket } from './interface/game-socket';
+import { GameSession } from './dto/game-session.dto';
+import { GameSocket } from './dto/game-socket.dto';
 
 @Injectable()
 export class GameSocketSession {

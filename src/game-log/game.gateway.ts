@@ -5,17 +5,18 @@ import {
   OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import GameType from 'src/enums/mastercode/game-type.enum';
 import { SocketGuard } from 'src/guards/socket.guard';
 import { SessionMiddleware } from 'src/session-middleware';
 import {
   PaddleDirective, RenderData, PatchRule, ReadyData, GameData,
 } from './dto/game-data';
+import { GameSession } from './dto/game-session.dto';
+import { GameSocket } from './dto/game-socket.dto';
 import { ScoreData } from './dto/in-game.dto';
+import { QueueDto } from './dto/queue.dto';
+import { StatusDto } from './dto/status.dto';
 import { GameSocketSession } from './game-socket-session';
 import { GameService } from './game.service';
-import { GameSession } from './interface/game-session';
-import { GameSocket } from './interface/game-socket';
 
 @WebSocketGateway({
   cors: {
@@ -81,14 +82,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   @UseGuards(SocketGuard)
   @SubscribeMessage('enQ')
-  async handleEnqueue(client: GameSocket, data: { isLadder: GameType }) {
+  async handleEnqueue(client: GameSocket, data: QueueDto) {
     this.logger.debug(`user ${client.session.userId} enqueued`);
     return this.gameService.handleEnqueue(client.session, data.isLadder);
   }
 
   @UseGuards(SocketGuard)
   @SubscribeMessage('deQ')
-  handleDequeue(client: GameSocket, data: { isLadder: GameType }) {
+  handleDequeue(client: GameSocket, data: QueueDto) {
     this.logger.debug(`user ${client.session.userId} request dequeued`);
     return this.gameService.handleDequeue(client.session, data.isLadder);
   }
@@ -101,8 +102,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       data[1].userId.toString(),
     ];
     this.server.to(players).emit('game:match', {
-      top: players[0],
-      btm: players[1],
+      blue: players[0],
+      red: players[1],
     });
     this.server.in(players).socketsJoin(data[0].roomId);
     // socket의 session data update를 해줌.
@@ -154,7 +155,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param data 게임 상태
    */
   @OnEvent('game:start')
-  handleGamestart(roomId: string, data: { status: string }) {
+  handleGamestart(roomId: string, data: StatusDto) {
     this.logger.debug(`game ${roomId} is ${data}`);
     this.server.to(roomId).emit('game:start', data);
   }

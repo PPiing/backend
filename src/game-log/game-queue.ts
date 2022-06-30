@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import GameType from 'src/enums/mastercode/game-type.enum';
-import { GameSession } from './interface/game-session';
+import { GameSession } from './dto/game-session.dto';
 
 @Injectable()
 export class GameQueue {

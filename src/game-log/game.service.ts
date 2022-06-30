@@ -7,8 +7,8 @@ import {
 } from './dto/game-data';
 import { InGameData, PaddleDirective } from './dto/in-game.dto';
 import { SimulationService } from './simulation.service';
-import { GameSession } from './interface/game-session';
 import { GameQueue } from './game-queue';
+import { GameSession } from './dto/game-session.dto';
 
 type Ready = boolean;
 
