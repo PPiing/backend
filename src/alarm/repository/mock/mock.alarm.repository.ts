@@ -56,9 +56,10 @@ export default class MockAlarmRepository {
     });
   }
 
-  async getAlarms(userSeq: number): Promise<AlarmResponseDto[]> {
+  async getAlarms(userSeq: number, alarmType: AlarmType): Promise<AlarmResponseDto[]> {
     return this.MockEntity
       .filter((e) => e.receiverSeq === userSeq
+    && e.alarmType === alarmType
     && e.read === false
     && e.delete === false)
       .map((alarm) => ({
@@ -69,9 +70,11 @@ export default class MockAlarmRepository {
       }));
   }
 
-  async getAllAlarms(userSeq: number): Promise<AlarmResponseDto[]> {
+  async getAllAlarms(userSeq: number, alarmType: AlarmType): Promise<AlarmResponseDto[]> {
     return this.MockEntity
-      .filter((e) => e.receiverSeq === userSeq && e.delete === false)
+      .filter((e) => e.receiverSeq === userSeq
+      && e.delete === false
+      && e.alarmType === alarmType)
       .map((alarm) => ({
         alarmSeq: alarm.alarmSeq,
         from: alarm.senderSeq,

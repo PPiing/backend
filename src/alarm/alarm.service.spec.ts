@@ -29,16 +29,16 @@ describe('AlarmService 테스트', () => {
     alarmService = app.get<AlarmService>(AlarmService);
   });
 
-  describe('getAlarms', () => {
-    test('getAlarms 테스트', async () => {
+  describe('getConfirms', () => {
+    test('getConfirms 테스트', async () => {
       // given
       const userSeq = 1;
 
       // when
-      const alarms = await alarmService.getAlarms(userSeq);
+      const alarms = await alarmService.getConfirms(userSeq);
 
       // then
-      expect(alarms.length).toBe(2);
+      expect(alarms.length).toBe(1);
       alarms.forEach((alarm) => {
         expect(alarm).toHaveProperty('from');
         expect(alarm).toHaveProperty('type');
@@ -47,16 +47,52 @@ describe('AlarmService 테스트', () => {
     });
   });
 
-  describe('getAllAlarms', () => {
-    test('getAllAlarms 테스트', async () => {
+  describe('getAllConfirms', () => {
+    test('getAllConfirms 테스트', async () => {
       // given
       const userSeq = 1;
 
       // when
-      const alarms = await alarmService.getAlarms(userSeq);
+      const alarms = await alarmService.getAllConfirms(userSeq);
 
       // then
-      expect(alarms.length).toBe(2);
+      expect(alarms.length).toBe(1);
+      alarms.forEach((alarm) => {
+        expect(alarm).toHaveProperty('from');
+        expect(alarm).toHaveProperty('type');
+        expect(alarm).toHaveProperty('code');
+      });
+    });
+  });
+
+  describe('getAlerts', () => {
+    test('getAlerts 테스트', async () => {
+      // given
+      const userSeq = 1;
+
+      // when
+      const alarms = await alarmService.getAlerts(userSeq);
+
+      // then
+      expect(alarms.length).toBe(1);
+      alarms.forEach((alarm) => {
+        expect(alarm).toHaveProperty('from');
+        expect(alarm).toHaveProperty('type');
+        expect(alarm).toHaveProperty('code');
+      });
+    });
+  });
+
+  describe('getAllAlerts', () => {
+    test('getAllAlerts 테스트', async () => {
+      // given
+      const userSeq = 1;
+
+      // when
+      const alarms = await alarmService.getAllAlerts(userSeq);
+
+      // then
+      expect(alarms.length).toBe(1);
       alarms.forEach((alarm) => {
         expect(alarm).toHaveProperty('from');
         expect(alarm).toHaveProperty('type');
@@ -73,12 +109,12 @@ describe('AlarmService 테스트', () => {
 
       // when
       await alarmService.readAlarm(alarmSeq, who);
-      const alarms = await alarmService.getAlarms(1);
-      const alarmsAll = await alarmService.getAllAlarms(1);
+      const alarms = await alarmService.getAlerts(1);
+      const alarmsAll = await alarmService.getAllAlerts(1);
 
       // then
       expect(alarms.length).toBe(1);
-      expect(alarmsAll.length).toBe(2);
+      expect(alarmsAll.length).toBe(1);
     });
   });
 
@@ -90,8 +126,8 @@ describe('AlarmService 테스트', () => {
 
       // when
       await alarmService.deleteAlarm(alarmSeq, who);
-      const alarms = await alarmService.getAlarms(1);
-      const alarmsAll = await alarmService.getAllAlarms(1);
+      const alarms = await alarmService.getAlerts(1);
+      const alarmsAll = await alarmService.getAllAlerts(1);
 
       // then
       expect(alarms.length).toBe(1);

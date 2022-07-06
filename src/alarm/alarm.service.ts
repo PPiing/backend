@@ -98,23 +98,43 @@ export class AlarmService {
   }
 
   /**
-   * 특정 유저가 수신한 알람을 가져옵니다. 읽음 처리 된 알람은 가져오지 않습니다.
+   * 특정 유저가 수신한 일반 알람을 가져옵니다. 읽음 처리 된 알람은 가져오지 않습니다.
    *
    * @param userSeq 유저 ID
    * @returns 알람 응답 DTO 배열
    */
-  async getAlarms(userSeq: number): Promise<AlarmResponseDto[]> {
-    return this.alarmRepository.getAlarms(userSeq);
+  async getAlerts(userSeq: number): Promise<AlarmResponseDto[]> {
+    return this.alarmRepository.getAlarms(userSeq, AlarmType.ALTP10);
   }
 
   /**
-   * 특정 유저가 수신한 알람을 가져옵니다. 읽은 알람도 가져옵니다.
+   * 특정 유저가 수신한 컨펌 알람을 가져옵니다. 읽음 처리 된 알람은 가져오지 않습니다.
    *
    * @param userSeq 유저 ID
    * @returns 알람 응답 DTO 배열
    */
-  async getAllAlarms(userSeq: number): Promise<AlarmResponseDto[]> {
-    return this.alarmRepository.getAllAlarms(userSeq);
+  async getConfirms(userSeq: number): Promise<AlarmResponseDto[]> {
+    return this.alarmRepository.getAlarms(userSeq, AlarmType.ALTP20);
+  }
+
+  /**
+   * 특정 유저가 수신한 일반 알람을 가져옵니다. 읽은 알람도 가져옵니다.
+   *
+   * @param userSeq 유저 ID
+   * @returns 알람 응답 DTO 배열
+   */
+  async getAllAlerts(userSeq: number): Promise<AlarmResponseDto[]> {
+    return this.alarmRepository.getAlarms(userSeq, AlarmType.ALTP10);
+  }
+
+  /**
+   * 특정 유저가 수신한 컨펌 알람을 가져옵니다. 읽은 알람도 가져옵니다.
+   *
+   * @param userSeq 유저 ID
+   * @returns 알람 응답 DTO 배열
+   */
+  async getAllConfirms(userSeq: number): Promise<AlarmResponseDto[]> {
+    return this.alarmRepository.getAlarms(userSeq, AlarmType.ALTP20);
   }
 
   /**

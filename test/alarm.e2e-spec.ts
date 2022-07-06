@@ -143,19 +143,18 @@ describe('Alarm 테스트 (e2e)', () => {
   });
 
   describe('알람 조회', () => {
-    test('특정 유저가 수신한 읽지 않은 알람 조회', async () => {
+    test('특정 유저가 수신한 읽지 않은 알람 조회 (일반 알람)', async () => {
       // given
       const userCookie = cookie;
 
       // when
       const res = await request(app.getHttpServer())
-        .get('/alarm/alarms')
+        .get('/alarm/alerts')
         .set('Cookie', userCookie);
 
       // then
       expect(res.status).toBe(200);
       expect(res.body).toBeInstanceOf(Array);
-      expect(res.body.length).toBe(2);
       res.body.forEach((alarm) => {
         expect(alarm).toHaveProperty('from');
         expect(alarm).toHaveProperty('type');
@@ -163,19 +162,58 @@ describe('Alarm 테스트 (e2e)', () => {
       });
     });
 
-    test('특정 유저가 수신한 모든 알람 조회', async () => {
+    test('특정 유저가 수신한 읽지 않은 알람 조회 (컨펌 알람)', async () => {
       // given
       const userCookie = cookie;
 
       // when
       const res = await request(app.getHttpServer())
-        .get('/alarm/alarms/all')
+        .get('/alarm/confirms')
         .set('Cookie', userCookie);
 
       // then
       expect(res.status).toBe(200);
       expect(res.body).toBeInstanceOf(Array);
-      expect(res.body.length).toBe(2);
+      expect(res.body.length).toBe(1);
+      res.body.forEach((alarm) => {
+        expect(alarm).toHaveProperty('from');
+        expect(alarm).toHaveProperty('type');
+        expect(alarm).toHaveProperty('code');
+      });
+    });
+
+    test('특정 유저가 수신한 모든 알람 조회 (일반 알람)', async () => {
+      // given
+      const userCookie = cookie;
+
+      // when
+      const res = await request(app.getHttpServer())
+        .get('/alarm/alerts/all')
+        .set('Cookie', userCookie);
+
+      // then
+      expect(res.status).toBe(200);
+      expect(res.body).toBeInstanceOf(Array);
+      res.body.forEach((alarm) => {
+        expect(alarm).toHaveProperty('from');
+        expect(alarm).toHaveProperty('type');
+        expect(alarm).toHaveProperty('code');
+      });
+    });
+
+    test('특정 유저가 수신한 모든 알람 조회 (컨펌 알람)', async () => {
+      // given
+      const userCookie = cookie;
+
+      // when
+      const res = await request(app.getHttpServer())
+        .get('/alarm/confirms/all')
+        .set('Cookie', userCookie);
+
+      // then
+      expect(res.status).toBe(200);
+      expect(res.body).toBeInstanceOf(Array);
+      expect(res.body.length).toBe(1);
       res.body.forEach((alarm) => {
         expect(alarm).toHaveProperty('from');
         expect(alarm).toHaveProperty('type');

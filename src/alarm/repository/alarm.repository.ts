@@ -54,7 +54,7 @@ export default class AlarmRepository extends Repository<Alarm> {
    * @param userSeq
    * @returns
    */
-  async getAlarms(userSeq: number): Promise<AlarmResponseDto[]> {
+  async getAlarms(userSeq: number, alarmType: AlarmType): Promise<AlarmResponseDto[]> {
     if (!userSeq) {
       return [];
     }
@@ -62,6 +62,7 @@ export default class AlarmRepository extends Repository<Alarm> {
       receiverSeq: userSeq,
       read: false,
       delete: false,
+      alarmType,
     });
     return rtn.map((alarm) => ({
       alarmSeq: alarm.alarmSeq,
@@ -77,13 +78,14 @@ export default class AlarmRepository extends Repository<Alarm> {
    * @param userSeq
    * @returns
    */
-  async getAllAlarms(userSeq: number): Promise<AlarmResponseDto[]> {
+  async getAllAlarms(userSeq: number, alarmType: AlarmType): Promise<AlarmResponseDto[]> {
     if (!userSeq) {
       return [];
     }
     const rtn = await this.find({
       receiverSeq: userSeq,
       delete: false,
+      alarmType,
     });
     return rtn.map((alarm) => ({
       alarmSeq: alarm.alarmSeq,
