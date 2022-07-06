@@ -24,11 +24,10 @@ export default class MockAchivRepository {
     });
   }
 
-  async getAchiv(achivSeq: number) : Promise<AchivDto | undefined> {
-    const target = await this.MockEntity.find((e) => e.achivSeq === achivSeq);
-    if (!target) {
+  async getAchiv() : Promise<AchivDto[] | undefined> {
+    if (this.MockEntity.length === 0) {
       return undefined;
     }
-    return target;
+    return this.MockEntity;
   }
 }

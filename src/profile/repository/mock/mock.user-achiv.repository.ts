@@ -1,5 +1,3 @@
-import { UserAchivDto } from 'src/profile/dto/user-achiv.dto';
-
 export default class MockUserAchivRepository {
   MockEntity: any[] = [];
 
@@ -21,11 +19,12 @@ export default class MockUserAchivRepository {
     });
   }
 
-  async getUserAchiv(userSeq: number): Promise<UserAchivDto[] | undefined> {
-    const target : UserAchivDto[] = await this.MockEntity.filter((e) => e.userSeq === userSeq);
+  async getUserAchiv(achivSeq: number, userSeq: number): Promise<boolean> {
+    const target = await this.MockEntity.filter(
+      (e) => e.userSeq === userSeq && e.achivSeq === achivSeq);
     if (target.length === 0) {
-      return undefined;
+      return false;
     }
-    return target;
+    return true;
   }
 }
