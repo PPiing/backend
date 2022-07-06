@@ -54,10 +54,10 @@ describe('User E2E Test', () => {
         // then
         expect(response.status).toBe(200);
         expect(response.body).toBeDefined();
-        expect(response.body.userName).toBeDefined();
-        expect(response.body.userEmail).toBeDefined();
-        expect(response.body.userStatus).toBeDefined();
-        expect(response.body.userImage).toBeDefined();
+        expect(response.body.user_info.userName).toBeDefined();
+        expect(response.body.user_info.userEmail).toBeDefined();
+        expect(response.body.user_info.userStatus).toBeDefined();
+        expect(response.body.user_info.userImage).toBeDefined();
         // expect(response.body.isFriend).toBeDefined();
         // expect(response.body.isBlock).toBeDefined();
         // NOTE: 다른 테이블과의 조인이 필요한 부분이므로 추후에 검증
