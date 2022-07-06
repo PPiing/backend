@@ -1,7 +1,6 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany,
 } from 'typeorm';
-import ProfileAchiv from './user-achiv.entity';
 import Rank from './rank.entity';
 import User from './user.entity';
 import UserAchiv from './user-achiv.entity';
