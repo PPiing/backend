@@ -1,16 +1,16 @@
 import UserAchiv from 'src/entities/user-achiv.entity';
 import { EntityRepository, Repository } from 'typeorm';
-import { UserAchivDto } from '../dto/user-achiv.dto';
 
 @EntityRepository(UserAchiv)
 export class UserAchivRepository extends Repository<UserAchiv> {
-  async getUserAchiv(userSeq: number): Promise<UserAchivDto[] | undefined> {
+  async getUserAchiv(achivSeq: number, userSeq: number): Promise<boolean> {
     const target = await this.find({
       userSeq,
+      achivSeq,
     });
     if (target.length === 0) {
-      return undefined;
+      return false;
     }
-    return target;
+    return true;
   }
 }

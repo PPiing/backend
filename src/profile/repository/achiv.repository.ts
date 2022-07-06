@@ -1,11 +1,15 @@
 import Achiv from 'src/entities/achiv.entity';
-import { EntityRepository, Repository } from 'typeorm';
+import { EntityRepository, getManager, Repository } from 'typeorm';
 import { AchivDto } from '../dto/achiv.dto';
 
 @EntityRepository(Achiv)
 export default class AchivRepository extends Repository<Achiv> {
-  async getAchiv(achivSeq: number) : Promise<AchivDto | undefined> {
-    const target = await this.findOne(achivSeq);
-    return target;
+  async getAchiv() : Promise<AchivDto[] | undefined> {
+    const em = getManager();
+    const achives = await em.query('select * from achiv');
+    if (achives.length === 0) {
+      return undefined;
+    }
+    return achives;
   }
 }
