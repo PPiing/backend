@@ -13,7 +13,7 @@ export class GetProfileDto {
 
   @ApiProperty({
     description: '업적 정보 리스트',
-    example:GetAchivDto
+    example: GetAchivDto,
   })
   @IsNotEmpty()
     achiv_info : GetAchivDto[];
