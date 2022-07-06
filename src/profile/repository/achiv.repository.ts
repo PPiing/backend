@@ -3,7 +3,7 @@ import { EntityRepository, getManager, Repository } from 'typeorm';
 import { AchivDto } from '../dto/achiv.dto';
 
 @EntityRepository(Achiv)
-export default class AchivRepository extends Repository<Achiv> {
+export class AchivRepository extends Repository<Achiv> {
   async getAchiv() : Promise<AchivDto[] | undefined> {
     const em = getManager();
     const achives = await em.query('select * from achiv');

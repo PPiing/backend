@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { AchivDto } from './dto/achiv.dto';
 import { GetAchivDto } from './dto/get-achiv.dto';
-import AchivRepository from './repository/achiv.repository';
+import { AchivRepository } from './repository/achiv.repository';
 import { UserAchivRepository } from './repository/user-achiv.repository';
 
 @Injectable()
@@ -10,7 +9,7 @@ export class UserAchivService {
 
   constructor(
     private readonly userAchivRepository : UserAchivRepository,
-    private readonly AchivRepository : AchivRepository,
+    private readonly achivRepository : AchivRepository,
   ) {}
 
   /**
@@ -22,7 +21,7 @@ export class UserAchivService {
   async getUserAchiv(userSeq: number): Promise<GetAchivDto []> {
     this.logger.log(`달성 업적 리스트 조회 요청 : ${userSeq}`);
 
-    const achives = await this.AchivRepository.getAchiv();
+    const achives = await this.achivRepository.getAchiv();
     if (achives === undefined) {
       throw new BadRequestException('등록된 업적이 없습니다.');
     }

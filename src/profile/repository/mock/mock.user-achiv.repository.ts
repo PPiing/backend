@@ -21,7 +21,8 @@ export default class MockUserAchivRepository {
 
   async getUserAchiv(achivSeq: number, userSeq: number): Promise<boolean> {
     const target = await this.MockEntity.filter(
-      (e) => e.userSeq === userSeq && e.achivSeq === achivSeq);
+      (e) => e.userSeq === userSeq && e.achivSeq === achivSeq,
+    );
     if (target.length === 0) {
       return false;
     }
