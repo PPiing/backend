@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import GameLog from 'src/entities/game-log.entity';
 import { GameRecordDto } from './dto/game-record.dts';
-import { GameLogRepository } from './game-log.repository';
+import { GameLogRepository } from './repository/game-log.repository';
 
 @Injectable()
 export class GameLogService {
@@ -15,7 +15,7 @@ export class GameLogService {
     return ret;
   }
 
-  async findRecentGameLog(userSeq: number, limit: number): Promise<GameLog[] | GameLog> {
+  async findRecentGameLog(userSeq: number, limit: number): Promise<GameLog[]> {
     this.logger.debug('findRecentGameLog', userSeq, limit);
     return this.gameLogRepository.findRecentGameLog(userSeq, limit);
   }

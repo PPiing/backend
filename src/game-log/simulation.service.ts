@@ -4,7 +4,7 @@ import { Interval } from '@nestjs/schedule';
 import GameOption from 'src/enums/mastercode/game-option.enum';
 import { GameData } from './dto/game-data';
 import { GameStatus, InGameData, PaddleDirective } from './dto/in-game.dto';
-import { GameLogRepository } from './game-log.repository';
+import { GameLogRepository } from './repository/game-log.repository';
 
 @Injectable()
 export class SimulationService {
@@ -211,6 +211,7 @@ export class SimulationService {
    */
   endGame(roomId: string) {
     const game = this.games.get(roomId);
+    // NOTE : MockGameLogRepository 에는 create 함수를 만들지 않아서, 이부분을 테스트해볼 때 오류가 발생할 수 있습니다.
     if (game && game.inGameData.status === GameStatus.End) {
       const gameLog = this.gameLogRepository.create({
         gameType: game.metaData.gameType,
