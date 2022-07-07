@@ -37,7 +37,7 @@ export class GameLogController {
   findRecentGameLog(
     @Param('userSeq') userSeq: number,
       @Query('limit') limit: number,
-  ): Promise<GameLog[] | GameLog> {
+  ): Promise<GameLog[]> {
     return this.gameLogService.findRecentGameLog(userSeq, limit);
   }
 
