@@ -15,7 +15,7 @@ export class UserProfileRepository extends Repository<User> {
       userName: user.nickName,
       userEmail: user.email,
       userStatus: user.status,
-      userImage: user.avatarImgUri,
+      userImage: `./api/upload/${user.avatarImgUri}`,
     });
   }
 
