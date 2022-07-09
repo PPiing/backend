@@ -1,16 +1,18 @@
 import {
-  Controller, Put, Get, Logger, Param, ValidationPipe, Delete, HttpCode, UsePipes,
+  Controller, Put, Get, Logger, Param, ValidationPipe, Delete, HttpCode, UsePipes, UseGuards,
 } from '@nestjs/common';
 import {
   ApiOperation, ApiParam, ApiResponse, ApiTags,
 } from '@nestjs/swagger';
 import { User } from 'src/auth/user.decorator';
+import { CheckLogin } from 'src/guards/check-login.guard';
 import { UserDto } from 'src/user/dto/user.dto';
 import { AlarmService } from './alarm.service';
 import { AlarmResponseDto } from './dto/alarm-response.dto';
 
 @ApiTags('알람')
 @Controller('alarm')
+@UseGuards(CheckLogin)
 @UsePipes(new ValidationPipe({ transform: true }))
 export class AlarmController {
   private logger: Logger = new Logger(AlarmController.name);
