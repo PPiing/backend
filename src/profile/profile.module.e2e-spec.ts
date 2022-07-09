@@ -1,5 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { GameModule } from 'src/game-log/game.module.e2e-spec';
 import { ProfileController } from './profile.controller';
 import { UserProfileService } from './user-profile.service';
 import MockUserProfileRepository from './repository/mock/mock.user-profile.repository';
@@ -10,7 +11,6 @@ import { AchivRepository } from './repository/achiv.repository';
 import MockAchivRepository from './repository/mock/mock.achiv.repository';
 import { UserAchivService } from './user-achiv.service';
 import { UserGameService } from './user-game.service';
-import { GameModule } from 'src/game-log/game.module.e2e-spec';
 
 const repositories = [
   {

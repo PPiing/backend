@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable, Logger } from "@nestjs/common";
-import { GetRankDto } from "./dto/get-rank.dto";
-import { RankRepository } from "./repository/rank.repository";
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { RankType } from 'src/enums/rank-type.enum';
+import { GetRankDto } from './dto/get-rank.dto';
+import { RankRepository } from './repository/rank.repository';
 
 @Injectable()
 export class UserRankService {
@@ -18,15 +19,24 @@ export class UserRankService {
    */
   async getUserRank(userSeq: number): Promise<GetRankDto> {
     const rank = await this.rankRepository.getRank(userSeq);
-    if (rank === undefined) {
-      throw new BadRequestException('랭크 정보가 부정확 합니다.');
-    }
     const result : GetRankDto = {
       rank_score: rank.rankScore,
       rank_name: '',
+    };
+    if (rank.rankScore <= -50 || rank.rankScore === undefined) {
+      result.rank_name = RankType.RANK01;
+    } else if (rank.rankScore > -50 && rank.rankScore <= 150) {
+      result.rank_name = RankType.RANK02;
+    } else if (rank.rankScore > 150 && rank.rankScore <= 300) {
+      result.rank_name = RankType.RANK03;
+    } else if (rank.rankScore > 300 && rank.rankScore <= 500) {
+      result.rank_name = RankType.RANK04;
+    } else if (rank.rankScore > 500 && rank.rankScore <= 1000) {
+      result.rank_name = RankType.RANK05;
+    } else {
+      result.rank_name = RankType.RANK06;
     }
-    if (rank.rankScore > 0 && rank.rankScore <= 50) {
-      result.rank_name
-    }
+
+    return result;
   }
 }

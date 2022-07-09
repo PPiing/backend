@@ -1,4 +1,4 @@
-import { RankDto } from "src/profile/dto/rank.dto";
+import { RankDto } from 'src/profile/dto/rank.dto';
 
 export default class MockRankRepository {
   MockEntity: any[] = [];
@@ -19,10 +19,10 @@ export default class MockRankRepository {
       rankScore: 70,
       userSeq: 3,
     });
-  };
+  }
 
   async getRank(userSeq: number) : Promise<RankDto | undefined> {
-    const target = await this.MockEntity.filter(e => e.userSeq === userSeq);
+    const target = await this.MockEntity.filter((e) => e.userSeq === userSeq);
     if (target.length !== 1) {
       return undefined;
     }

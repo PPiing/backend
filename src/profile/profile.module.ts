@@ -16,7 +16,7 @@ import { UserProfileService } from './user-profile.service';
       UserAchivRepository,
       AchivRepository,
     ]),
-    forwardRef(() => GameModule)
+    forwardRef(() => GameModule),
   ],
   controllers: [ProfileController],
   providers: [

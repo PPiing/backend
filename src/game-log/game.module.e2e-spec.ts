@@ -1,6 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
+import AppModule from 'src/app.module.e2e-spec';
 import { GameGateway } from './game.gateway';
 import { GameService } from './game.service';
 import { GameLogRepository } from './repository/game-log.repository';
@@ -10,7 +11,6 @@ import { GameSocketSession } from './game-socket-session';
 import { GameLogController } from './game-log.controller';
 import { GameLogService } from './game-log.service';
 import { MockGameLogRepository } from './repository/mock/mock.game-log.repository';
-import AppModule from 'src/app.module.e2e-spec';
 
 @Module({
   imports: [

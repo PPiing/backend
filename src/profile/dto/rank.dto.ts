@@ -1,7 +1,7 @@
 export class RankDto {
-	rankSeq: number;
+  rankSeq: number;
 
-	rankScore: number;
+  rankScore: number;
 
-	userSeq: number;
+  userSeq: number;
 }
