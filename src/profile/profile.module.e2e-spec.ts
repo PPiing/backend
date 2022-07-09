@@ -10,7 +10,7 @@ import { AchivRepository } from './repository/achiv.repository';
 import MockAchivRepository from './repository/mock/mock.achiv.repository';
 import { UserAchivService } from './user-achiv.service';
 import { UserGameService } from './user-game.service';
-import { GameModule } from 'src/game-log/game.module';
+import { GameModule } from 'src/game-log/game.module.e2e-spec';
 
 const repositories = [
   {

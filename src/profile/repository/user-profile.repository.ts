@@ -15,7 +15,7 @@ export class UserProfileRepository extends Repository<User> {
       userName: user.nickName,
       userEmail: user.email,
       userStatus: user.status,
-      userImage: user.avatarImgUri,
+      userImage: `./api/upload/${user.avatarImgUri}`,
     });
   }
 
@@ -38,7 +38,7 @@ export class UserProfileRepository extends Repository<User> {
       nickName: user.nickName,
       email: user.email,
       secAuthStatus: user.secAuthStatuc,
-      avatarImgUri: user.avatarImgUri,
+      avatarImgUri: `./api/upload/${user.avatarImgUri}`,
     });
   }
 
@@ -62,7 +62,7 @@ export class UserProfileRepository extends Repository<User> {
       userName: user.nickName,
       userEmail: user.email,
       userStatus: user.status,
-      userImage: user.avatarImgUri,
+      userImage: `./api/upload/${user.avatarImgUri}`,
     }));
   }
 }

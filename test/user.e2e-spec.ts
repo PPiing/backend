@@ -1,14 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import AppModule from 'src/app.module.e2e-spec';
-import * as session from 'express-session';
-import * as passport from 'passport';
 import * as request from 'supertest';
-import * as sess from 'session-file-store';
 
 describe('User E2E Test', () => {
   let app: INestApplication;
-  let cookie: string;
+  let cookie: string[];
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -16,18 +13,6 @@ describe('User E2E Test', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    const FileStore = sess(session);
-    app.use(
-      session({
-        secret: 'secret key',
-        resave: false,
-        saveUninitialized: true,
-        store: new FileStore(),
-      }),
-    );
-
-    app.use(passport.initialize());
-    app.use(passport.session());
 
     await app.init();
 
