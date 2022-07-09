@@ -148,7 +148,7 @@ export class ProfileController {
   @Get('/search/:nickname')
   async searchUser(
     @Param('nickname') nickname: string,
-  ): Promise<GetUserDto> {
+  ): Promise<GetProfileDto> {
     this.logger.log(`닉네임 정보 조회 요청: ${nickname}`);
 
     const findUser = await this.userService.findByNickname(nickname);
