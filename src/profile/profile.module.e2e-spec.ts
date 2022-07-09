@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ProfileController } from './profile.controller';
 import { UserProfileService } from './user-profile.service';
@@ -9,6 +9,8 @@ import MockUserAchivRepository from './repository/mock/mock.user-achiv.repositor
 import { AchivRepository } from './repository/achiv.repository';
 import MockAchivRepository from './repository/mock/mock.achiv.repository';
 import { UserAchivService } from './user-achiv.service';
+import { UserGameService } from './user-game.service';
+import { GameModule } from 'src/game-log/game.module';
 
 const repositories = [
   {
@@ -25,10 +27,14 @@ const repositories = [
   },
 ];
 @Module({
+  imports: [
+    forwardRef(() => GameModule),
+  ],
   controllers: [ProfileController],
   providers: [
     UserProfileService,
     UserAchivService,
+    UserGameService,
     ...repositories,
   ],
   exports: [UserProfileService],

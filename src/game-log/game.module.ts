@@ -31,6 +31,6 @@ import { MockGameLogRepository } from './repository/mock/mock.game-log.repositor
     GameLogService,
   ],
   controllers: [GameLogController],
-  exports: [GameGateway],
+  exports: [GameGateway, GameLogService],
 })
 export class GameModule {}
