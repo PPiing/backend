@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module.e2e-spec';
 import { ChatroomsModule } from './chatrooms/chatrooms.module.e2e-spec';
 import { FriendsModule } from './community-bar/friends/friends.module.e2e-spec';
 import configuration from './configs/configuration';
+import { GameModule } from './game-log/game.module.e2e-spec';
 import { UserProfileModule } from './profile/profile.module.e2e-spec';
 import { SessionMiddleware } from './session-middleware';
 import { UserModule } from './user/user.module.e2e-spec';
@@ -23,6 +24,7 @@ import { UserModule } from './user/user.module.e2e-spec';
       load: [configuration],
     }),
     ChatroomsModule,
+    GameModule,
     UserModule,
     AuthModule,
     FriendsModule,

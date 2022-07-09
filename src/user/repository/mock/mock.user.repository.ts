@@ -74,4 +74,9 @@ export default class MockUserRepository {
     });
     return friendsInfo;
   }
+
+  async findByNickname(nickname: string): Promise<number | undefined> {
+    const result = await this.MockEntity.find((e) => e.nickName === nickname);
+    return result;
+  }
 }

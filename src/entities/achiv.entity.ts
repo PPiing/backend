@@ -1,7 +1,7 @@
 import {
   Entity, Column, PrimaryGeneratedColumn, OneToMany,
 } from 'typeorm';
-import ProfileAchiv from './profile-achiv.entity';
+import UserAchiv from './user-achiv.entity';
 
 @Entity()
 export default class Achiv {
@@ -12,14 +12,11 @@ export default class Achiv {
     achivTitle: string; // 업적
 
   @Column()
-    condition: string; // 조건
+    achivImgUri: string; // 이미지
 
   @Column()
-    imgUri: string; // 이미지
+    totalScore: number; // 목표달성점수
 
-  @Column()
-    totalScore: string; // 목표달성점수
-
-  @OneToMany(() => ProfileAchiv, (profileAchiv) => profileAchiv.achiv)
-    profileAchiv: ProfileAchiv[]; // 프로필 업적 엔티티
+  @OneToMany(() => UserAchiv, (userAchiv) => userAchiv.userAchivSeq)
+    userAchiv: UserAchiv[]; // 프로필 업적 엔티티
 }

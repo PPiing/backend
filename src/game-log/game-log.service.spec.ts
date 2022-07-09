@@ -1,14 +1,14 @@
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { time } from 'console';
 import GameOption from 'src/enums/mastercode/game-option.enum';
 import GameType from 'src/enums/mastercode/game-type.enum';
-import { GameLogRepository, MockGameLogRepository } from './game-log.repository';
+import { GameLogRepository } from './repository/game-log.repository';
 import { GameLogService } from './game-log.service';
 import { GameQueue } from './game-queue';
 import { GameService } from './game.service';
 import { SimulationService } from './simulation.service';
+import { MockGameLogRepository } from './repository/mock/mock.game-log.repository';
 
 describe('GameModule', () => {
   let gameLogService: GameLogService;
@@ -68,7 +68,7 @@ describe('GameModule', () => {
       });
     });
     it('findRecentGameLog', async () => {
-      expect(await gameLogService.findRecentGameLog(1, 2)).toMatchObject({
+      expect(await gameLogService.findRecentGameLog(1, 2)).toMatchObject([{
         gameLogSeq: 1,
         roomId: '1',
         topUserName: 'user1',
@@ -84,13 +84,13 @@ describe('GameModule', () => {
         option3: GameOption.GLOP40,
         createdAt: '2022-06-16T00:26:58.205Z',
         updatedAt: '2022-06-16T00:26:58.205Z',
-      });
+      }]);
     });
     it('findUserGameLog', async () => {
       expect(await gameLogService.findUserGameLog(1)).toEqual(
         {
-          total: 30,
-          win: 15,
+          total: 1,
+          win: 1,
         },
       );
     });

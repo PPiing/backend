@@ -15,10 +15,7 @@ export default class GameLog {
     roomId: string;
 
   @Column()
-    topUserName: string;
-
-  @Column()
-    btmUserName: string;
+    gameType: GameType;
 
   @ManyToOne(() => User)
   @JoinColumn()
@@ -29,7 +26,10 @@ export default class GameLog {
     btmUserSeq: number;
 
   @Column()
-    gameType: GameType;
+    topUserName: string;
+
+  @Column()
+    btmUserName: string;
 
   @ManyToOne(() => User)
     winnerSeq: number;

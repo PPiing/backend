@@ -1,5 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { GetFriendsDto } from 'src/community-bar/friends/dto/get-friends.dto';
+import User from 'src/entities/user.entity';
 import { UserDto } from './dto/user.dto';
 import { UserRepository } from './repository/user.repository';
 
@@ -26,7 +27,7 @@ export class UserService {
         userId: user.userId,
         nickName: user.nickName,
         email: user.email,
-        secAuthStatus: user.secAuthStatuc,
+        secAuthStatus: user.secAuthStatus,
         avatarImgUri: user.avatarImgUri,
         status: user.status,
         deleteStatus: user.deleteStatus,
@@ -68,7 +69,7 @@ export class UserService {
       userId: userInstance.userId,
       nickName: userInstance.nickName,
       email: userInstance.email,
-      secAuthStatus: userInstance.secAuthStatuc,
+      secAuthStatus: userInstance.secAuthStatus,
       avatarImgUri: userInstance.avatarImgUri,
       status: userInstance.status,
       deleteStatus: userInstance.deleteStatus,
@@ -98,7 +99,7 @@ export class UserService {
         userId: user.userId,
         nickName: user.nickName,
         email: user.email,
-        secAuthStatus: user.secAuthStatuc,
+        secAuthStatus: user.secAuthStatus,
         avatarImgUri: user.avatarImgUri,
         status: user.status,
         deleteStatus: user.deleteStatus,
@@ -118,5 +119,21 @@ export class UserService {
     this.logger.debug(`UserService.getFriendsInfo: ${userIds}`);
     const users = await this.userRepository.getFriendsInfo(userIds);
     return users;
+  }
+
+  /**
+   * nickname 으로 유저를 검색합니다.
+   *
+   * @param nickName 유저 닉네임
+   * @return 유저 정보
+   */
+  async findByNickname(nickName: string): Promise<UserDto> {
+    this.logger.debug(`findByNickname: ${nickName}`);
+    const user = await this.userRepository.findByNickname(nickName);
+
+    if (user === undefined) {
+      throw new BadRequestException('잘못된 닉네임 입니다.');
+    }
+    return user;
   }
 }
