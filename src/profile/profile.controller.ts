@@ -13,6 +13,7 @@ import { UserDto } from '../user/dto/user.dto';
 import { UserProfileService } from './user-profile.service';
 import { GetProfileDto } from './dto/get-profile.dto';
 import { UserAchivService } from './user-achiv.service';
+import { UserGameService } from './user-game.service';
 
 @ApiTags('유저')
 @Controller('users')
@@ -23,6 +24,7 @@ export class ProfileController {
   constructor(
     private readonly userProfileService: UserProfileService,
     private readonly userAchivService: UserAchivService,
+    private readonly userGameService : UserGameService,
   ) {}
 
   /**
@@ -50,9 +52,11 @@ export class ProfileController {
     }
     const user = await this.userProfileService.getUserInfo(userSeq);
     const achiv = await this.userAchivService.getUserAchiv(userSeq);
+    const game = await this.userGameService.geUserGame(userSeq);
     return ({
       user_info: user,
       achiv_info: achiv,
+      game_log: game,
     });
   }
 

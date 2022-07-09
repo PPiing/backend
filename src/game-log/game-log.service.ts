@@ -5,7 +5,7 @@ import { GameLogRepository } from './repository/game-log.repository';
 
 @Injectable()
 export class GameLogService {
-  private readonly logger:Logger = new Logger('GameLogService');
+  private readonly logger:Logger = new Logger(GameLogService.name);
 
   constructor(private readonly gameLogRepository: GameLogRepository) {}
 
