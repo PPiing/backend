@@ -77,14 +77,24 @@ export class ProfileController {
   @Get('/profile')
   async getMe(
     @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
-  ): Promise<GetUserDto> {
+  ): Promise<GetProfileDto> {
     this.logger.log(`나의 정보 조회 요청: ${user.userSeq}`);
 
     const check = await this.userProfileService.checkUser(user.userSeq);
     if (!check) {
       throw new BadRequestException('유저 정보가 존재하지 않습니다.');
     }
-    return this.userProfileService.getUserInfo(user.userSeq);
+    
+    const userInfo = await this.userProfileService.getUserInfo(user.userSeq);
+    const achiv = await this.userAchivService.getUserAchiv(user.userSeq);
+    const rank = await this.userRankService.getUserRank(user.userSeq);
+    const game = await this.userGameService.geUserGame(user.userSeq);
+    return ({
+      user_info: userInfo,
+      achiv_info: achiv,
+      rank_info: rank,
+      game_log: game,
+    });
   }
 
   /**
