@@ -4,6 +4,8 @@ import {
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { UserModule } from './user/user.module';
 import AppController from './app.controller';
 import AppService from './app.service';
@@ -17,6 +19,7 @@ import { ProfileModule } from './profile/profile.module';
 import { SessionMiddleware } from './session-middleware';
 import { AlarmModule } from './alarm/alarm.module';
 import { UploadModule } from './upload/upload.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -38,6 +41,7 @@ import { UploadModule } from './upload/upload.module';
     AlarmModule,
     ProfileModule,
     UploadModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService, SessionMiddleware],
