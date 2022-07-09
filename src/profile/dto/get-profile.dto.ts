@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 import { GetAchivDto } from './get-achiv.dto';
+import { GetGameDto } from './get-game.dto';
 import { GetUserDto } from './get-user.dto';
 
 export class GetProfileDto {
@@ -17,4 +18,11 @@ export class GetProfileDto {
   })
   @IsNotEmpty()
     achiv_info : GetAchivDto[];
+
+  @ApiProperty({
+    description: '게임 업적',
+    example: GetGameDto,
+  })
+  @IsNotEmpty()
+    game_log: GetGameDto[];
 }

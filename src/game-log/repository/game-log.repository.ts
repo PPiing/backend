@@ -12,12 +12,29 @@ export class GameLogRepository extends Repository<GameLog> {
 
   async findRecentGameLog(userSeq: number, limit: number): Promise<GameLog[]> {
     this.logger.debug('findRecentGameLog');
-    const ret = await this.find({
-      where: {
-        userSeq,
-        limit,
-      },
-    });
+    let ret;
+    if (limit > 0) { // limit 지정해서 가져올 때
+      ret = await this.find({
+        where: [
+          { topUserSeq: userSeq },
+          { btmUserSeq: userSeq },
+        ],
+        order: {
+          createdAt: 'DESC',
+        },
+        take: limit,
+      });
+    } else { // limit 제한 없이 가져올 때
+      ret = await this.find({
+        where: [
+          { topUserSeq: userSeq },
+          { btmUserSeq: userSeq },
+        ],
+        order: {
+          createdAt: 'DESC',
+        },
+      });
+    }
     return ret;
   }
 
