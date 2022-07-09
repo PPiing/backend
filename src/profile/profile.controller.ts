@@ -15,6 +15,7 @@ import { GetProfileDto } from './dto/get-profile.dto';
 import { UserAchivService } from './user-achiv.service';
 import { UserGameService } from './user-game.service';
 import { UserRankService } from './user-rank.service';
+import { UserService } from 'src/user/user.service';
 
 @ApiTags('유저')
 @Controller('users')
@@ -27,6 +28,7 @@ export class ProfileController {
     private readonly userAchivService: UserAchivService,
     private readonly userGameService : UserGameService,
     private readonly userRankService : UserRankService,
+    private readonly userService: UserService,
   ) {}
 
   /**
@@ -146,8 +148,29 @@ export class ProfileController {
   @Get('/search/:nickname')
   async searchUser(
     @Param('nickname') nickname: string,
-  ): Promise<Array<GetUserDto>> {
-    this.logger.log(`닉네임 검색 요청: ${nickname}`);
-    return this.userProfileService.getUserByNickname(nickname);
+  ): Promise<GetUserDto> {
+    this.logger.log(`닉네임 정보 조회 요청: ${nickname}`);
+
+    const findUser = await this.userService.findByNickname(nickname);
+    const userSeq = findUser.userSeq;
+
+    if (userSeq === 0) {
+      throw new ForbiddenException('허가되지 않은 동작입니다.');
+    }
+
+    const check = await this.userProfileService.checkUser(userSeq);
+    if (!check) {
+      throw new BadRequestException('유저 정보가 존재하지 않습니다.');
+    }
+    const user = await this.userProfileService.getUserInfo(userSeq);
+    const achiv = await this.userAchivService.getUserAchiv(userSeq);
+    const rank = await this.userRankService.getUserRank(userSeq);
+    const game = await this.userGameService.geUserGame(userSeq);
+    return ({
+      user_info: user,
+      achiv_info: achiv,
+      rank_info: rank,
+      game_log: game,
+    });
   }
 }

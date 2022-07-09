@@ -74,4 +74,12 @@ export default class MockUserRepository {
     });
     return friendsInfo;
   }
+
+  async findByNickname(nickname: string): Promise<number | undefined> {
+    const result = this.MockEntity.filter(e => e.nickname === nickname);
+    if (result.length !== 1) {
+      return undefined
+    }
+    return result[0];
+  }
 }

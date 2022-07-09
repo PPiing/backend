@@ -1,6 +1,7 @@
 import { GetFriendsDto } from 'src/community-bar/friends/dto/get-friends.dto';
 import User from 'src/entities/user.entity';
 import { EntityRepository, Repository } from 'typeorm';
+import { UserDto } from '../dto/user.dto';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
@@ -28,5 +29,15 @@ export class UserRepository extends Repository<User> {
       });
     });
     return friendsInfo;
+  }
+
+  async findByNickname(nickname: string): Promise<UserDto | undefined> {
+    const target = await this.find({
+      nickName: nickname,
+    });
+    if (target.length !== 0) {
+      return undefined;
+    }
+    return target[0];
   }
 }

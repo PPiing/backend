@@ -22,7 +22,7 @@ export default class User {
     email: string; // 이메일
 
   @Column({ default: false })
-    secAuthStatuc: boolean; // 이차인증 여부
+    secAuthStatus: boolean; // 이차인증 여부
 
   @Column({ default: 'DefaultProfile.jpg' })
     avatarImgUri: string; // 프로필 이미지 URI
