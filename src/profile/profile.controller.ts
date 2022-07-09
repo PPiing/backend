@@ -7,6 +7,7 @@ import {
 } from '@nestjs/swagger';
 import { User } from 'src/auth/user.decorator';
 import { CheckLogin } from 'src/guards/check-login.guard';
+import { UserService } from 'src/user/user.service';
 import { GetUserDto } from './dto/get-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDto } from '../user/dto/user.dto';
@@ -15,7 +16,6 @@ import { GetProfileDto } from './dto/get-profile.dto';
 import { UserAchivService } from './user-achiv.service';
 import { UserGameService } from './user-game.service';
 import { UserRankService } from './user-rank.service';
-import { UserService } from 'src/user/user.service';
 
 @ApiTags('유저')
 @Controller('users')
@@ -84,7 +84,7 @@ export class ProfileController {
     if (!check) {
       throw new BadRequestException('유저 정보가 존재하지 않습니다.');
     }
-    
+
     const userInfo = await this.userProfileService.getUserInfo(user.userSeq);
     const achiv = await this.userAchivService.getUserAchiv(user.userSeq);
     const rank = await this.userRankService.getUserRank(user.userSeq);
@@ -162,7 +162,7 @@ export class ProfileController {
     this.logger.log(`닉네임 정보 조회 요청: ${nickname}`);
 
     const findUser = await this.userService.findByNickname(nickname);
-    const userSeq = findUser.userSeq;
+    const { userSeq } = findUser;
 
     if (userSeq === 0) {
       throw new ForbiddenException('허가되지 않은 동작입니다.');

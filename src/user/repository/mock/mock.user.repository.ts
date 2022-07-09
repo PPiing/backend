@@ -76,10 +76,7 @@ export default class MockUserRepository {
   }
 
   async findByNickname(nickname: string): Promise<number | undefined> {
-    const result = this.MockEntity.filter(e => e.nickname === nickname);
-    if (result.length !== 1) {
-      return undefined
-    }
-    return result[0];
+    const result = await this.MockEntity.find((e) => e.nickName === nickname);
+    return result;
   }
 }
