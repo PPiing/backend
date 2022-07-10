@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GetUserDto } from './dto/get-user.dto';
+import { SearchUserDto } from './dto/search-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserProfileRepository } from './repository/user-profile.repository';
 
@@ -60,11 +61,11 @@ export class UserProfileService {
   /**
    * 사용자 닉네임으로 사용자 검색
    *
-   * @param nickname 닉네임
+   * @param keyword 키워드
    * @return 사용자 정보
    */
-  async getUserByNickname(nickname: string): Promise<Array<GetUserDto>> {
-    this.logger.log(`유저 닉네임 조회 요청: ${nickname}`);
-    return this.userProfileRepository.searchUsersByNickname(nickname);
+  async getUserByKeyword(keyword: string): Promise<Array<SearchUserDto>> {
+    this.logger.log(`유저 닉네임 조회 요청: ${keyword}`);
+    return this.userProfileRepository.searchUsersByKeyword(keyword);
   }
 }
