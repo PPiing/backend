@@ -39,7 +39,8 @@ export class ProfileController {
    */
   @ApiOperation({ summary: '유저 정보 조회', description: '유저 정보를 조회합니다.' })
   @ApiResponse({ status: 200, type: GetProfileDto, description: '유저 정보 조회 성공' })
-  @ApiResponse({ status: 400, description: '유저 정보 조회 실패' })
+
+  \@ApiResponse({ status: 400, description: '유저 정보 조회 실패' })
   @ApiParam({
     name: 'user_seq', type: Number, example: 1, description: '유저 시퀀스',
   })
@@ -72,7 +73,7 @@ export class ProfileController {
    * @returns 나의 정보
    */
   @ApiOperation({ summary: '나의 정보 조회', description: '나의 정보를 조회합니다.' })
-  @ApiResponse({ status: 200, type: GetUserDto, description: '나의 정보 조회 성공' })
+  @ApiResponse({ status: 200, type: GetProfileDto, description: '나의 정보 조회 성공' })
   @UseGuards(CheckLogin)
   @Get('/profile')
   async getMe(
@@ -154,7 +155,7 @@ export class ProfileController {
    * @param nickname 닉네임
    */
   @ApiOperation({ summary: '닉네임 검색', description: '닉네임으로 유저를 검색합니다.' })
-  @ApiResponse({ status: 200, type: [GetUserDto], description: '닉네임 검색 성공' })
+  @ApiResponse({ status: 200, type: GetProfileDto, description: '닉네임 검색 성공' })
   @Get('/search/:nickname')
   async searchUser(
     @Param('nickname') nickname: string,
