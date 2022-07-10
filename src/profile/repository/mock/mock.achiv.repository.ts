@@ -7,19 +7,19 @@ export default class MockAchivRepository {
     this.MockEntity.push({
       achivSeq: 1,
       achivTitle: 'Score50',
-      imgUri: './achiv1.jpg',
+      achivImgUri: './achiv1.jpg',
       totalScore: 50,
     });
     this.MockEntity.push({
       achivSeq: 2,
       achivTitle: 'Score100',
-      imgUri: './achiv2.jpg',
+      achivImgUri: './achiv2.jpg',
       totalScore: 100,
     });
     this.MockEntity.push({
       achivSeq: 3,
       achivTitle: 'Score150',
-      imgUri: './achiv3.jpg',
+      achivImgUri: './achiv3.jpg',
       totalScore: 150,
     });
   }
