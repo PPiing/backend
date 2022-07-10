@@ -1,29 +1,29 @@
-import { ApiProperty } from "@nestjs/swagger";
-import UserStatus from "src/enums/mastercode/user-status.enum";
+import { ApiProperty } from '@nestjs/swagger';
+import UserStatus from 'src/enums/mastercode/user-status.enum';
 
 export class SearchUserDto {
   @ApiProperty({
     description: '유저 시퀀스',
     example: 1,
   })
-  userSeq: number;
+    userSeq: number;
 
   @ApiProperty({
     description: '유저 닉네임',
     example: 'skim',
   })
-  nickName: String;
+    nickName: string;
 
   @ApiProperty({
     description: '유저 상태',
     enum: ['USST10', 'USST20', 'USST30', 'USST40'],
     example: 'USST10',
   })
-  userStatus: UserStatus;
+    userStatus: UserStatus;
 
   @ApiProperty({
     description: '유저 이미지',
-    example: './img/defaultProfile.jpg'
+    example: './img/defaultProfile.jpg',
   })
-  userImage: string;
+    userImage: string;
 }

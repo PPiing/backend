@@ -191,14 +191,13 @@ export class ProfileController {
    *
    * @param keyword 키워드
    */
-  @ApiOperation({ summary: '키워드 검색', description: '키워드로 유저를 검색합니다.'})
-  @ApiResponse({ status: 200, type: SearchUserDto[], description: '키워드 검색 성공' })
+  @ApiOperation({ summary: '키워드 검색', description: '키워드로 유저를 검색합니다.' })
+  @ApiResponse({ status: 200, type: [SearchUserDto], description: '키워드 검색 성공' })
   @UseGuards(CheckLogin)
   @Get('/search/nickname/:keyword')
   async searchKeyword(
     @Param('keyword') keyword: string,
   ): Promise<SearchUserDto[]> {
-    return await this.userProfileService.getUserByKeyword(keyword);
+    return this.userProfileService.getUserByKeyword(keyword);
   }
-
 }
