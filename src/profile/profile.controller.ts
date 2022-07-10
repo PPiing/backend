@@ -39,8 +39,7 @@ export class ProfileController {
    */
   @ApiOperation({ summary: '유저 정보 조회', description: '유저 정보를 조회합니다.' })
   @ApiResponse({ status: 200, type: GetProfileDto, description: '유저 정보 조회 성공' })
-
-  \@ApiResponse({ status: 400, description: '유저 정보 조회 실패' })
+  @ApiResponse({ status: 400, description: '유저 정보 조회 실패' })
   @ApiParam({
     name: 'user_seq', type: Number, example: 1, description: '유저 시퀀스',
   })
