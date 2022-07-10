@@ -113,10 +113,12 @@ describe('User E2E Test', () => {
       test('유저 닉네임 검색', async () => {
         // given
         const nickname = 'skim';
+        const userCookie = cookie;
 
         // when
         const response = await request(app.getHttpServer())
-          .get(`/users/search/${nickname}`);
+          .get(`/users/search/${nickname}`)
+          .set('Cookie', userCookie);
 
         // then (skim)
         expect(response.status).toBe(200);
