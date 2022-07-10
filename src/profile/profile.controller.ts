@@ -16,6 +16,7 @@ import { GetProfileDto } from './dto/get-profile.dto';
 import { UserAchivService } from './user-achiv.service';
 import { UserGameService } from './user-game.service';
 import { UserRankService } from './user-rank.service';
+import { SearchUserDto } from './dto/search-user.dto';
 
 @ApiTags('유저')
 @Controller('users')
@@ -149,12 +150,13 @@ export class ProfileController {
   }
 
   /**
-   * 유저를 닉네임으로 검색합니다.
+   * 유저를 (full)닉네임으로 검색합니다.
    *
    * @param nickname 닉네임
    */
   @ApiOperation({ summary: '닉네임 검색', description: '닉네임으로 유저를 검색합니다.' })
   @ApiResponse({ status: 200, type: GetProfileDto, description: '닉네임 검색 성공' })
+  @UseGuards(CheckLogin)
   @Get('/search/:nickname')
   async searchUser(
     @Param('nickname') nickname: string,
@@ -182,5 +184,20 @@ export class ProfileController {
       rank_info: rank,
       game_log: game,
     });
+  }
+
+  /**
+   * 키워드로 유저를 검색합니다.
+   *
+   * @param keyword 키워드
+   */
+  @ApiOperation({ summary: '키워드 검색', description: '키워드로 유저를 검색합니다.' })
+  @ApiResponse({ status: 200, type: [SearchUserDto], description: '키워드 검색 성공' })
+  @UseGuards(CheckLogin)
+  @Get('/search/nickname/:keyword')
+  async searchKeyword(
+    @Param('keyword') keyword: string,
+  ): Promise<SearchUserDto[]> {
+    return this.userProfileService.getUserByKeyword(keyword);
   }
 }
