@@ -16,33 +16,14 @@ import { UserGameService } from './user-game.service';
 import { UserProfileService } from './user-profile.service';
 import { UserRankService } from './user-rank.service';
 
-const repositories = [
-  {
-    provide: getRepositoryToken(UserProfileRepository),
-    useClass: MockUserProfileRepository,
-  },
-  {
-    provide: getRepositoryToken(UserAchivRepository),
-    useClass: MockUserAchivRepository,
-  },
-  {
-    provide: getRepositoryToken(AchivRepository),
-    useClass: MockAchivRepository,
-  },
-  {
-    provide: getRepositoryToken(RankRepository),
-    useClass: MockRankRepository,
-  },
-];
-
 @Module({
   imports: [
-    // TypeOrmModule.forFeature([
-    //   UserProfileRepository,
-    //   UserAchivRepository,
-    //   AchivRepository,
-    //   RankRepository,
-    // ]),
+    TypeOrmModule.forFeature([
+      UserProfileRepository,
+      UserAchivRepository,
+      AchivRepository,
+      RankRepository,
+    ]),
     forwardRef(() => GameModule),
     UserModule,
   ],
@@ -52,7 +33,6 @@ const repositories = [
     UserAchivService,
     UserGameService,
     UserRankService,
-    ...repositories,
   ],
   exports: [UserProfileService],
 })
