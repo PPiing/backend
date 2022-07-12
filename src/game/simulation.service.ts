@@ -10,7 +10,7 @@ import { GameLogRepository } from './repository/game-log.repository';
 import { initBeforeStartGame } from './initializeGame/start';
 import { countReadyAndStart } from './initializeGame/ready';
 import { movePaddle } from './calPosition/paddle';
-import { moveBall } from './calPosition/ball';
+import { calculateBallDisplacement } from './calPosition/ball';
 import { checkWallCollision } from './calCollision/wall.collision';
 import { checkPaddleCollision } from './calCollision/paddle.collision';
 import { checkScorePosition } from './calPosition/score.position';
@@ -44,7 +44,12 @@ export class SimulationService {
         case GameStatus.Playing: {
           // plus vector to position.
           this.movePaddle(data);
-          this.moveBall(data);
+
+          /* calculateBallDisplacement and add it to the position */
+          const { dx, dy } = calculateBallDisplacement(data);
+          inGameData.ball.position.x += dx;
+          inGameData.ball.position.y += dy;
+
           this.eventRunner.emit('game:render', roomId, data.inGameData.renderData);
           // check wall bound
           this.checkWallCollision(data);
@@ -112,12 +117,6 @@ export class SimulationService {
  * @param game game data
  */
   private checkWallCollision = checkWallCollision;
-
-  /**
- * 매 프레임 마다 공의 위치를 계산해 이동시킨다.
- * @param game game data
- */
-  private moveBall = moveBall;
 
   /**
  * 매 프레임 마다 패들의 위치를 계산해 이동시킨다.
