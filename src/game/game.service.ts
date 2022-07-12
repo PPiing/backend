@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { randomUUID } from 'crypto';
-import GameType from 'src/enums/mastercode/game-type.enum';
 import GameOption from 'src/enums/mastercode/game-option.enum';
 import {
   GameData, PatchRule, MetaData, RuleData,
@@ -10,6 +9,7 @@ import { InGameData, PaddleDirective } from './dto/in-game.dto';
 import { SimulationService } from './simulation.service';
 import { GameQueue } from './game-queue';
 import { GameSession } from './dto/game-session.dto';
+import { DequeueDto, QueueDto } from './dto/queue.dto';
 
 type Ready = boolean;
 
@@ -37,30 +37,34 @@ export class GameService {
     return this.games.get(roomId);
   }
 
-  async handleEnqueue(client: GameSession, isLadder: GameType) {
-    const ret = await this.gameQueue.enQueue(client, isLadder);
-    if (typeof ret === 'object') {
-      const newGame = new GameData();
-      newGame.metaData = new MetaData(
-        randomUUID(),
-        ret[0],
-        ret[1],
-        isLadder,
-      );
-      newGame.ruleData = new RuleData();
-      newGame.inGameData = new InGameData();
-      this.games.set(newGame.metaData.roomId, newGame);
-      this.users.set(ret[0].userId, ret[0].roomId);
-      this.users.set(ret[1].userId, ret[1].roomId);
-      this.readyCheck.set(newGame.metaData.roomId, false);
-      ret[0].roomId = newGame.metaData.roomId;
-      ret[1].roomId = newGame.metaData.roomId;
-      this.eventRunner.emit('game:match', ret);
-    }
+  async handleEnqueue(client: GameSession, enqueueData: QueueDto) {
+    const matchedPlayers = await this.gameQueue.enQueue(client, enqueueData);
+
+    if (matchedPlayers === false) return;
+
+    const [bluePlayer, redPlayer] = [...matchedPlayers];
+    const newGame = new GameData();
+    newGame.metaData = new MetaData(
+      randomUUID(),
+      bluePlayer[0],
+      redPlayer[0],
+      enqueueData.isRankGame,
+    );
+    newGame.ruleData = new RuleData();
+    newGame.inGameData = new InGameData();
+    this.games.set(newGame.metaData.roomId, newGame);
+    this.users.set(bluePlayer[0].userId, bluePlayer[0].roomId);
+    this.users.set(redPlayer[0].userId, redPlayer[0].roomId);
+    this.readyCheck.set(newGame.metaData.roomId, false);
+    bluePlayer[0].roomId = newGame.metaData.roomId;
+    redPlayer[0].roomId = newGame.metaData.roomId;
+
+    /** TODO(jinbekim): add Ruledata to newGame data */
+    this.eventRunner.emit('game:match', matchedPlayers);
   }
 
-  handleDequeue(client: GameSession, isLadder: GameType) {
-    return this.gameQueue.deQueue(client, isLadder);
+  handleDequeue(client: GameSession, dequeueData: DequeueDto) {
+    return this.gameQueue.deQueue(client, dequeueData);
   }
 
   /**

@@ -1,69 +1,69 @@
 import { Injectable, Logger } from '@nestjs/common';
 import GameType from 'src/enums/mastercode/game-type.enum';
 import { GameSession } from './dto/game-session.dto';
+import { DequeueDto, QueueDto } from './dto/queue.dto';
 
 @Injectable()
 export class GameQueue {
   private readonly logger: Logger = new Logger('GameQueue');
 
-  private normal: Array<GameSession> = [];
+  private normalQueue: Array<[GameSession, QueueDto]> = [];
 
-  private ladder: Array<GameSession> = [];
+  private ladderQueue: Array<[GameSession, QueueDto]> = [];
 
-  enQueue(client: GameSession, isLadder: string): Promise<GameSession[] | boolean> {
+  enQueue(client: GameSession, enqueueData: QueueDto) {
     this.logger.debug(client);
-    // TODO: check duplicates
-    if (isLadder === GameType.LADDER) {
-      return this.addToLadder(client);
+    const { isRankGame } = enqueueData;
+
+    if (isRankGame === GameType.LADDER) {
+      return this.addToLadderQueue(client, enqueueData);
     }
-    return this.addToNormal(client);
+    return this.addToNormalQueue(client, enqueueData);
   }
 
-  deQueue(client:GameSession, isLadder: string): void {
+  deQueue(client:GameSession, dequeueData: DequeueDto) {
     this.logger.debug(client);
-    if (isLadder === GameType.LADDER) {
-      return this.removeFromLadder(client);
+    const { isRankGame } = dequeueData;
+
+    if (isRankGame === GameType.LADDER) {
+      return this.removeFromLadderQueue(client, dequeueData);
     }
-    return this.removeFromNormal(client);
+    return this.removeFromNormalQueue(client, dequeueData);
   }
 
-  async addToNormal(client: GameSession): Promise<GameSession[] | boolean> {
-    // const index = this.normal.indexOf(client);
-    // if (index > -1) {
-    //   this.logger.error(`${client.userId} is already in normal queue`);
-    //   return false;
-    // }
-    this.normal.push(client);
-    if (this.normal.length >= 2) {
-      const players: GameSession[] = this.normal.splice(0, 2);
+  private async addToNormalQueue(client: GameSession, enqueueData: QueueDto) {
+    const index = this.normalQueue.indexOf([client, enqueueData]);
+    if (index === -1) {
+      this.normalQueue.push([client, enqueueData]);
+    }
+    if (this.normalQueue.length >= 2) {
+      const players: [GameSession, QueueDto][] = this.normalQueue.splice(0, 2);
       return players;
     }
     return false;
   }
 
-  async addToLadder(client: GameSession): Promise<GameSession[] | boolean> {
-    // const index = this.ladder.indexOf(client);
-    // if (index > -1) {
-    //   this.logger.error(`${client.userId} is already in ladder queue`);
-    //   return false;
-    // }
-    this.ladder.push(client);
-    if (this.ladder.length >= 2) {
-      const players: GameSession[] = this.ladder.splice(0, 2);
+  private async addToLadderQueue(client: GameSession, enqueueData: QueueDto) {
+    const index = this.ladderQueue.indexOf([client, enqueueData]);
+    if (index === -1) {
+      this.ladderQueue.push([client, enqueueData]);
+    }
+    if (this.ladderQueue.length >= 2) {
+      const players: [GameSession, QueueDto][] = this.ladderQueue.splice(0, 2);
       return players;
     }
     return false;
   }
 
-  removeFromNormal(client: GameSession) {
-    const index = this.normal.indexOf(client);
-    if (index > -1) this.normal.splice(index, 1);
-    else this.logger.error(`${client.userId} is not in normal queue`);
+  removeFromNormalQueue(client: GameSession, dequeueData: DequeueDto) {
+    const index = this.normalQueue.indexOf([client, dequeueData]);
+    if (index > -1) this.normalQueue.splice(index, 1);
+    else this.logger.error(`${client.userId} is not in normalQueue queue`);
   }
 
-  removeFromLadder(client: GameSession) {
-    const index = this.ladder.indexOf(client);
-    if (index > -1) this.ladder.splice(index, 1);
-    else this.logger.error(`${client.userId} is not in ladder queue`);
+  removeFromLadderQueue(client: GameSession, dequeueData: DequeueDto) {
+    const index = this.ladderQueue.indexOf([client, dequeueData]);
+    if (index > -1) this.ladderQueue.splice(index, 1);
+    else this.logger.error(`${client.userId} is not in ladderQueue queue`);
   }
 }

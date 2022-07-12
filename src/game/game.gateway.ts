@@ -13,7 +13,7 @@ import {
 import { GameSession } from './dto/game-session.dto';
 import { GameSocket } from './dto/game-socket.dto';
 import { ScoreData } from './dto/in-game.dto';
-import { QueueDto } from './dto/queue.dto';
+import { DequeueDto, QueueDto } from './dto/queue.dto';
 import { StatusDto } from './dto/status.dto';
 import { GameSocketSession } from './game-socket-session';
 import { GameService } from './game.service';
@@ -80,18 +80,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
   }
 
+  /** TODO(jinbekim): rename subscribeMessage
+   */
   @UseGuards(SocketGuard)
   @SubscribeMessage('enQ')
-  async handleEnqueue(client: GameSocket, data: QueueDto) {
+  async handleEnqueue(client: GameSocket, enqueueData: QueueDto) {
     this.logger.debug(`user ${client.session.userId} enqueued`);
-    return this.gameService.handleEnqueue(client.session, data.isLadder);
+    return this.gameService.handleEnqueue(client.session, enqueueData);
   }
 
   @UseGuards(SocketGuard)
   @SubscribeMessage('deQ')
-  handleDequeue(client: GameSocket, data: QueueDto) {
+  handleDequeue(client: GameSocket, dequeueData: DequeueDto) {
     this.logger.debug(`user ${client.session.userId} request dequeued`);
-    return this.gameService.handleDequeue(client.session, data.isLadder);
+    return this.gameService.handleDequeue(client.session, dequeueData);
   }
 
   @OnEvent('game:match')
@@ -111,6 +113,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.socketSession.saveSession(data[1].sessionId, data[1]);
   }
 
+  /**
+   * TODO(jinbeki): rule event will be removed
+   */
   @UseGuards(SocketGuard)
   @SubscribeMessage('rule')
   settingGameRule(client: GameSocket, data: PatchRule) {
