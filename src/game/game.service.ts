@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { randomUUID } from 'crypto';
 import GameType from 'src/enums/mastercode/game-type.enum';
+import GameOption from 'src/enums/mastercode/game-option.enum';
 import {
   GameData, PatchRule, MetaData, RuleData,
 } from './dto/game-data';
@@ -96,7 +97,28 @@ export class GameService {
    */
   async createGame(roomId: string) {
     const game = this.games.get(roomId);
-    game.inGameData = new InGameData();
+    const { ruleData: { option1, option2, option3 } } = game;
+
+    const inGameDataForm = new InGameData();
+
+    /** default options */
+    inGameDataForm.ballSpeed = 1;
+    inGameDataForm.matchScore = 5;
+    inGameDataForm.paddleSize = 1;
+
+    /** GLOP20 slow, GLOP22 fast */
+    if (option1 === GameOption.GLOP20) inGameDataForm.paddleSize = 0.5;
+    if (option1 === GameOption.GLOP22) inGameDataForm.paddleSize = 1.5;
+
+    /** GLOP30 slow, GLOP32 fast */
+    if (option2 === GameOption.GLOP30) inGameDataForm.ballSpeed = 0.8;
+    if (option2 === GameOption.GLOP32) inGameDataForm.ballSpeed = 1.2;
+
+    /** GLOP40 3, GLOP42 7 */
+    if (option3 === GameOption.GLOP40) inGameDataForm.matchScore = 3;
+    if (option3 === GameOption.GLOP42) inGameDataForm.matchScore = 7;
+
+    game.inGameData = inGameDataForm;
     this.readyCheck.delete(roomId);
     this.simulator.startGame(game);
   }
