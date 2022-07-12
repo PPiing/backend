@@ -3,8 +3,18 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Interval } from '@nestjs/schedule';
 import GameOption from 'src/enums/mastercode/game-option.enum';
 import { GameData } from './dto/game-data';
-import { GameStatus, InGameData, PaddleDirective } from './dto/in-game.dto';
+import { GameStatus } from './dto/in-game.dto';
+import { initAfterEndGame } from './initializeGame/end';
+import { handlePaddle } from './handler/paddle';
 import { GameLogRepository } from './repository/game-log.repository';
+import { initBeforeStartGame } from './initializeGame/start';
+import { countReadyAndStart } from './initializeGame/ready';
+import { movePaddle } from './calPosition/paddle';
+import { moveBall } from './calPosition/ball';
+import { checkWallCollision } from './calCollision/wall.collision';
+import { checkPaddleCollision } from './calCollision/paddle.collision';
+import { checkScorePosition } from './calPosition/score.position';
+import { resetBallAndPaddle } from './initializeGame/reset';
 
 @Injectable()
 export class SimulationService {
@@ -78,154 +88,63 @@ export class SimulationService {
     });
   }
 
-  private resetBallAndPaddle(game: GameData) {
-    this.logger.debug('resetBallAndPaddle');
-    const { inGameData } = game;
-    const { ball, paddleBlue, paddleRed } = inGameData;
-    ball.position.x = GameData.spec.arena.width / 2;
-    ball.position.y = GameData.spec.arena.height / 2;
-    paddleBlue.position.x = GameData.spec.arena.width / 2;
-    paddleRed.position.x = GameData.spec.arena.width / 2;
-    ball.velocity.x = 0;
-    ball.velocity.y = 1; // TODO: random 1 or -1
-  }
+  /**
+ * 한쪽이 승리하게 되면, 공과 패들의 위치를 초기화 시킨다.
+ * @param game game data
+ */
+  private resetBallAndPaddle = resetBallAndPaddle;
 
-  private checkScorePosition(game: GameData) {
-    const { inGameData } = game;
-    const { ball } = inGameData;
+  /**
+ * 매 프레임 마다 공의 위치가 승리조건에 부합하는지 판단한다.
+ * @param game game data
+ * @returns win or lose
+ */
+  private checkScorePosition = checkScorePosition;
 
-    if (ball.position.y - GameData.spec.ball.radius < 0) {
-      inGameData.scoreBlue += 1;
-      return 1;
-    } if (ball.position.y + GameData.spec.ball.radius > GameData.spec.arena.height) {
-      inGameData.scoreRed += 1;
-      return 2;
-    }
-    return false;
-  }
+  /**
+ * 패들과의 충돌을 판단해서 방향을 바꿔준다.
+ * @param game game data
+ */
+  private checkPaddleCollision = checkPaddleCollision;
 
-  private checkPaddleCollision(game: GameData) {
-    const { inGameData, ruleData } = game; // TODO: ruleData 적용.
-    const { ball, paddleBlue, paddleRed } = inGameData;
-    const BALL = ball.position;
-    const SPEC = GameData.spec;
-    if (
-      BALL.x < paddleBlue.position.x + SPEC.paddle.width / 2
-      && BALL.x > paddleBlue.position.x - SPEC.paddle.width / 2
-      && BALL.y - SPEC.ball.radius < paddleBlue.position.y + SPEC.paddle.height / 2
-      && BALL.y + SPEC.ball.radius > paddleBlue.position.y - SPEC.paddle.height / 2
-    ) {
-      ball.velocity.y *= -1;
-      BALL.y = paddleBlue.position.y + SPEC.ball.radius + SPEC.paddle.height / 2;
-    } else if (
-      BALL.x - SPEC.ball.radius < paddleRed.position.x + SPEC.paddle.width
-      && BALL.x + SPEC.ball.radius > paddleRed.position.x
-      && BALL.y + SPEC.ball.radius > paddleRed.position.y
-      && BALL.y - SPEC.ball.radius < paddleRed.position.y + SPEC.paddle.height
-    ) {
-      ball.velocity.y *= -1;
-      BALL.y = paddleRed.position.y - SPEC.ball.radius - SPEC.paddle.height / 2;
-    }
-  }
+  /**
+ * 벽과 충돌을 판단해서 충돌 했을 경우 방향을 바꿔준다.
+ * @param game game data
+ */
+  private checkWallCollision = checkWallCollision;
 
-  private checkWallCollision(game: GameData) {
-    const { inGameData } = game;
-    const { ball } = inGameData;
-    if (ball.position.x - GameData.spec.ball.radius < 0) {
-      ball.position.x = GameData.spec.ball.radius;
-      ball.velocity.x *= -1;
-    } else if (ball.position.x + GameData.spec.ball.radius > GameData.spec.arena.width) {
-      ball.position.x = GameData.spec.arena.width - GameData.spec.ball.radius;
-      ball.velocity.x *= -1;
-    }
-  }
+  /**
+ * 매 프레임 마다 공의 위치를 계산해 이동시킨다.
+ * @param game game data
+ */
+  private moveBall = moveBall;
 
-  private moveBall(game: GameData) {
-    const { inGameData, ruleData } = game; // TODO: ruleData 적용.
-    const { ball } = inGameData;
-    ball.position.x += ball.velocity.x * GameData.spec.ball.speed;
-    ball.position.y += ball.velocity.y * GameData.spec.ball.speed;
-  }
+  /**
+ * 매 프레임 마다 패들의 위치를 계산해 이동시킨다.
+ * @param game game data
+ */
+  private movePaddle = movePaddle;
 
-  private movePaddle(game: GameData) {
-    const { inGameData, ruleData } = game; // TODO: ruleData 적용.
-    const { paddleBlue, paddleRed } = inGameData;
-    paddleBlue.position.x += paddleBlue.velocity.x * GameData.spec.paddle.speed;
-    paddleRed.position.x += paddleRed.velocity.x * GameData.spec.paddle.speed;
-    if (paddleRed.position.x - GameData.spec.paddle.width < 0) {
-      paddleRed.position.x = GameData.spec.paddle.width / 2;
-    }
-    if (paddleRed.position.x + GameData.spec.paddle.width > GameData.spec.arena.width) {
-      paddleRed.position.x = GameData.spec.arena.width - GameData.spec.paddle.width / 2;
-    }
-    if (paddleBlue.position.x - GameData.spec.paddle.width < 0) {
-      paddleBlue.position.x = GameData.spec.paddle.width / 2;
-    }
-    if (paddleBlue.position.x + GameData.spec.paddle.width > GameData.spec.arena.width) {
-      paddleBlue.position.x = GameData.spec.arena.width - GameData.spec.paddle.width / 2;
-    }
-  }
-
-  private countReadyAndStart(roomId: string, inGameData: InGameData): boolean {
-    if (inGameData.frame === 1) {
-      this.eventRunner.emit('game:start', roomId, {
-        status: 'ready',
-      });
-    } else if (inGameData.frame === 1200) {
-      this.eventRunner.emit('game:start', roomId, {
-        status: 'start',
-      });
-    } else if (inGameData.frame > 1200) {
-      return true;
-    }
-    return false;
-  }
+  /**
+ * 게임이 시작되기 전에 준비할 시간을 주기 위해
+ * 일정 시간동안 딜레이(지연)시간을 준다.
+ * @param roomId 방 아이디
+ * @param inGameData
+ * @returns 게임 시작 전 상태
+ */
+  private countReadyAndStart = countReadyAndStart;
 
   /**
    * 시뮬레이션 큐에 해당 게임을 등록한다.
    * @param game 등록할 게임 데이터
    */
-  async startGame(game: GameData) {
-    this.logger.debug(`startGame: ${game.metaData}`);
-    this.games.set(game.metaData.roomId, game);
-    // const inGame = this.gameRepository.create({
-    //   roomId: game.metaData.roomId,
-    //   topUserName: game.metaData.playerTop.userId,
-    //   btmUserName: game.metaData.playerBtm.userId,
-    //   topUserSeq: game.metaData.playerTop.userId,
-    //   btmUserSeq: game.metaData.playerBtm.userId,
-    // });
-    // // 실제 게임 실행과는 별개여서 await해줄 필요 없을듯.
-    // try {
-    //   const ret = await this.gameRepository.save(inGame);
-    //   // eslint-disable-next-line no-param-reassign
-    //   game.metaData.gameSeq = ret.gameSeq; // NOTE: 추후에 게임로그 저장시 사용할 게임 시퀀스.
-    // } catch (err) {
-    //   this.logger.error(err);
-    // }
-  }
+  startGame = initBeforeStartGame;
 
   /**
    * 게임 종료 후에 게임을 삭제한다.
    * @param roomId 방 아이디
    */
-  endGame(roomId: string) {
-    const game = this.games.get(roomId);
-    // NOTE : MockGameLogRepository 에는 create 함수를 만들지 않아서, 이부분을 테스트해볼 때 오류가 발생할 수 있습니다.
-    if (game && game.inGameData.status === GameStatus.End) {
-      const gameLog = this.gameLogRepository.create({
-        gameType: game.metaData.gameType,
-        topSideScore: game.inGameData.scoreBlue,
-        btmSideScore: game.inGameData.scoreRed,
-        winnerSeq: game.inGameData.winner,
-        option1: game.ruleData.option1,
-        option2: game.ruleData.option2,
-        option3: game.ruleData.option3,
-      });
-      this.gameLogRepository.save(gameLog);
-      this.games.delete(roomId);
-    }
-  }
+  endGame = initAfterEndGame;
 
   /**
    * 해당 유저의 패들의 방향을 변경한다.
@@ -234,14 +153,5 @@ export class SimulationService {
    * @param direction 패들의 방향
    * @returns void
    */
-  handlePaddle(roomId:string, userId: number, direction: PaddleDirective) {
-    const game = this.games.get(roomId);
-    if (!game) return;
-    if (game.metaData.playerTop.userId === userId) {
-      game.inGameData.paddleBlue.velocity.x = direction;
-    }
-    if (game.metaData.playerBtm.userId === userId) {
-      game.inGameData.paddleRed.velocity.x = direction;
-    }
-  }
+  handlePaddle = handlePaddle;
 }
