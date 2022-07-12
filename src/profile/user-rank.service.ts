@@ -19,6 +19,10 @@ export class UserRankService {
    */
   async getUserRank(userSeq: number): Promise<GetRankDto> {
     const rank = await this.rankRepository.getRank(userSeq);
+
+    if (rank === undefined) {
+      throw new BadRequestException(`${userSeq} 의 랭크정보가 유효하지 않습니다.`);
+    }
     const result : GetRankDto = {
       rank_score: rank.rankScore,
       rank_name: '',
