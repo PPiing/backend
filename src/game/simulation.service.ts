@@ -13,7 +13,7 @@ import { movePaddle } from './calPosition/paddle';
 import { calculateBallDisplacement } from './calPosition/ball';
 import { checkWallCollision } from './calCollision/wall.collision';
 import { checkPaddleCollision } from './calCollision/paddle.collision';
-import { checkScorePosition } from './calPosition/score.position';
+import { checkScorePosition, ScorePosition } from './calPosition/score.position';
 import { resetBallAndPaddle } from './initializeGame/reset';
 
 @Injectable()
@@ -55,9 +55,9 @@ export class SimulationService {
           this.checkWallCollision(data);
           // check paddle bound
           this.checkPaddleCollision(data);
-          // check goal
-          const checker = this.checkScorePosition(data);
-          if (checker) {
+          /* checking scoring player */
+          const checker: ScorePosition = this.checkScorePosition(data);
+          if (checker === ScorePosition.blueWin || checker === ScorePosition.redWin) {
             this.resetBallAndPaddle(data);
             this.eventRunner.emit('game:score', roomId, data.inGameData.scoreData);
             let matchScore: number;
