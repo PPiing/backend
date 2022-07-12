@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
-import { GameModule } from 'src/game-log/game.module';
+import { GameModule } from 'src/game/game.module';
 import { UserModule } from 'src/user/user.module.e2e-spec';
 import { ProfileController } from './profile.controller';
 import { AchivRepository } from './repository/achiv.repository';
