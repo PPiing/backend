@@ -6,7 +6,9 @@ import { GameData } from '../dto/game-data';
 */
 export const initBeforeStartGame = async function startGame(game: GameData) {
   this.logger.debug(`startGame: ${game.metaData}`);
+  /* add game in simulation game queue */
   this.games.set(game.metaData.roomId, game);
+  /** TODO(jinbekim): save initial GameLog entity to repository */
   // const inGame = this.gameRepository.create({
   //   roomId: game.metaData.roomId,
   //   topUserName: game.metaData.playerTop.userId,

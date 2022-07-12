@@ -16,12 +16,12 @@ export const checkScorePosition = (game: GameData) : ScorePosition => {
   // left(blue) lose
   if (ball.position.x - GameData.spec.ball.radius < ((GameData.spec.arena.width / 2) * -1)) {
     inGameData.scoreBlue += 1;
-    return ScorePosition.blueWin;
+    return ScorePosition.redWin;
   }
   // rigth(red) lose
   if (ball.position.x + GameData.spec.ball.radius > (GameData.spec.arena.width / 2)) {
     inGameData.scoreRed += 1;
-    return ScorePosition.redWin;
+    return ScorePosition.blueWin;
   }
   return ScorePosition.playing;
 };

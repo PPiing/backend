@@ -5,7 +5,7 @@ import { GameData } from '../dto/game-data';
  * @param game game data
  */
 export const checkPaddleCollision = (game: GameData) => {
-  const { inGameData, ruleData } = game; // TODO: ruleData 적용.
+  const { inGameData } = game;
   const { ball, paddleBlue, paddleRed } = inGameData;
   const BALL = ball.position;
   const SPEC = GameData.spec;
