@@ -213,26 +213,4 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.server.to(roomId).emit('game:end', data);
     this.server.in(roomId).socketsLeave(roomId);
   }
-
-  /**
-   * 관전자를 해당 게임룸에 추가한다.
-   * @param client 관전자의 소켓
-   * @param roomId 참여하고자 하는 방 아이디
-   */
-  @UseGuards(SocketGuard)
-  @SubscribeMessage('watch')
-  handleWatch(client: GameSocket, roomId: string) {
-    client.join(roomId);
-  }
-
-  /**
-   * 관전하던 방을 나간다.
-   * @param client 관전자
-   * @param roomId 관전하는 방
-   */
-  @UseGuards(SocketGuard)
-  @SubscribeMessage('unWatch')
-  handleUnWatch(client: GameSocket, roomId: string) {
-    client.leave(roomId);
-  }
 }
