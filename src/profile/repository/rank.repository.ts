@@ -6,7 +6,7 @@ import { RankDto } from '../dto/rank.dto';
 export class RankRepository extends Repository<Rank> {
   async getRank(userSeq: number) : Promise<RankDto | undefined> {
     const target = await this.find({
-      userSeq,
+      where: { userSeq: userSeq },
     });
     if (target.length !== 1) {
       return undefined;
