@@ -2,8 +2,8 @@ import { Logger } from '@nestjs/common';
 import GameLog from 'src/entities/game-log.entity';
 import GameOption from 'src/enums/mastercode/game-option.enum';
 import GameType from 'src/enums/mastercode/game-type.enum';
-import { GameLogDto } from 'src/game-log/dto/game-log.dto';
-import { GameRecordDto } from 'src/game-log/dto/game-record.dts';
+import { GameLogDto } from 'src/game/dto/game-log.dto';
+import { GameRecordDto } from 'src/game/dto/game-record.dts';
 
 export class MockGameLogRepository {
   private readonly logger: Logger = new Logger(MockGameLogRepository.name);

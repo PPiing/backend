@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { GameModule } from 'src/game-log/game.module.e2e-spec';
+import { GameModule } from 'src/game/game.module.e2e-spec';
 import { UserModule } from 'src/user/user.module.e2e-spec';
 import { ProfileController } from './profile.controller';
 import { UserProfileService } from './user-profile.service';

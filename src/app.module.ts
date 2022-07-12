@@ -10,7 +10,7 @@ import AppService from './app.service';
 import configuration from './configs/configuration';
 import TypeOrmConfigService from './configs/typeorm.config';
 import { AuthModule } from './auth/auth.module';
-import { GameModule } from './game-log/game.module';
+import { GameModule } from './game/game.module';
 import { ChatroomsModule } from './chatrooms/chatrooms.module';
 import { CommunityBarModule } from './community-bar/community-bar.module';
 import { ProfileModule } from './profile/profile.module';

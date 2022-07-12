@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import GameLog from 'src/entities/game-log.entity';
-import { GameLogService } from 'src/game-log/game-log.service';
+import { GameLogService } from 'src/game/game-log.service';
 import { GetGameDto } from './dto/get-game.dto';
 
 @Injectable()
