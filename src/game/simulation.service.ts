@@ -12,7 +12,9 @@ import { countReadyAndStart } from './initializeGame/ready';
 import { movePaddle } from './calPosition/paddle';
 import { checkWallCollision } from './calCollision/wall.collision';
 import { checkPaddleCollision } from './calCollision/paddle.collision';
-import { checkScorePosition, ScorePosition } from './calPosition/score.position';
+import {
+  checkEndOfGame, checkScorePosition, GameResult, ScorePosition,
+} from './calPosition/score.position';
 import { resetBallAndPaddle } from './initializeGame/reset';
 import { calculateBallDisplacement } from './calPosition/calculate.ball.displacement';
 
@@ -60,17 +62,12 @@ export class SimulationService {
           if (checker === ScorePosition.blueWin || checker === ScorePosition.redWin) {
             this.resetBallAndPaddle(data);
             this.eventRunner.emit('game:score', roomId, data.inGameData.scoreData);
-            let matchScore: number;
 
-            if (GameOption.GLOP40 === ruleData.option3) matchScore = 5;
-            else if (GameOption.GLOP41 === ruleData.option3) matchScore = 3;
-            else if (GameOption.GLOP42 === ruleData.option3) matchScore = 1;
-            else this.logger.error('invalid option3');
-
-            if (matchScore === inGameData.scoreData.red) {
+            const endOfGame = checkEndOfGame(data);
+            if (endOfGame === GameResult.redWin) {
               inGameData.status = GameStatus.End;
               inGameData.winner = metaData.playerBtm.userId;
-            } else if (matchScore === inGameData.scoreData.blue) {
+            } else if (endOfGame === GameResult.blueWin) {
               inGameData.status = GameStatus.End;
               inGameData.winner = metaData.playerTop.userId;
             }
