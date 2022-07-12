@@ -26,6 +26,9 @@ export class MetaData {
   @IsObject()
     playerBtm: GameSession;
 
+  /**
+     * gameType can be modified to isRankGame: boolean type
+     */
   @IsString()
     gameType: GameType;
 }

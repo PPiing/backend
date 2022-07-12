@@ -2,6 +2,7 @@ import {
   IsBoolean, IsNumber, IsString, IsUUID,
 } from 'class-validator';
 
+/** TODO: add userName in session */
 export class GameSession {
   @IsUUID()
     sessionId: string;

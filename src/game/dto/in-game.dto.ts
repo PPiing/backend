@@ -27,11 +27,14 @@ export const enum GameStatus {
 export class InGameData {
   frame = 0;
 
-  matchScore;
+  /** 3, 5, 7 */
+  matchScore = 5;
 
-  ballSpeed;
+  /** 0.8, 1, 1.2 */
+  ballSpeed = 1;
 
-  paddleSize;
+  /** 0.5, 1, 1.5 */
+  paddleSize = 1;
 
   status: GameStatus = GameStatus.Ready;
 
