@@ -21,8 +21,25 @@ export default class MockRankRepository {
     });
   }
 
+  async addRank(userSeq: number) : Promise<RankDto> {
+    const target = await this.MockEntity.push({
+      rankSeq: this.MockEntity.length + 1,
+      rankScore: 0,
+      userSeq,
+    });
+
+    return ({
+      rankSeq: this.MockEntity.length + 1,
+      rankScore: 0,
+      userSeq,
+    });
+  }
+
   async getRank(userSeq: number) : Promise<RankDto | undefined> {
     const target = await this.MockEntity.filter((e) => e.userSeq === userSeq);
+    if (target.length === 0) {
+      return this.addRank(userSeq);
+    }
     if (target.length !== 1) {
       return undefined;
     }
