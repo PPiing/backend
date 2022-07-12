@@ -10,11 +10,11 @@ import { GameLogRepository } from './repository/game-log.repository';
 import { initBeforeStartGame } from './initializeGame/start';
 import { countReadyAndStart } from './initializeGame/ready';
 import { movePaddle } from './calPosition/paddle';
-import { calculateBallDisplacement } from './calPosition/ball';
 import { checkWallCollision } from './calCollision/wall.collision';
 import { checkPaddleCollision } from './calCollision/paddle.collision';
 import { checkScorePosition, ScorePosition } from './calPosition/score.position';
 import { resetBallAndPaddle } from './initializeGame/reset';
+import { calculateBallDisplacement } from './calPosition/calculate.ball.displacement';
 
 @Injectable()
 export class SimulationService {
