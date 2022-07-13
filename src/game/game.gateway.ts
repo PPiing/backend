@@ -8,12 +8,12 @@ import { Server } from 'socket.io';
 import { SocketGuard } from 'src/guards/socket.guard';
 import { SessionMiddleware } from 'src/session-middleware';
 import {
-  PaddleDirective, RenderData, PatchRule, ReadyData, GameData,
+  PaddleDirective, RenderData, GameData,
 } from './dto/game-data';
 import { GameSession } from './dto/game-session.dto';
 import { GameSocket } from './dto/game-socket.dto';
 import { ScoreData } from './dto/in-game.dto';
-import { DequeueDto, QueueDto } from './dto/queue.dto';
+import { RuleDto } from './dto/rule.dto';
 import { StatusDto } from './dto/status.dto';
 import { GameSocketSession } from './game-socket-session';
 import { GameService } from './game.service';
@@ -111,25 +111,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     // socket의 session data update를 해줌.
     this.socketSession.saveSession(data[0].sessionId, data[0]);
     this.socketSession.saveSession(data[1].sessionId, data[1]);
-  }
-
-  /**
-   * TODO(jinbeki): rule event will be removed
-   */
-  @UseGuards(SocketGuard)
-  @SubscribeMessage('rule')
-  settingGameRule(client: GameSocket, data: PatchRule) {
-    this.gameService.handleRule(client.session.roomId, data);
-    client.to(client.session.roomId).emit('rule', data);
-    this.logger.debug(`setting game rule ${JSON.stringify(data)}`);
-  }
-
-  @UseGuards(SocketGuard)
-  @SubscribeMessage('ready')
-  handleReady(client: GameSocket, data: ReadyData) {
-    this.gameService.handleReady(client.session.roomId, data.isReady);
-    client.to(client.session.roomId).emit('ready', data.isReady);
-    this.logger.debug(`user ${client.session.userId} is ${data.isReady ? 'ready' : 'not ready'}`);
   }
 
   /**
