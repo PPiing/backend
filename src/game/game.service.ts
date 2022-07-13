@@ -37,27 +37,30 @@ export class GameService {
     return this.games.get(roomId);
   }
 
-  async handleEnqueue(client: GameSession, enqueueData: QueueDto) {
-    const matchedPlayers = await this.gameQueue.enQueue(client, enqueueData);
+  async handleEnqueue(client: GameSession, ruldData: RuleDto) {
+    const matchedPlayers = await this.gameQueue.enQueue(client, ruldData);
 
+    /** if not matched return */
     if (matchedPlayers === false) return;
 
-    const [bluePlayer, redPlayer] = [...matchedPlayers];
+    /** after Matching players */
+    const [[bluePlayer, blueRule], [redPlayer, redRule]] = [...matchedPlayers];
     const newGame = new GameData();
     newGame.metaData = new MetaData(
       randomUUID(),
-      bluePlayer[0],
-      redPlayer[0],
-      enqueueData.isRankGame,
+      bluePlayer,
+      redPlayer,
+      ruldData.isRankGame,
     );
-    newGame.ruleData = new RuleData();
+    /** temporarily apply bluePlayer's rule */
+    newGame.ruleData = blueRule;
+
     newGame.inGameData = new InGameData();
     this.games.set(newGame.metaData.roomId, newGame);
-    this.users.set(bluePlayer[0].userId, bluePlayer[0].roomId);
-    this.users.set(redPlayer[0].userId, redPlayer[0].roomId);
-    this.readyCheck.set(newGame.metaData.roomId, false);
-    bluePlayer[0].roomId = newGame.metaData.roomId;
-    redPlayer[0].roomId = newGame.metaData.roomId;
+    this.users.set(bluePlayer.userId, bluePlayer.roomId);
+    this.users.set(redPlayer.userId, redPlayer.roomId);
+    bluePlayer.roomId = newGame.metaData.roomId;
+    redPlayer.roomId = newGame.metaData.roomId;
 
     /** TODO(jinbekim): add Ruledata to newGame data */
     this.eventRunner.emit('game:match', matchedPlayers);

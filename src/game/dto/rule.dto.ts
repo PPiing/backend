@@ -1,13 +1,19 @@
-/* eslint-disable max-classes-per-file */
-import { PartialType } from '@nestjs/mapped-types';
-import GameOption from 'src/enums/mastercode/game-option.enum';
+import { IsBoolean, IsNumber, Length } from 'class-validator';
 
-export class RuleData {
-  option1: GameOption = GameOption.GLOP21; // paddle size 보통
+/**
+ * TODO: naming 센스있게 바꿔야 할듯. e.g. speed -> ballSpeed
+ */
+export class RuleDto {
+  @IsNumber()
+  @Length(1, 10)
+    score: number;
 
-  option2: GameOption = GameOption.GLOP31; // ball speed 보통
+  @IsNumber()
+    speed: number;
 
-  option3: GameOption = GameOption.GLOP41; // match score 3점
+  @IsNumber()
+    size: number;
+
+  @IsBoolean()
+    isRankGame: boolean;
 }
-
-export class PatchRule extends PartialType(RuleData) {}

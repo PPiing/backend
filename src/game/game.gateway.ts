@@ -84,16 +84,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   @UseGuards(SocketGuard)
   @SubscribeMessage('enQ')
-  async handleEnqueue(client: GameSocket, enqueueData: QueueDto) {
+  async handleEnqueue(client: GameSocket, ruleData: RuleDto) {
     this.logger.debug(`user ${client.session.userId} enqueued`);
-    return this.gameService.handleEnqueue(client.session, enqueueData);
+    return this.gameService.handleEnqueue(client.session, ruleData);
   }
 
   @UseGuards(SocketGuard)
   @SubscribeMessage('deQ')
-  handleDequeue(client: GameSocket, dequeueData: DequeueDto) {
+  handleDequeue(client: GameSocket, ruleData: RuleDto) {
     this.logger.debug(`user ${client.session.userId} request dequeued`);
-    return this.gameService.handleDequeue(client.session, dequeueData);
+    return this.gameService.handleDequeue(client.session, ruleData);
   }
 
   @OnEvent('game:match')
@@ -143,12 +143,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     if (roomId) {
       this.gameService.createGame(data.metaData.roomId);
       this.server.to(data.metaData.roomId).emit('game:ready', data);
-      this.socketSession.saveSession(data.metaData.playerTop.sessionId, {
-        ...data.metaData.playerTop,
+      this.socketSession.saveSession(data.metaData.playerBlue.sessionId, {
+        ...data.metaData.playerBlue,
         inGame: true,
       });
-      this.socketSession.saveSession(data.metaData.playerBtm.sessionId, {
-        ...data.metaData.playerBtm,
+      this.socketSession.saveSession(data.metaData.playerRed.sessionId, {
+        ...data.metaData.playerRed,
         inGame: true,
       });
     }
