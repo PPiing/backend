@@ -11,16 +11,16 @@ export const enum ScorePosition {
  * @returns win or lose
  */
 export const checkScorePosition = (game: GameData) : ScorePosition => {
-  const { inGameData, inGameData: { ball } } = game;
+  const { inGameData: { ball } } = game;
+  const BALL = GameData.spec.ball;
+  const ARENA = GameData.spec.arena;
 
   // left(blue) lose
-  if (ball.position.x - GameData.spec.ball.radius < ((GameData.spec.arena.width / 2) * -1)) {
-    inGameData.scoreBlue += 1;
+  if (ball.position.x - BALL.radius < ((ARENA.width / 2) * -1)) {
     return ScorePosition.redWin;
   }
   // rigth(red) lose
-  if (ball.position.x + GameData.spec.ball.radius > (GameData.spec.arena.width / 2)) {
-    inGameData.scoreRed += 1;
+  if (ball.position.x + BALL.radius > (ARENA.width / 2)) {
     return ScorePosition.blueWin;
   }
   return ScorePosition.playing;

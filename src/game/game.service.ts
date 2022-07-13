@@ -15,6 +15,7 @@ import { GameSocket } from './dto/game-socket.dto';
 export class GameService {
   private readonly logger: Logger = new Logger('GameService');
 
+  /** game list  */
   private games: Map<string, GameData> = new Map();
 
   /**
@@ -33,8 +34,9 @@ export class GameService {
     return this.games.get(roomId);
   }
 
-  async handleEnqueue(client: GameSession, ruldData: RuleDto) {
-    const matchedPlayers = await this.gameQueue.enQueue(client, ruldData);
+  async handleEnqueue(client: GameSession, ruleData: RuleDto) {
+    this.logger.debug(`user client: ${client.userId} and ruleData: ${ruleData}`);
+    const matchedPlayers = await this.gameQueue.enQueue(client, ruleData);
 
     /** if not matched return */
     if (matchedPlayers === false) return;
@@ -47,7 +49,7 @@ export class GameService {
       randomUUID(),
       bluePlayer,
       redPlayer,
-      ruldData.isRankGame,
+      ruleData.isRankGame,
     );
     /** temporarily apply bluePlayer's rule */
     newGame.ruleData.ballSpeed = blueRule.ballSpeed;
@@ -66,6 +68,7 @@ export class GameService {
   }
 
   handleDequeue(client: GameSession, ruleData: RuleDto) {
+    this.logger.debug('handleDequeue', ruleData);
     return this.gameQueue.deQueue(client, ruleData);
   }
 
@@ -74,15 +77,18 @@ export class GameService {
    * @param roomId 방 아이디
    */
   async createGame(roomId: string) {
+    this.logger.debug(`createGame(roomId: ${roomId}): creating`);
     const game = this.games.get(roomId);
     this.simulator.initBeforeStartGame(game);
   }
 
   createTestGame(client: GameSocket) {
+    this.logger.debug('createTestGame', client);
     this.simulator.initBeforeStartTestGame(client);
   }
 
   async endGame(roomId: string) {
+    this.logger.debug(`ended games roomId: ${roomId}`);
     const { playerBlue, playerRed } = this.games.get(roomId).metaData;
     this.games.delete(roomId);
     this.users.delete(playerRed.userId);
@@ -97,6 +103,7 @@ export class GameService {
    * @param cmd 패들 움직임 명령
    */
   handlePaddle(roomId: string, userId: number, cmd: PaddleDirective) {
+    this.logger.debug(`handlePaddle called with roomId ${roomId} userId ${userId}, ${cmd}`);
     this.simulator.handlePaddle(roomId, userId, cmd);
   }
 
@@ -107,6 +114,7 @@ export class GameService {
    * @param cmd 패들 움직임 명령
    */
   handleTestPaddle(roomId: string, userId: string, cmd: PaddleDirective) {
+    this.logger.debug(`handleTestPaddle(roomId: ${roomId}, userId: ${userId})`);
     this.simulator.handleTestPaddle(roomId, userId, cmd);
   }
 }

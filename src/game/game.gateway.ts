@@ -126,7 +126,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   @OnEvent('game:start')
   handleGamestart(roomId: string) {
-    this.logger.debug(`game ${roomId}`);
+    this.logger.debug(`game:start, ${roomId}`);
     this.server.to(roomId).emit('game:start');
   }
 
@@ -156,6 +156,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   @SubscribeMessage('test:render')
   forTestPurpose(client: GameSocket) {
+    this.logger.debug(`test:render ${client}`);
     this.gameService.createTestGame(client);
   }
 
@@ -166,6 +167,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   @OnEvent('game:render')
   handleGameData(roomId: string, renderData: RenderData) {
+    this.logger.debug(`game ${roomId} was rendered renderData: ${renderData}`);
     this.server.to(roomId).emit('game:render', renderData);
   }
 
@@ -176,6 +178,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   @OnEvent('game:score')
   handleGaemtScore(roomId: string, scoreData: ScoreData) {
+    this.logger.debug(`game ${roomId} was scored scoreData: ${scoreData}`);
     this.server.to(roomId).emit('game:score', scoreData);
   }
 
@@ -185,6 +188,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   @OnEvent('game:end')
   handleGameEnd(roomId: string, data: GameData) {
+    this.logger.debug(`game ${roomId} ended with data: ${data}`);
     const { metaData } = data;
     this.gameService.endGame(roomId);
     this.socketSession.saveSession(metaData.playerBlue.sessionId, {

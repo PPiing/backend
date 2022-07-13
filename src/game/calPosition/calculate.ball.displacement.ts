@@ -12,9 +12,10 @@ export type BallDisplacement = {
  */
 export const calculateBallDisplacement = (game: GameData) : BallDisplacement => {
   const { inGameData: { ball }, ruleData: { ballSpeed } } = game;
+  const { BALL } = GameData.spec;
 
   return {
-    dx: ball.velocity.x * GameData.spec.ball.speed * ballSpeed,
-    dy: ball.velocity.y * GameData.spec.ball.speed * ballSpeed,
+    dx: ball.velocity.x * BALL.speed * ballSpeed,
+    dy: ball.velocity.y * BALL.speed * ballSpeed,
   };
 };

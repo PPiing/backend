@@ -1,11 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Interval } from '@nestjs/schedule';
-import { GameData, MetaData } from './dto/game-data';
+import { GameData } from './dto/game-data';
 import { GameStatus, InGameData, PaddleDirective } from './dto/in-game.dto';
 import { handlePaddle } from './handler/paddle';
 import { GameLogRepository } from './repository/game-log.repository';
-import { movePaddle } from './calPosition/paddle';
 import { checkWallCollision } from './calCollision/wall.collision';
 import { checkPaddleCollision } from './calCollision/paddle.collision';
 import {
@@ -15,6 +14,7 @@ import { resetBallAndPaddle } from './initializeGame/reset';
 import { calculateBallDisplacement } from './calPosition/calculate.ball.displacement';
 import { GameSocket } from './dto/game-socket.dto';
 import { RuleDto } from './dto/rule.dto';
+import { calculatePaddleDisplacement } from './calPosition/calculate.paddle.displacement';
 
 @Injectable()
 export class SimulationService {
@@ -42,8 +42,10 @@ export class SimulationService {
           break;
         }
         case GameStatus.Playing: {
-          // plus vector to position.
-          this.movePaddle(gameData);
+          /** calculatePaddleDisplacement and add it to the position */
+          const { dBlue, dRed } = calculatePaddleDisplacement(gameData);
+          inGameData.paddleBlue.position.y += dBlue;
+          inGameData.paddleRed.position.y += dRed;
 
           /* calculateBallDisplacement and add it to the position */
           const { dx, dy } = calculateBallDisplacement(gameData);
@@ -57,18 +59,18 @@ export class SimulationService {
           this.checkPaddleCollision(gameData);
           /* checking scoring player */
           const checker: ScorePosition = this.checkScorePosition(gameData);
-          if (checker === ScorePosition.blueWin || checker === ScorePosition.redWin) {
-            this.resetBallAndPaddle(gameData);
-            this.eventRunner.emit('game:score', roomId, inGameData.scoreData);
+          if (checker === ScorePosition.blueWin) inGameData.scoreBlue += 1;
+          if (checker === ScorePosition.redWin) inGameData.scoreRed += 1;
+          this.eventRunner.emit('game:score', roomId, inGameData.scoreData);
+          this.resetBallAndPaddle(gameData);
 
-            const endOfGame = checkEndOfGame(gameData);
-            if (endOfGame === GameResult.redWin) {
-              inGameData.status = GameStatus.End;
-              inGameData.winnerSeq = metaData.playerRed.userId;
-            } else if (endOfGame === GameResult.blueWin) {
-              inGameData.status = GameStatus.End;
-              inGameData.winnerSeq = metaData.playerBlue.userId;
-            }
+          const endOfGame: GameResult = checkEndOfGame(gameData);
+          if (endOfGame === GameResult.redWin) {
+            inGameData.status = GameStatus.End;
+            inGameData.winnerSeq = metaData.playerRed.userId;
+          } else if (endOfGame === GameResult.blueWin) {
+            inGameData.status = GameStatus.End;
+            inGameData.winnerSeq = metaData.playerBlue.userId;
           }
           break;
         }
