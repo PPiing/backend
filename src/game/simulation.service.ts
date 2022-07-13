@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Interval } from '@nestjs/schedule';
-import GameOption from 'src/enums/mastercode/game-option.enum';
 import { GameData } from './dto/game-data';
 import { GameStatus } from './dto/in-game.dto';
 import { initAfterEndGame } from './initializeGame/end';
@@ -35,7 +34,7 @@ export class SimulationService {
   @Interval(17) // TODO: games가 변경되면 이벤트를 발생시킨다.로 수정. 아니면 다이나믹 모듈로 변경해도 될듯.
   handleGames() {
     this.games.forEach((data, roomId) => {
-      const { inGameData, metaData, ruleData } = data;
+      const { inGameData, metaData } = data;
       inGameData.frame += 1;
       switch (inGameData.status) {
         case GameStatus.Ready: {
@@ -66,10 +65,10 @@ export class SimulationService {
             const endOfGame = checkEndOfGame(data);
             if (endOfGame === GameResult.redWin) {
               inGameData.status = GameStatus.End;
-              inGameData.winner = metaData.playerBtm.userId;
+              inGameData.winner = metaData.playerRed.userId;
             } else if (endOfGame === GameResult.blueWin) {
               inGameData.status = GameStatus.End;
-              inGameData.winner = metaData.playerTop.userId;
+              inGameData.winner = metaData.playerBlue.userId;
             }
           }
           break;

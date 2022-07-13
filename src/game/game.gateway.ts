@@ -8,12 +8,12 @@ import { Server } from 'socket.io';
 import { SocketGuard } from 'src/guards/socket.guard';
 import { SessionMiddleware } from 'src/session-middleware';
 import {
-  PaddleDirective, RenderData, PatchRule, ReadyData, GameData,
+  PaddleDirective, RenderData, GameData,
 } from './dto/game-data';
 import { GameSession } from './dto/game-session.dto';
 import { GameSocket } from './dto/game-socket.dto';
 import { ScoreData } from './dto/in-game.dto';
-import { QueueDto } from './dto/queue.dto';
+import { RuleDto } from './dto/rule.dto';
 import { StatusDto } from './dto/status.dto';
 import { GameSocketSession } from './game-socket-session';
 import { GameService } from './game.service';
@@ -80,18 +80,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
   }
 
+  /** TODO(jinbekim): rename subscribeMessage
+   */
   @UseGuards(SocketGuard)
   @SubscribeMessage('enQ')
-  async handleEnqueue(client: GameSocket, data: QueueDto) {
+  async handleEnqueue(client: GameSocket, ruleData: RuleDto) {
     this.logger.debug(`user ${client.session.userId} enqueued`);
-    return this.gameService.handleEnqueue(client.session, data.isLadder);
+    return this.gameService.handleEnqueue(client.session, ruleData);
   }
 
   @UseGuards(SocketGuard)
   @SubscribeMessage('deQ')
-  handleDequeue(client: GameSocket, data: QueueDto) {
+  handleDequeue(client: GameSocket, ruleData: RuleDto) {
     this.logger.debug(`user ${client.session.userId} request dequeued`);
-    return this.gameService.handleDequeue(client.session, data.isLadder);
+    return this.gameService.handleDequeue(client.session, ruleData);
   }
 
   @OnEvent('game:match')
@@ -111,22 +113,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.socketSession.saveSession(data[1].sessionId, data[1]);
   }
 
-  @UseGuards(SocketGuard)
-  @SubscribeMessage('rule')
-  settingGameRule(client: GameSocket, data: PatchRule) {
-    this.gameService.handleRule(client.session.roomId, data);
-    client.to(client.session.roomId).emit('rule', data);
-    this.logger.debug(`setting game rule ${JSON.stringify(data)}`);
-  }
-
-  @UseGuards(SocketGuard)
-  @SubscribeMessage('ready')
-  handleReady(client: GameSocket, data: ReadyData) {
-    this.gameService.handleReady(client.session.roomId, data.isReady);
-    client.to(client.session.roomId).emit('ready', data.isReady);
-    this.logger.debug(`user ${client.session.userId} is ${data.isReady ? 'ready' : 'not ready'}`);
-  }
-
   /**
    * 주어진 메타 데이터로 게임을 생성하고 게임을 시작한다.
    * @param data game의 metadata
@@ -138,12 +124,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     if (roomId) {
       this.gameService.createGame(data.metaData.roomId);
       this.server.to(data.metaData.roomId).emit('game:ready', data);
-      this.socketSession.saveSession(data.metaData.playerTop.sessionId, {
-        ...data.metaData.playerTop,
+      this.socketSession.saveSession(data.metaData.playerBlue.sessionId, {
+        ...data.metaData.playerBlue,
         inGame: true,
       });
-      this.socketSession.saveSession(data.metaData.playerBtm.sessionId, {
-        ...data.metaData.playerBtm,
+      this.socketSession.saveSession(data.metaData.playerRed.sessionId, {
+        ...data.metaData.playerRed,
         inGame: true,
       });
     }
@@ -200,39 +186,17 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   handleGameEnd(roomId: string, data: GameData) {
     const { metaData } = data;
     this.gameService.endGame(roomId);
-    this.socketSession.saveSession(metaData.playerTop.sessionId, {
-      ...metaData.playerTop,
+    this.socketSession.saveSession(metaData.playerBlue.sessionId, {
+      ...metaData.playerBlue,
       roomId: null,
       inGame: false,
     });
-    this.socketSession.saveSession(metaData.playerBtm.sessionId, {
-      ...metaData.playerBtm,
+    this.socketSession.saveSession(metaData.playerRed.sessionId, {
+      ...metaData.playerRed,
       roomId: null,
       inGame: false,
     });
     this.server.to(roomId).emit('game:end', data);
     this.server.in(roomId).socketsLeave(roomId);
-  }
-
-  /**
-   * 관전자를 해당 게임룸에 추가한다.
-   * @param client 관전자의 소켓
-   * @param roomId 참여하고자 하는 방 아이디
-   */
-  @UseGuards(SocketGuard)
-  @SubscribeMessage('watch')
-  handleWatch(client: GameSocket, roomId: string) {
-    client.join(roomId);
-  }
-
-  /**
-   * 관전하던 방을 나간다.
-   * @param client 관전자
-   * @param roomId 관전하는 방
-   */
-  @UseGuards(SocketGuard)
-  @SubscribeMessage('unWatch')
-  handleUnWatch(client: GameSocket, roomId: string) {
-    client.leave(roomId);
   }
 }

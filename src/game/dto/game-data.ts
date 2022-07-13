@@ -1,16 +1,15 @@
 import { InGameData, RenderData, PaddleDirective } from './in-game.dto';
 import { MetaData } from './meta.dto';
-import { RuleData, PatchRule } from './rule.dto';
 import { SpecData } from './spec.dto';
-import { ReadyData } from './ready.dto';
+import { RuleDto } from './rule.dto';
 
 export {
-  MetaData, RuleData, SpecData, InGameData, RenderData, PatchRule, ReadyData, PaddleDirective,
+  MetaData, SpecData, InGameData, RenderData, PaddleDirective,
 };
 export class GameData {
   metaData: MetaData;
 
-  ruleData: RuleData;
+  ruleData: RuleDto;
 
   inGameData: InGameData;
 
