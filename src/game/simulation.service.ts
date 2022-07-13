@@ -116,12 +116,6 @@ export class SimulationService {
   private checkWallCollision = checkWallCollision;
 
   /**
- * 매 프레임 마다 패들의 위치를 계산해 이동시킨다.
- * @param game game data
- */
-  private movePaddle = movePaddle;
-
-  /**
  * 게임이 시작되기 전에 준비할 시간을 주기 위해
  * 일정 시간동안 딜레이(지연)시간을 준다.
  * @param roomId 방 아이디
