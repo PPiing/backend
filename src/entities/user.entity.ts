@@ -54,9 +54,9 @@ export default class User {
   @OneToMany(() => GameLog, (gameLog) => gameLog.winnerSeq)
     winner: GameLog[];
 
-  @OneToMany(() => GameLog, (gameLog) => gameLog.topUserSeq)
-    topUser: GameLog[];
+  @OneToMany(() => GameLog, (gameLog) => gameLog.blueUserSeq)
+    blueUser: GameLog[];
 
-  @OneToMany(() => GameLog, (gameLog) => gameLog.btmUserSeq)
-    btmUser: GameLog[];
+  @OneToMany(() => GameLog, (gameLog) => gameLog.redUserSeq)
+    redUser: GameLog[];
 }

@@ -9,6 +9,7 @@ import { SimulationService } from './simulation.service';
 import { GameQueue } from './game-queue';
 import { GameSession } from './dto/game-session.dto';
 import { RuleDto } from './dto/rule.dto';
+import { GameSocket } from './dto/game-socket.dto';
 
 @Injectable()
 export class GameService {
@@ -41,6 +42,7 @@ export class GameService {
     /** after Matching players */
     const [[bluePlayer, blueRule], [redPlayer, redRule]] = [...matchedPlayers];
     const newGame = new GameData();
+    /** metaData */
     newGame.metaData = new MetaData(
       randomUUID(),
       bluePlayer,
@@ -48,8 +50,11 @@ export class GameService {
       ruldData.isRankGame,
     );
     /** temporarily apply bluePlayer's rule */
-    newGame.ruleData = blueRule;
+    newGame.ruleData.ballSpeed = blueRule.ballSpeed;
+    newGame.ruleData.matchScore = blueRule.ballSpeed;
+    newGame.ruleData.paddleSize = redRule.ballSpeed;
 
+    /** inGameData */
     newGame.inGameData = new InGameData();
     this.games.set(newGame.metaData.roomId, newGame);
     this.users.set(bluePlayer.userId, bluePlayer.roomId);
@@ -57,8 +62,7 @@ export class GameService {
     bluePlayer.roomId = newGame.metaData.roomId;
     redPlayer.roomId = newGame.metaData.roomId;
 
-    /** TODO(jinbekim): add Ruledata to newGame data */
-    this.eventRunner.emit('game:match', matchedPlayers);
+    this.eventRunner.emit('game:ready', newGame.metaData);
   }
 
   handleDequeue(client: GameSession, ruleData: RuleDto) {
@@ -71,7 +75,11 @@ export class GameService {
    */
   async createGame(roomId: string) {
     const game = this.games.get(roomId);
-    this.simulator.startGame(game);
+    this.simulator.initBeforeStartGame(game);
+  }
+
+  createTestGame(client: GameSocket) {
+    this.simulator.initBeforeStartTestGame(client);
   }
 
   async endGame(roomId: string) {
@@ -79,7 +87,7 @@ export class GameService {
     this.games.delete(roomId);
     this.users.delete(playerRed.userId);
     this.users.delete(playerBlue.userId);
-    this.simulator.endGame(roomId);
+    this.simulator.initAfterEndGame(roomId);
   }
 
   /**
@@ -90,5 +98,15 @@ export class GameService {
    */
   handlePaddle(roomId: string, userId: number, cmd: PaddleDirective) {
     this.simulator.handlePaddle(roomId, userId, cmd);
+  }
+
+  /**
+   * 자신의 패들 방향을 바꾼다.
+   * @param roomId 방 아이디
+   * @param userId 유저 아이디
+   * @param cmd 패들 움직임 명령
+   */
+  handleTestPaddle(roomId: string, userId: string, cmd: PaddleDirective) {
+    this.simulator.handleTestPaddle(roomId, userId, cmd);
   }
 }

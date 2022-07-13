@@ -41,9 +41,9 @@ export const enum GameResult {
  * @returns game result
  */
 export const checkEndOfGame = (game: GameData) : GameResult => {
-  const { ruleData: { score }, inGameData: { scoreBlue, scoreRed } } = game;
+  const { ruleData: { matchScore }, inGameData: { scoreBlue, scoreRed } } = game;
 
-  if (score === scoreBlue) return GameResult.blueWin;
-  if (score === scoreRed) return GameResult.redWin;
+  if (matchScore === scoreBlue) return GameResult.blueWin;
+  if (matchScore === scoreRed) return GameResult.redWin;
   return GameResult.playing;
 };

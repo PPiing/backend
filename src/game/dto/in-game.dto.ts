@@ -29,7 +29,7 @@ export class InGameData {
 
   status: GameStatus = GameStatus.Ready;
 
-  winner: number = null;
+  winnerSeq: number = null;
 
   scoreBlue = 0;
 

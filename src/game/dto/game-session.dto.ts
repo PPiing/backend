@@ -1,5 +1,5 @@
 import {
-  IsBoolean, IsNumber, IsString, IsUUID,
+  IsNumber, IsString, IsUUID,
 } from 'class-validator';
 
 /** TODO: add userName in session */
@@ -13,6 +13,6 @@ export class GameSession {
   @IsString()
     roomId: string;
 
-  @IsBoolean()
-    inGame: boolean;
+  @IsString()
+    userName: string;
 }

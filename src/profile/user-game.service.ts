@@ -23,22 +23,22 @@ export class UserGameService {
     const allGames : GameLog[] = await this.gameLogService.findRecentGameLog(userSeq, -1);
     const result: GetGameDto[] = [];
     allGames.forEach((game) => {
-      if (game.winnerSeq === game.topUserSeq) {
+      if (game.winnerSeq === game.blueUserSeq) {
         result.push({
-          winner_name: game.topUserName,
-          loser_name: game.btmUserName,
-          game_type: game.gameType,
-          winner_score: game.topSideScore,
-          loser_score: game.btmSideScore,
+          winner_name: game.blueUserName,
+          loser_name: game.redUserName,
+          game_type: game.isRankGame,
+          winner_score: game.blueScore,
+          loser_score: game.redScore,
           start_time: game.createdAt,
         });
-      } else if (game.winnerSeq === game.btmUserSeq) {
+      } else if (game.winnerSeq === game.redUserSeq) {
         result.push({
-          winner_name: game.btmUserName,
-          loser_name: game.topUserName,
-          game_type: game.gameType,
-          winner_score: game.btmSideScore,
-          loser_score: game.topSideScore,
+          winner_name: game.redUserName,
+          loser_name: game.blueUserName,
+          game_type: game.isRankGame,
+          winner_score: game.redScore,
+          loser_score: game.blueScore,
           start_time: game.createdAt,
         });
       }

@@ -27,7 +27,7 @@ export class GameSocketSession {
         sessionId: randomUUID(),
         userId: 123,
         roomId: null,
-        inGame: false,
+        userName: 'anonymous',
       };
       this.logger.debug('session', session);
       this.saveSession(session.sessionId, session);
