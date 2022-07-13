@@ -15,7 +15,7 @@ export class GetProfileDto {
 
   @ApiProperty({
     description: '업적 정보 리스트',
-    example: GetAchivDto,
+    type: [GetAchivDto],
   })
   @IsNotEmpty()
     achiv_info : GetAchivDto[];
@@ -29,8 +29,7 @@ export class GetProfileDto {
 
   @ApiProperty({
     description: '게임 업적',
-    example: GetGameDto,
+    type: [GetGameDto],
   })
-  @IsNotEmpty()
     game_log: GetGameDto[];
 }
