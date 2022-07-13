@@ -27,9 +27,6 @@ export class SimulationService {
     private readonly gameLogRepository: GameLogRepository,
   ) {}
 
-  /**
-   * 일정 인터벌 마다 게임을 실행하고 결과를 반환한다.
-   */
   @Interval(17) // TODO: games가 변경되면 이벤트를 발생시킨다.로 수정. 아니면 다이나믹 모듈로 변경해도 될듯.
   handleGames() {
     this.games.forEach((gameData, roomId) => {
@@ -37,8 +34,11 @@ export class SimulationService {
       inGameData.frame += 1;
       switch (inGameData.status) {
         case GameStatus.Ready: {
-          const started = this.countReadyAndStart(roomId, gameData);
-          if (started) inGameData.status = GameStatus.Playing;
+          const isDelayedEnough = this.delayGameStart(gameData);
+          if (isDelayedEnough) {
+            inGameData.status = GameStatus.Playing;
+            this.eventRunner.emit('game:start', roomId);
+          }
           break;
         }
         case GameStatus.Playing: {
@@ -123,17 +123,14 @@ export class SimulationService {
  * 게임이 시작되기 전에 준비할 시간을 주기 위해
  * 일정 시간동안 딜레이(지연)시간을 준다.
  * @param roomId 방 아이디
- * @param inGameData
- * @returns 게임 시작 전 상태
+ * @param gameData
+ * @returns 게임 시작 여부.
  */
-  countReadyAndStart(
-    roomId: string,
+  delayGameStart(
     gameData: GameData,
   ): boolean {
     const { inGameData } = gameData;
-    if (inGameData.frame === 1) return false;
-    if (inGameData.frame > 1200) return true;
-    this.eventRunner.emit('game:start', roomId);
+    if (inGameData.frame > 800) return true;
     return false;
   }
 
