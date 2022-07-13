@@ -8,7 +8,7 @@ import { PaddleDirective } from '../dto/in-game.dto';
 * @returns void
 */
 export const handlePaddle = function handler(
-  roomId:string,
+  roomId: string,
   userId: number,
   direction: PaddleDirective,
 ) {
