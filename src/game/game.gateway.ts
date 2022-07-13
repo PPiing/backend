@@ -205,13 +205,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   handleGameEnd(roomId: string, data: GameData) {
     const { metaData } = data;
     this.gameService.endGame(roomId);
-    this.socketSession.saveSession(metaData.playerTop.sessionId, {
-      ...metaData.playerTop,
+    this.socketSession.saveSession(metaData.playerBlue.sessionId, {
+      ...metaData.playerBlue,
       roomId: null,
       inGame: false,
     });
-    this.socketSession.saveSession(metaData.playerBtm.sessionId, {
-      ...metaData.playerBtm,
+    this.socketSession.saveSession(metaData.playerRed.sessionId, {
+      ...metaData.playerRed,
       roomId: null,
       inGame: false,
     });

@@ -1,34 +1,31 @@
 import {
+  IsBoolean,
   IsObject, IsString,
 } from 'class-validator';
-import GameType from 'src/enums/mastercode/game-type.enum';
 import { GameSession } from './game-session.dto';
 
 export class MetaData {
   constructor(
     roomId: string,
-    playerTop: GameSession,
-    playerBtm: GameSession,
-    gameType: GameType,
+    playerBlue: GameSession,
+    playerRed: GameSession,
+    isRankGame: boolean,
   ) {
     this.roomId = roomId;
-    this.playerTop = playerTop;
-    this.playerBtm = playerBtm;
-    this.gameType = gameType;
+    this.playerBlue = playerBlue;
+    this.playerRed = playerRed;
+    this.isRankGame = isRankGame;
   }
 
   @IsString()
     roomId: string;
 
   @IsObject()
-    playerTop: GameSession;
+    playerBlue: GameSession;
 
   @IsObject()
-    playerBtm: GameSession;
+    playerRed: GameSession;
 
-  /**
-     * gameType can be modified to isRankGame: boolean type
-     */
-  @IsString()
-    gameType: GameType;
+  @IsBoolean()
+    isRankGame: boolean;
 }

@@ -128,10 +128,10 @@ export class GameService {
   }
 
   async endGame(roomId: string) {
-    const { playerTop, playerBtm } = this.games.get(roomId).metaData;
+    const { playerBlue, playerRed } = this.games.get(roomId).metaData;
     this.games.delete(roomId);
-    this.users.delete(playerBtm.userId);
-    this.users.delete(playerTop.userId);
+    this.users.delete(playerRed.userId);
+    this.users.delete(playerBlue.userId);
     this.simulator.endGame(roomId);
   }
 
