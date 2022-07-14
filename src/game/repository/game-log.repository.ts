@@ -1,8 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { Logger } from '@nestjs/common';
 import GameLog from 'src/entities/game-log.entity';
-import GameOption from 'src/enums/mastercode/game-option.enum';
-import GameType from 'src/enums/mastercode/game-type.enum';
 import { EntityRepository, Repository } from 'typeorm';
 import { GameRecordDto } from '../dto/game-record.dts';
 

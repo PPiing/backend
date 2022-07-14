@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { GetFriendsDto } from 'src/community-bar/friends/dto/get-friends.dto';
-import User from 'src/entities/user.entity';
 import { UserDto } from './dto/user.dto';
 import { UserRepository } from './repository/user.repository';
 

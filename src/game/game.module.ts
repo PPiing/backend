@@ -1,6 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { AppModule } from 'src/app.module';
 import { GameGateway } from './game.gateway';
 import { GameService } from './game.service';
