@@ -1,29 +1,30 @@
-import { IsNumber, IsString } from 'class-validator';
-import GameOption from 'src/enums/mastercode/game-option.enum';
-import GameType from 'src/enums/mastercode/game-type.enum';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class CreateGameLogDto {
-  @IsNumber()
-    gameSeq: number;
-
   @IsString()
-    gameType: GameType;
+    roomId: string;
 
-  @IsNumber()
-    topSideScore: number;
+  @IsBoolean()
+    isRankGame: boolean;
 
   @IsNumber()
-    btmSideScore: number;
+    blueUserSeq: number;
 
   @IsNumber()
-    winner: number;
+    redUserSeq: number;
 
   @IsString()
-    option1: GameOption;
+    blueUserName: string;
 
   @IsString()
-    option2: GameOption;
+    redUserName: string;
 
-  @IsString()
-    option3: GameOption;
+  @IsNumber()
+    paddleSize: number;
+
+  @IsNumber()
+    ballSpeed: number;
+
+  @IsNumber()
+    matchScore: number;
 }

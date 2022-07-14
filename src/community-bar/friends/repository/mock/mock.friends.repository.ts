@@ -1,6 +1,4 @@
 import RelationStatus from 'src/enums/mastercode/relation-status.enum';
-import { threadId } from 'worker_threads';
-import { GetFriendsDto } from '../../dto/get-friends.dto';
 
 export default class MockFriendsRepository {
   MockEntity: any[] = [];

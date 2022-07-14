@@ -22,7 +22,7 @@ export default class MockRankRepository {
   }
 
   async addRank(userSeq: number) : Promise<RankDto> {
-    const target = await this.MockEntity.push({
+    await this.MockEntity.push({
       rankSeq: this.MockEntity.length + 1,
       rankScore: 0,
       userSeq,

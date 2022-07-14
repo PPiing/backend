@@ -1,15 +1,12 @@
-import { HttpException, INestApplication } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import AppModule from 'src/app.module.e2e-spec';
-import * as session from 'express-session';
 import * as request from 'supertest';
-import { FtGuard } from 'src/guards/ft.guard';
 
 describe('Friends E2E Test', () => {
   let app: INestApplication;
   let cookie: string;
-  const user = 1; // NOTE: 사용자 아이디
+  // const user = 1; // NOTE: 사용자 아이디
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({

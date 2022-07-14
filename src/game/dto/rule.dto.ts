@@ -1,4 +1,6 @@
-import { IsBoolean, IsNumber, Length } from 'class-validator';
+import {
+  IsBoolean, IsNumber, Max, Min,
+} from 'class-validator';
 
 /**
  * TODO(jinbekim): naming 센스있게 바꿔야 할듯. e.g. speed -> ballSpeed
@@ -11,15 +13,20 @@ import { IsBoolean, IsNumber, Length } from 'class-validator';
  */
 export class RuleDto {
   @IsNumber()
-  @Length(1, 10)
-    score: number;
+  @Min(1)
+  @Max(10)
+    matchScore = 5;
 
   @IsNumber()
-    speed: number;
+  @Min(0.8)
+  @Max(1.2)
+    ballSpeed = 1;
 
   @IsNumber()
-    size: number;
+  @Min(0.5)
+  @Max(1.5)
+    paddleSize = 1;
 
   @IsBoolean()
-    isRankGame: boolean;
+    isRankGame = false;
 }

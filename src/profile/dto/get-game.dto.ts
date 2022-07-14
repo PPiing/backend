@@ -15,9 +15,9 @@ export class GetGameDto {
 
   @ApiProperty({
     description: '게임 종류',
-    example: 'GLTY10',
+    example: false,
   })
-    game_type: string;
+    game_type: boolean;
 
   @ApiProperty({
     description: '승자 점수',

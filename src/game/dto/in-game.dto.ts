@@ -29,7 +29,7 @@ export class InGameData {
 
   status: GameStatus = GameStatus.Ready;
 
-  winner: number = null;
+  winnerSeq: number = null;
 
   scoreBlue = 0;
 
@@ -37,34 +37,34 @@ export class InGameData {
 
   paddleBlue: MovementInfo = {
     position: {
-      x: GameData.spec.arena.width / 2,
-      y: 10,
+      x: (GameData.spec.arena.width / 2) * (-1) + 10,
+      y: 0,
     },
     velocity: {
-      x: 1,
-      y: 0,
+      x: 0,
+      y: 1,
     },
   };
 
   paddleRed: MovementInfo = {
     position: {
-      x: GameData.spec.arena.width / 2,
-      y: GameData.spec.arena.height - 10,
+      x: (GameData.spec.arena.width / 2) - 10,
+      y: 0,
     },
     velocity: {
-      x: 1,
-      y: 0,
+      x: 0,
+      y: 1,
     },
   };
 
   ball: MovementInfo = {
     position: {
-      x: GameData.spec.arena.width / 2,
-      y: GameData.spec.arena.height / 2,
+      x: 0,
+      y: 0,
     },
     velocity: {
       x: 0,
-      y: 1, // NOTE: 번갈아 가면서 나와야 함.
+      y: 1,
     },
   };
 
