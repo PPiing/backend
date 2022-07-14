@@ -49,4 +49,4 @@ const repositories = [
   ],
   exports: [UserProfileService],
 })
-export class UserProfileModule {}
+export class ProfileModule {}

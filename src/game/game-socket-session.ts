@@ -17,7 +17,8 @@ export class GameSocketSession {
 
   async joinSession(socket: GameSocket, next: () => any) {
     this.logger.debug(`user ${socket} connected`);
-    const { sessionId, userId } = socket.handshake.auth;
+    // const { sessionId, userId } = socket.handshake.auth;
+    const { sessionId } = socket.handshake.auth;
     let session: GameSession = null;
     if (sessionId) {
       session = await this.findSession(sessionId);

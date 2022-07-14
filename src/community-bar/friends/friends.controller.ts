@@ -9,8 +9,12 @@ import { UserDto } from 'src/user/dto/user.dto';
 import { User } from 'src/auth/user.decorator';
 import { UserProfileService } from 'src/profile/user-profile.service';
 import { UserService } from 'src/user/user.service';
-import { GetFriendsDto } from './dto/get-friends.dto';
+import { AlarmService } from 'src/alarm/alarm.service';
+import AlarmType from 'src/enums/mastercode/alarm-type.enum';
+import AlarmCode from 'src/enums/mastercode/alarm-code.enum';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { FriendsService } from './friends.service';
+import { GetFriendsDto } from './dto/get-friends.dto';
 
 @ApiTags('친구')
 @Controller('/community/friends')
@@ -22,6 +26,8 @@ export class FriendsController {
     private readonly friendsService: FriendsService,
     private readonly userProfileService: UserProfileService,
     private readonly userService: UserService,
+    private readonly alarmService : AlarmService,
+    private readonly eventEitter : EventEmitter2,
   ) {}
 
   /**
@@ -74,11 +80,9 @@ export class FriendsController {
       throw new Error('유저 정보가 존재하지 않습니다.');
     }
 
-    // TODO: alarm service에서 알람 생성 후 alarm_seq 를 받아와야 함
-    // const alarm = await this.alarmService.requestFriends(user.userSeq, target);
-    // TODO: 친구 요청 eventRunner 등록 (param : userSeq, target, alarmSeq)
-
-    await this.friendsService.requestFriend(user.userSeq, target);
+    await this.alarmService.addAlarm(user.userSeq, target, AlarmType.ALTP20, AlarmCode.ALAM20);
+    this.friendsService.requestFriend(user.userSeq, target);
+    await this.eventEitter.emit('alarm:confirm', user.userSeq, target, AlarmCode.ALAM20);
   }
 
   /**
@@ -94,7 +98,7 @@ export class FriendsController {
     name: 'alarm_seq', type: Number, example: 1, description: '알림 시퀀스',
   })
   @ApiParam({
-    name: 'target', type: Number, example: 1, description: '수학된 대상 유저',
+    name: 'target', type: Number, example: 1, description: '먼저 친구 요청을 보낸 유저',
   })
   @UseGuards(CheckLogin)
   @Post('/accept/:alarm_seq')
@@ -103,16 +107,16 @@ export class FriendsController {
     target: number,
     @Param('alarm_seq') alarm_seq: number,
   ) {
-    this.logger.log(`친구 요청 - 수락: ${user.userSeq} -> ${target}`);
+    this.logger.log(`친구 요청 - 수락: ${user.userSeq} 가 ${target} 의 친구요정을 수락하였습니다.`);
 
     const check = await this.userProfileService.checkUser(user.userSeq);
     if (!check) {
       throw new Error('유저 정보가 존재하지 않습니다.');
     }
 
-    // TODO: 친구 요청 수학 eventRunner 등록 (param : userSeq, target, alarmSeq)
-
     await this.friendsService.acceptFriend(user.userSeq, target);
+    await this.alarmService.deleteAlarm(alarm_seq, user.userSeq);
+    this.eventEitter.emit('friends:update', user.userSeq, target);
   }
 
   /**
@@ -128,7 +132,7 @@ export class FriendsController {
     name: 'alarm_seq', type: Number, example: 1, description: '알림 시퀀스',
   })
   @ApiParam({
-    name: 'target', type: Number, example: 1, description: '수학된 대상 유저',
+    name: 'target', type: Number, example: 1, description: '먼저 친구 요청을 보낸 유저',
   })
   @UseGuards(CheckLogin)
   @Post('/reject/:alarm_seq')
@@ -137,16 +141,14 @@ export class FriendsController {
     target: number,
     @Param('alarm_seq') alarm_seq: number,
   ) {
-    this.logger.log(`친구 요청 - 거절: ${user.userSeq} -> ${target}`);
+    this.logger.log(`친구 요청 - 거절: ${user.userSeq} 가 ${target} 의 친구요청을 거절하였습니다.`);
 
     const check = await this.userProfileService.checkUser(user.userSeq);
     if (!check) {
       throw new Error('유저 정보가 존재하지 않습니다.');
     }
-
-    // TODO: 친구 요청 eventRunner 등록 (param : userSeq, target, alarmSeq)
-
     await this.friendsService.rejectFriend(user.userSeq, target);
+    await this.alarmService.deleteAlarm(alarm_seq, user.userSeq);
   }
 
   /**
@@ -157,7 +159,9 @@ export class FriendsController {
   @ApiOperation({ summary: '친구 삭제', description: '친구를 삭제합니다.' })
   @ApiResponse({ status: 200, description: '친구 삭제 성공' })
   @ApiResponse({ status: 400, description: '친구 삭제 실패' })
-
+  @ApiParam({
+    name: 'target', type: Number, example: 1, description: '삭제 대상이 된 유저',
+  })
   @UseGuards(CheckLogin)
   @Post('/delete')
   async deleteFriend(
@@ -171,6 +175,7 @@ export class FriendsController {
       throw new Error('유저 정보가 존재하지 않습니다.');
     }
 
-    // await this.friendsService.removeFriend(user.userSeq, target);
+    await this.friendsService.removeFriend(user.userSeq, target);
+    this.eventEitter.emit('friends:update', user.userSeq, target);
   }
 }
