@@ -34,7 +34,7 @@ export class SimulationService {
       inGameData.frame += 1;
       switch (inGameData.status) {
         case GameStatus.Ready: {
-          const isDelayedEnough = this.delayGameStart(gameData);
+          const isDelayedEnough: boolean = this.delayGameStart(gameData);
           if (isDelayedEnough) {
             inGameData.status = GameStatus.Playing;
             this.eventRunner.emit('game:start', roomId);
@@ -58,10 +58,11 @@ export class SimulationService {
           // check paddle bound
           this.checkPaddleCollision(gameData);
           /* checking scoring player */
-          const checker: ScorePosition = this.checkScorePosition(gameData);
+          const checker: ScorePosition = checkScorePosition(gameData);
           if (checker === ScorePosition.blueWin) inGameData.scoreBlue += 1;
           if (checker === ScorePosition.redWin) inGameData.scoreRed += 1;
           this.eventRunner.emit('game:score', roomId, inGameData.scoreData);
+
           this.resetBallAndPaddle(gameData);
 
           const endOfGame: GameResult = checkEndOfGame(gameData);
@@ -95,13 +96,6 @@ export class SimulationService {
  * @param game game data
  */
   private resetBallAndPaddle = resetBallAndPaddle;
-
-  /**
- * 매 프레임 마다 공의 위치가 승리조건에 부합하는지 판단한다.
- * @param game game data
- * @returns win or lose
- */
-  private checkScorePosition = checkScorePosition;
 
   /**
  * 패들과의 충돌을 판단해서 방향을 바꿔준다.
