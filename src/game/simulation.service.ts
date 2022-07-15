@@ -3,7 +3,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Interval } from '@nestjs/schedule';
 import { GameData } from './dto/game-data';
 import { GameStatus, InGameData, PaddleDirective } from './dto/in-game.dto';
-import { handlePaddle } from './handler/paddle';
 import { GameLogRepository } from './repository/game-log.repository';
 import { checkWallCollision } from './calCollision/wall.collision';
 import { checkPaddleCollision } from './calCollision/paddle.collision';
@@ -34,7 +33,7 @@ export class SimulationService {
       inGameData.frame += 1;
       switch (inGameData.status) {
         case GameStatus.Ready: {
-          const isDelayedEnough = this.delayGameStart(gameData);
+          const isDelayedEnough: boolean = this.delayGameStart(gameData);
           if (isDelayedEnough) {
             inGameData.status = GameStatus.Playing;
             this.eventRunner.emit('game:start', roomId);
@@ -46,24 +45,25 @@ export class SimulationService {
           const { dBlue, dRed } = calculatePaddleDisplacement(gameData);
           inGameData.paddleBlue.position.y += dBlue;
           inGameData.paddleRed.position.y += dRed;
-
           /* calculateBallDisplacement and add it to the position */
           const { dx, dy } = calculateBallDisplacement(gameData);
           inGameData.ball.position.x += dx;
           inGameData.ball.position.y += dy;
-
           this.eventRunner.emit('game:render', roomId, inGameData.renderData);
-          // check wall bound
-          this.checkWallCollision(gameData);
+
+          /** check wall bound */
+          const wallCollision = checkWallCollision(gameData);
+          if (wallCollision) inGameData.ball.velocity.y *= (-1);
           // check paddle bound
-          this.checkPaddleCollision(gameData);
+          const paddleBound = checkPaddleCollision(gameData);
+          if (paddleBound) inGameData.ball.velocity.x *= (-1);
           /* checking scoring player */
-          const checker: ScorePosition = this.checkScorePosition(gameData);
+          const checker: ScorePosition = checkScorePosition(gameData);
           if (checker === ScorePosition.blueWin) inGameData.scoreBlue += 1;
           if (checker === ScorePosition.redWin) inGameData.scoreRed += 1;
           this.eventRunner.emit('game:score', roomId, inGameData.scoreData);
-          this.resetBallAndPaddle(gameData);
 
+          this.resetBallAndPaddle(gameData);
           const endOfGame: GameResult = checkEndOfGame(gameData);
           if (endOfGame === GameResult.redWin) {
             inGameData.status = GameStatus.End;
@@ -95,25 +95,6 @@ export class SimulationService {
  * @param game game data
  */
   private resetBallAndPaddle = resetBallAndPaddle;
-
-  /**
- * 매 프레임 마다 공의 위치가 승리조건에 부합하는지 판단한다.
- * @param game game data
- * @returns win or lose
- */
-  private checkScorePosition = checkScorePosition;
-
-  /**
- * 패들과의 충돌을 판단해서 방향을 바꿔준다.
- * @param game game data
- */
-  private checkPaddleCollision = checkPaddleCollision;
-
-  /**
- * 벽과 충돌을 판단해서 충돌 했을 경우 방향을 바꿔준다.
- * @param game game data
- */
-  private checkWallCollision = checkWallCollision;
 
   /**
  * 게임이 시작되기 전에 준비할 시간을 주기 위해
@@ -166,7 +147,7 @@ export class SimulationService {
   }
 
   /**
-  * 게임 종료 후에 게임을 삭제한다.
+  * 게임 종료 후에 메모리상에 있는 게임을 레파지토리로 저장한다.
   * @param roomId 방 아이디
   */
   async initAfterEndGame(roomId: string) {
@@ -182,22 +163,33 @@ export class SimulationService {
   }
 
   /**
-   * 해당 유저의 패들의 방향을 변경한다.
-   * @param roomId 방 아이디
-   * @param userId 방향을 바꿀 유저 아이디
-   * @param direction 패들의 방향
-   * @returns void
-   */
-  handlePaddle = handlePaddle;
+  * 해당 유저의 패들의 방향을 변경한다.
+  * @param roomId 방 아이디
+  * @param userId 방향을 바꿀 유저 아이디
+  * @param direction 패들의 방향
+  */
+  handlePaddle(
+    roomId: string,
+    userId: number,
+    direction: PaddleDirective,
+  ) {
+    const { metaData, inGameData } = this.games.get(roomId);
+    if (!metaData || !inGameData) return;
+    if (metaData.playerBlue.userId === userId) {
+      inGameData.paddleBlue.velocity.y = direction;
+    }
+    if (metaData.playerRed.userId === userId) {
+      inGameData.paddleRed.velocity.y = direction;
+    }
+  }
 
   handleTestPaddle(
     roomId: string,
     userId: string,
     direction: PaddleDirective,
   ) {
-    const game = this.games.get(roomId);
-    const { metaData, inGameData } = game;
-    if (!game) return;
+    const { metaData, inGameData } = this.games.get(roomId);
+    if (!metaData || !inGameData) return;
     if (metaData.playerBlue.userId.toString() === userId) {
       inGameData.paddleBlue.velocity.x = direction;
     }

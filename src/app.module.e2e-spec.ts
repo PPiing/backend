@@ -11,7 +11,7 @@ import { ChatroomsModule } from './chatrooms/chatrooms.module.e2e-spec';
 import { FriendsModule } from './community-bar/friends/friends.module.e2e-spec';
 import configuration from './configs/configuration';
 import { GameModule } from './game/game.module.e2e-spec';
-import { UserProfileModule } from './profile/profile.module.e2e-spec';
+import { ProfileModule } from './profile/profile.module.e2e-spec';
 import { SessionMiddleware } from './session-middleware';
 import { UserModule } from './user/user.module.e2e-spec';
 
@@ -29,7 +29,7 @@ import { UserModule } from './user/user.module.e2e-spec';
     AuthModule,
     FriendsModule,
     AlarmModule,
-    UserProfileModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService, SessionMiddleware],

@@ -25,5 +25,8 @@ import AlarmRepository from './repository/alarm.repository';
     AlarmGateway,
     AlarmService,
   ],
+  exports: [
+    AlarmService,
+  ],
 })
 export class AlarmModule { }
