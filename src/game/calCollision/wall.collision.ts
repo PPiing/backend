@@ -1,17 +1,18 @@
 import { GameData } from '../dto/game-data';
 
 /**
- * 벽과 충돌을 판단해서 충돌 했을 경우 방향을 바꿔준다.
+ * 벽과 충돌을 판단해서 return 한다.
  * @param game game data
+ * @return boolean
  */
-export const checkWallCollision = (game: GameData) => {
-  const { inGameData } = game;
-  const { ball } = inGameData;
-  if (ball.position.x - GameData.spec.ball.radius < 0) {
-    ball.position.x = GameData.spec.ball.radius;
-    ball.velocity.x *= -1;
-  } else if (ball.position.x + GameData.spec.ball.radius > GameData.spec.arena.width) {
-    ball.position.x = GameData.spec.arena.width - GameData.spec.ball.radius;
-    ball.velocity.x *= -1;
+export const checkWallCollision = (game: GameData): boolean => {
+  const { inGameData: { ball } } = game;
+  const BALL = GameData.spec.ball;
+  const HALF_OF_ARENA_HEIGHT = GameData.spec.arena.height / 2;
+
+  if (ball.position.y + BALL.radius > HALF_OF_ARENA_HEIGHT
+    && ball.position.y - BALL.radius < (-1) * HALF_OF_ARENA_HEIGHT) {
+    return true;
   }
+  return false;
 };
