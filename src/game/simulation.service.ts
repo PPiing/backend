@@ -46,18 +46,18 @@ export class SimulationService {
           const { dBlue, dRed } = calculatePaddleDisplacement(gameData);
           inGameData.paddleBlue.position.y += dBlue;
           inGameData.paddleRed.position.y += dRed;
-
           /* calculateBallDisplacement and add it to the position */
           const { dx, dy } = calculateBallDisplacement(gameData);
           inGameData.ball.position.x += dx;
           inGameData.ball.position.y += dy;
-
           this.eventRunner.emit('game:render', roomId, inGameData.renderData);
-          /** check ball collision */
+
+          /** check wall bound */
           const wallCollision = checkWallCollision(gameData);
           if (wallCollision) inGameData.ball.velocity.y *= (-1);
           // check paddle bound
-          this.checkPaddleCollision(gameData);
+          const paddleBound = checkPaddleCollision(gameData);
+          if (paddleBound) inGameData.ball.velocity.x *= (-1);
           /* checking scoring player */
           const checker: ScorePosition = checkScorePosition(gameData);
           if (checker === ScorePosition.blueWin) inGameData.scoreBlue += 1;
@@ -65,7 +65,6 @@ export class SimulationService {
           this.eventRunner.emit('game:score', roomId, inGameData.scoreData);
 
           this.resetBallAndPaddle(gameData);
-
           const endOfGame: GameResult = checkEndOfGame(gameData);
           if (endOfGame === GameResult.redWin) {
             inGameData.status = GameStatus.End;
@@ -97,12 +96,6 @@ export class SimulationService {
  * @param game game data
  */
   private resetBallAndPaddle = resetBallAndPaddle;
-
-  /**
- * 패들과의 충돌을 판단해서 방향을 바꿔준다.
- * @param game game data
- */
-  private checkPaddleCollision = checkPaddleCollision;
 
   /**
  * 게임이 시작되기 전에 준비할 시간을 주기 위해
