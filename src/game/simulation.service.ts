@@ -157,7 +157,7 @@ export class SimulationService {
   */
   initAfterEndGame(roomId: string) {
     const { metaData, inGameData, ruleData } = this.games.get(roomId);
-    if (metaData ?? ruleData ?? inGameData?.status === GameStatus.End) {
+    if (metaData && ruleData && inGameData?.status === GameStatus.End) {
       const finishedGameLog = this.gameLogRepository.create({
         roomId: metaData.roomId,
         isRankGame: ruleData.isRankGame,
