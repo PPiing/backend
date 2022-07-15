@@ -18,7 +18,7 @@ import { calculatePaddleDisplacement } from './calPosition/calculate.paddle.disp
 
 @Injectable()
 export class SimulationService {
-  private readonly logger: Logger = new Logger('SimulationService');
+  private readonly logger: Logger = new Logger('Simula`tionService');
 
   private games: Map<string, GameData> = new Map();
 
@@ -185,6 +185,7 @@ export class SimulationService {
    * @param userId 방향을 바꿀 유저 아이디
    * @param direction 패들의 방향
    * @returns void
+   * tmp
    */
   handlePaddle = handlePaddle;
 
