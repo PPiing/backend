@@ -3,7 +3,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Interval } from '@nestjs/schedule';
 import { GameData } from './dto/game-data';
 import { GameStatus, InGameData, PaddleDirective } from './dto/in-game.dto';
-import { handlePaddle } from './handler/paddle';
 import { GameLogRepository } from './repository/game-log.repository';
 import { checkWallCollision } from './calCollision/wall.collision';
 import { checkPaddleCollision } from './calCollision/paddle.collision';
@@ -153,13 +152,12 @@ export class SimulationService {
   }
 
   /**
-  * 게임 종료 후에 게임을 삭제한다.
+  * 게임 종료 후에 메모리상에 있는 게임을 레파지토리로 저장한다.
   * @param roomId 방 아이디
   */
   initAfterEndGame(roomId: string) {
-    const game = this.games.get(roomId);
-    const { metaData, inGameData, ruleData } = game;
-    if (game && game.inGameData.status === GameStatus.End) {
+    const { metaData, inGameData, ruleData } = this.games.get(roomId);
+    if (metaData ?? ruleData ?? inGameData?.status === GameStatus.End) {
       const finishedGameLog = this.gameLogRepository.create({
         roomId: metaData.roomId,
         isRankGame: ruleData.isRankGame,
@@ -180,22 +178,33 @@ export class SimulationService {
   }
 
   /**
-   * 해당 유저의 패들의 방향을 변경한다.
-   * @param roomId 방 아이디
-   * @param userId 방향을 바꿀 유저 아이디
-   * @param direction 패들의 방향
-   * @returns void
-   */
-  handlePaddle = handlePaddle;
+  * 해당 유저의 패들의 방향을 변경한다.
+  * @param roomId 방 아이디
+  * @param userId 방향을 바꿀 유저 아이디
+  * @param direction 패들의 방향
+  */
+  handlePaddle(
+    roomId: string,
+    userId: number,
+    direction: PaddleDirective,
+  ) {
+    const { metaData, inGameData } = this.games.get(roomId);
+    if (!metaData || !inGameData) return;
+    if (metaData.playerBlue.userId === userId) {
+      inGameData.paddleBlue.velocity.y = direction;
+    }
+    if (metaData.playerRed.userId === userId) {
+      inGameData.paddleRed.velocity.y = direction;
+    }
+  }
 
   handleTestPaddle(
     roomId: string,
     userId: string,
     direction: PaddleDirective,
   ) {
-    const game = this.games.get(roomId);
-    const { metaData, inGameData } = game;
-    if (!game) return;
+    const { metaData, inGameData } = this.games.get(roomId);
+    if (!metaData || !inGameData) return;
     if (metaData.playerBlue.userId.toString() === userId) {
       inGameData.paddleBlue.velocity.x = direction;
     }
