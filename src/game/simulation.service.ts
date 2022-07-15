@@ -53,8 +53,9 @@ export class SimulationService {
           inGameData.ball.position.y += dy;
 
           this.eventRunner.emit('game:render', roomId, inGameData.renderData);
-          // check wall bound
-          this.checkWallCollision(gameData);
+          /** check ball collision */
+          const wallCollision = checkWallCollision(gameData);
+          if (wallCollision) inGameData.ball.velocity.y *= (-1);
           // check paddle bound
           this.checkPaddleCollision(gameData);
           /* checking scoring player */
@@ -102,12 +103,6 @@ export class SimulationService {
  * @param game game data
  */
   private checkPaddleCollision = checkPaddleCollision;
-
-  /**
- * 벽과 충돌을 판단해서 충돌 했을 경우 방향을 바꿔준다.
- * @param game game data
- */
-  private checkWallCollision = checkWallCollision;
 
   /**
  * 게임이 시작되기 전에 준비할 시간을 주기 위해
