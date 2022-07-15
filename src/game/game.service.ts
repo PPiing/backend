@@ -18,9 +18,7 @@ export class GameService {
   /** game list  */
   private games: Map<string, GameData> = new Map();
 
-  /**
-   * To quickly get roomId which is participanted by the userSeq
-   */
+  /** To quickly get roomId which is participanted by the userSeq */
   private users: Map<number, string> = new Map();
 
   constructor(

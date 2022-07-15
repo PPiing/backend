@@ -115,12 +115,25 @@ export class SimulationService {
    * 시뮬레이션 큐에 해당 게임을 등록한다.
    * @param game 등록할 게임 데이터
    */
-  initBeforeStartGame(game: GameData) {
+  async initBeforeStartGame(game: GameData) {
     this.logger.debug(`startGame: ${game.metaData}`);
     /* add game in simulation game queue */
     this.games.set(game.metaData.roomId, game);
 
-  /** TODO(jinbekim): save initial GameLog entity to repository */
+    const { metaData, ruleData } = game;
+    const newLog = this.gameLogRepository.create({
+      roomId: metaData.roomId,
+      isRankGame: metaData.isRankGame,
+      blueUserSeq: metaData.playerBlue.userId,
+      redUserSeq: metaData.playerRed.userId,
+      blueUserName: metaData.playerBlue.userName,
+      redUserName: metaData.playerRed.userName,
+      paddleSize: ruleData.paddleSize,
+      ballSpeed: ruleData.ballSpeed,
+      matchScore: ruleData.matchScore,
+    });
+    const savedLog = await this.gameLogRepository.save(newLog);
+    metaData.gameLogSeq = savedLog.gameLogSeq;
   }
 
   initBeforeStartTestGame(client: GameSocket) {
@@ -137,24 +150,14 @@ export class SimulationService {
   * 게임 종료 후에 메모리상에 있는 게임을 레파지토리로 저장한다.
   * @param roomId 방 아이디
   */
-  initAfterEndGame(roomId: string) {
-    const { metaData, inGameData, ruleData } = this.games.get(roomId);
-    if (metaData && ruleData && inGameData?.status === GameStatus.End) {
-      const finishedGameLog = this.gameLogRepository.create({
-        roomId: metaData.roomId,
-        isRankGame: ruleData.isRankGame,
-        blueUserSeq: metaData.playerBlue.userId,
-        redUserSeq: metaData.playerRed.userId,
-        blueUserName: metaData.playerBlue.userName,
-        redUserName: metaData.playerRed.userName,
+  async initAfterEndGame(roomId: string) {
+    const { metaData, inGameData } = this.games.get(roomId);
+    if (metaData?.gameLogSeq && inGameData.status === GameStatus.End) {
+      await this.gameLogRepository.update(metaData.gameLogSeq, {
         winnerSeq: inGameData.winnerSeq,
         blueScore: inGameData.scoreBlue,
         redScore: inGameData.scoreRed,
-        paddleSize: ruleData.paddleSize,
-        ballSpeed: ruleData.ballSpeed,
-        matchScore: ruleData.matchScore,
       });
-      this.gameLogRepository.save(finishedGameLog);
       this.games.delete(roomId);
     }
   }
