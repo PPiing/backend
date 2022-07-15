@@ -40,29 +40,39 @@ export class AuthService {
     return true;
   }
 
-  // TODO: user DB에 있는 이메일에 전송하는 방식으로 수정하기
-  async sendAuthCodeToEmail(user: any, sessionID: string): Promise<void> {
+  isSecAuthStatus(user: any): boolean {
+    if (!user.secAuthStatus) {
+      console.log('two factor 인증을 하지 않아도 되는 계정입니다.');
+      return false;
+    }
+    return true;
+  }
+
+  setIsLogin(sessionID, flag): void {
     const fileName = `sessions/${sessionID}.json`;
     const sessionData = this.cvtFileDataToObject(fileName);
+    sessionData.passport.user.is_login = flag;
+    this.cvtObjectDataToFile(fileName, sessionData);
+  }
 
+  // TODO: user DB에 있는 이메일에 전송하는 방식으로 수정하기
+  async sendAuthCodeToEmail(user: any, sessionID: string): Promise<void> {
     // TODO: auth code를 랜덤으로 생성하도록 수정합니다.
     // TODO: auth code 만기 시간을 정하도록 수정합니다.
     const factorCode = this.getRandomCode();
     await this.cacheManager.set(sessionID, factorCode);
     if (user.secAuthStatus) {
-      sessionData.passport.user.is_login = 'N';
-      this.cvtObjectDataToFile(fileName, sessionData);
+      this.setIsLogin(sessionID, 'N');
       // NOTE: 인증 이메일 전송
       // NOTE: 전송 후 리다이렉션하여 이메일 전송했다는 문구 띄우기
       this.mailService.example('dev.yamkim@gmail.com', String(factorCode));
     } else {
       // NOTE: 이차인증을 수행하지 경우로, 바로 is_login을 'Y'로 설정합니다.
-      sessionData.passport.user.is_login = 'Y';
-      this.cvtObjectDataToFile(fileName, sessionData);
+      this.setIsLogin(sessionID, 'Y');
     }
   }
 
-  async checkAuthCodeFromEmail(sessionID: string, code: number): Promise<void> {
+  async isValidAuthCodeFromEmail(sessionID: string, code: number): Promise<boolean> {
     const fileName = `sessions/${sessionID}.json`;
     const sessionData = this.cvtFileDataToObject(fileName);
 
@@ -71,12 +81,15 @@ export class AuthService {
     const authCode = await this.cacheManager.get(sessionID);
     if (code === authCode) {
       // NOTE: 이차인증을 성공하는 경우로, 드디어 is_login을 'Y'로 설정합니다.
+      console.log('코드를 제대로 입력하였습니다.');
       sessionData.passport.user.is_login = 'Y';
       this.cvtObjectDataToFile(fileName, sessionData);
-    } else {
-      // NOTE: 이차인증 코드가 잘못된 경우입니다. 다시 인증 화면으로 리다이렉션 시킵니다.
-      sessionData.passport.user.is_login = 'N';
-      this.cvtObjectDataToFile(fileName, sessionData);
+      return true;
     }
+    // NOTE: 이차인증 코드가 잘못된 경우입니다. 다시 인증 화면으로 리다이렉션 시킵니다.
+    console.log('코드를 잘못입력하였습니다.');
+    sessionData.passport.user.is_login = 'N';
+    this.cvtObjectDataToFile(fileName, sessionData);
+    return false;
   }
 }

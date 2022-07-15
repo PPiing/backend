@@ -18,9 +18,6 @@ export class MailService {
         console.log('success!');
       })
       .catch((e) => {
-        console.log(process.env.MAILDEV_INCOMING_USER);
-        console.log(process.env.MAILDEV_INCOMING_PASS);
-        console.error(e);
         console.log('failure!');
       });
   }

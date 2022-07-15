@@ -19,8 +19,14 @@ export class AuthController {
 
   @Get('login/callback')
   @UseGuards(FtGuard)
-  @Redirect('../../../', 302)
-  callback() {}
+  @Redirect('/', 302)
+  callback(@Req() req: any) {
+    if (!this.authService.isSecAuthStatus(req.user)) {
+      this.authService.setIsLogin(req.sessionID, 'Y');
+      return { url: '/home' };
+    }
+    return { url: '/auth/redirect' };
+  }
 
   @Get('logout')
   @UseGuards(CheckLogin)
@@ -29,21 +35,21 @@ export class AuthController {
     req.logout();
   }
 
-  @Get('factor')
-  @Redirect('/auth/factor/window', 302)
-  async checkFactor(@Req() req: any):Promise<void> {
+  @Get('twofactor/check')
+  async checkFactor(@Req() req: any):Promise<boolean> {
     if (!this.authService.checkLogin(req.user, req.sessionID)) {
-      return;
+      return false;
     }
     await this.authService.sendAuthCodeToEmail(req.user, req.sessionID);
+    return true;
   }
 
-  @Get('factor/code')
-  @Redirect('auth/factor/', 302)
-  async checkFactorCode(@Req() req: any, @Query('code', ParseIntPipe) code: number): Promise<void> {
+  @Get('twofactor/code')
+  async checkFactorCode(@Req() req: any, @Query('code', ParseIntPipe) code: number): Promise<boolean> {
     if (!this.authService.checkLogin(req.user, req.sessionID)) {
-      return;
+      return false;
     }
-    this.authService.checkAuthCodeFromEmail(req.sessionID, code);
+    const validChk = this.authService.isValidAuthCodeFromEmail(req.sessionID, code);
+    return validChk;
   }
 }
