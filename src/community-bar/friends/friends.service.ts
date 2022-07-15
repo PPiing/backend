@@ -33,7 +33,7 @@ export class FriendsService {
   /**
    * 사용자 접속이 끊기면 캐시에서 사용자의 리스트를 제거합니다.
    *
-   * @param userSocket 잡속한 사용자 소켓 ID
+   * @param userSocket 접속한 사용자 소켓 ID
    * @param userSeq 접속이 끊긴 사용자 시퀀스
    */
   async onlineUserRemove(userSocket: Socket, userSeq: number): Promise<void> {

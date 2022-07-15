@@ -81,7 +81,7 @@ export class FriendsController {
     }
 
     await this.alarmService.addAlarm(user.userSeq, target, AlarmType.ALTP20, AlarmCode.ALAM20);
-    this.friendsService.requestFriend(user.userSeq, target);
+    await this.friendsService.requestFriend(user.userSeq, target);
     await this.eventEitter.emit('alarm:confirm', user.userSeq, target, AlarmCode.ALAM20);
   }
 
