@@ -31,5 +31,8 @@ const repositories = [
     AlarmService,
     ...repositories,
   ],
+  exports: [
+    AlarmService,
+  ],
 })
 export class AlarmModule { }
