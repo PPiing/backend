@@ -1,5 +1,6 @@
 import {
   IsBoolean,
+  IsNumber,
   IsObject, IsString,
 } from 'class-validator';
 import { GameSession } from './game-session.dto';
@@ -16,6 +17,9 @@ export class MetaData {
     this.playerRed = playerRed;
     this.isRankGame = isRankGame;
   }
+
+  @IsNumber()
+    gameLogSeq: number;
 
   @IsString()
     roomId: string;
