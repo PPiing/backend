@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GameModule } from 'src/game/game.module';
-import { UserModule } from 'src/user/user.module.e2e-spec';
+import { UserModule } from 'src/user/user.module';
 import { ProfileController } from './profile.controller';
 import { AchivRepository } from './repository/achiv.repository';
 import { RankRepository } from './repository/rank.repository';
