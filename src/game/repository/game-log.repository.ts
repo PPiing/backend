@@ -2,6 +2,7 @@
 import { Logger } from '@nestjs/common';
 import GameLog from 'src/entities/game-log.entity';
 import { EntityRepository, Repository } from 'typeorm';
+import { GameData } from '../dto/game-data';
 import { GameRecordDto } from '../dto/game-record.dts';
 
 @EntityRepository(GameLog)
@@ -48,5 +49,30 @@ export class GameLogRepository extends Repository<GameLog> {
       return prev;
     }, 0);
     return { total: count, win: winGames };
+  }
+
+  async saveInitGame(game:GameData): Promise<number> {
+    const { metaData, ruleData } = game;
+    const newLog = this.create({
+      roomId: metaData.roomId,
+      isRankGame: metaData.isRankGame,
+      blueUserSeq: metaData.playerBlue.userId,
+      redUserSeq: metaData.playerRed.userId,
+      blueUserName: metaData.playerBlue.userName,
+      redUserName: metaData.playerRed.userName,
+      paddleSize: ruleData.paddleSize,
+      ballSpeed: ruleData.ballSpeed,
+      matchScore: ruleData.matchScore,
+    });
+    const savedLog = await this.save(newLog);
+    return savedLog.gameLogSeq;
+  }
+
+  async saveUpdatedGame(metaData, inGameData) {
+    await this.update(metaData.gameLogSeq, {
+      winnerSeq: inGameData.winnerSeq,
+      blueScore: inGameData.scoreBlue,
+      redScore: inGameData.scoreRed,
+    });
   }
 }
