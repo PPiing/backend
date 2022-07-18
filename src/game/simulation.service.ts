@@ -4,16 +4,14 @@ import { Interval } from '@nestjs/schedule';
 import { GameData } from './dto/game-data';
 import { GameStatus, InGameData, PaddleDirective } from './dto/in-game.dto';
 import { GameLogRepository } from './repository/game-log.repository';
-import { checkWallCollision } from './calCollision/wall.collision';
-import { checkPaddleCollision } from './calCollision/paddle.collision';
-import {
-  checkEndOfGame, checkScorePosition, GameResult, ScorePosition,
-} from './calPosition/score.position';
-import { resetBallAndPaddle } from './initializeGame/reset';
 import { calculateBallDisplacement } from './calPosition/calculate.ball.displacement';
 import { GameSocket } from './dto/game-socket.dto';
 import { RuleDto } from './dto/rule.dto';
 import { calculatePaddleDisplacement } from './calPosition/calculate.paddle.displacement';
+import { checkWallBound } from './checkBound/check.wall.bound';
+import { checkPaddleBound } from './checkBound/check.paddle.bound';
+import { checkEndOfRound, RoundResult } from './checkStatus/check.end-of-round';
+import { checkEndOfGame, GameResult } from './checkStatus/check.end-of-game';
 
 @Injectable()
 export class SimulationService {
@@ -52,26 +50,26 @@ export class SimulationService {
           this.eventRunner.emit('game:render', roomId, inGameData.renderData);
 
           /** check wall bound */
-          const wallCollision = checkWallCollision(gameData);
+          const wallCollision = checkWallBound(gameData);
           if (wallCollision) inGameData.ball.velocity.y *= (-1);
           // check paddle bound
-          const paddleBound = checkPaddleCollision(gameData);
+          const paddleBound = checkPaddleBound(gameData);
           if (paddleBound) inGameData.ball.velocity.x *= (-1);
-          /* checking scoring player */
-          const checker: ScorePosition = checkScorePosition(gameData);
-          if (checker === ScorePosition.blueWin) inGameData.scoreBlue += 1;
-          if (checker === ScorePosition.redWin) inGameData.scoreRed += 1;
+          /* check end of Round and return winner of the round */
+          const roundResult: RoundResult = checkEndOfRound(gameData);
+          if (roundResult === RoundResult.playing) break;
+          if (roundResult === RoundResult.blueWin) inGameData.scoreBlue += 1;
+          if (roundResult === RoundResult.redWin) inGameData.scoreRed += 1;
           this.eventRunner.emit('game:score', roomId, inGameData.scoreData);
 
+          /** reset object to default position */
           this.resetBallAndPaddle(gameData);
-          const endOfGame: GameResult = checkEndOfGame(gameData);
-          if (endOfGame === GameResult.redWin) {
-            inGameData.status = GameStatus.End;
-            inGameData.winnerSeq = metaData.playerRed.userId;
-          } else if (endOfGame === GameResult.blueWin) {
-            inGameData.status = GameStatus.End;
-            inGameData.winnerSeq = metaData.playerBlue.userId;
-          }
+          /** check end of Game and wiiner of the game */
+          const gameResult: GameResult = checkEndOfGame(gameData);
+          if (gameResult === GameResult.playing) break;
+          if (gameResult === GameResult.redWin) inGameData.winnerSeq = metaData.playerRed.userId;
+          if (gameResult === GameResult.blueWin) inGameData.winnerSeq = metaData.playerBlue.userId;
+          inGameData.status = GameStatus.End;
           break;
         }
         case GameStatus.End: {
@@ -94,7 +92,17 @@ export class SimulationService {
  * 한쪽이 승리하게 되면, 공과 패들의 위치를 초기화 시킨다.
  * @param game game data
  */
-  private resetBallAndPaddle = resetBallAndPaddle;
+  resetBallAndPaddle(game: GameData) {
+    this.logger.debug('resetBallAndPaddle');
+    const { inGameData: { ball, paddleBlue, paddleRed } } = game;
+
+    paddleBlue.position.y = 0;
+    paddleRed.position.x = 0;
+    ball.position.x = 0;
+    ball.position.y = 0;
+    ball.velocity.x = 0; // TODO(jinbekim): apply rand
+    ball.velocity.y = 1; // TODO(jinbekim): apply rand
+  }
 
   /**
  * 게임이 시작되기 전에 준비할 시간을 주기 위해
