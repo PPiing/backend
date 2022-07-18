@@ -16,7 +16,7 @@ import { MockGameLogRepository } from './repository/mock/mock.game-log.repositor
   imports: [
     forwardRef(() => AppModule),
     EventEmitterModule.forRoot(),
-    // TypeOrmModule.forFeature([GameRepository, GameLogRepository]),
+    // TypeOrmModule.forFeature([GameLogRepository]),
   ],
   providers: [
     GameService,

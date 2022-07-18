@@ -5,7 +5,7 @@ import { GameData } from '../dto/game-data';
  * @param game game data
  * @return boolean
  */
-export const checkPaddleCollision = (game: GameData): boolean => {
+export const checkPaddleBound = (game: GameData): boolean => {
   const { inGameData: { ball, paddleBlue, paddleRed } } = game;
   const HALF_OF_PADDLE_HEIGHT = GameData.spec.paddle.height / 2;
   const HALF_OF_PADDLE_WIDTH = GameData.spec.paddle.width / 2;

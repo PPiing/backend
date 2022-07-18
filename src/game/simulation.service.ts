@@ -4,16 +4,15 @@ import { Interval } from '@nestjs/schedule';
 import { GameData } from './dto/game-data';
 import { GameStatus, InGameData, PaddleDirective } from './dto/in-game.dto';
 import { GameLogRepository } from './repository/game-log.repository';
-import { checkWallCollision } from './calCollision/wall.collision';
-import { checkPaddleCollision } from './calCollision/paddle.collision';
-import {
-  checkEndOfGame, checkScorePosition, GameResult, ScorePosition,
-} from './calPosition/score.position';
 import { resetBallAndPaddle } from './initializeGame/reset';
 import { calculateBallDisplacement } from './calPosition/calculate.ball.displacement';
 import { GameSocket } from './dto/game-socket.dto';
 import { RuleDto } from './dto/rule.dto';
 import { calculatePaddleDisplacement } from './calPosition/calculate.paddle.displacement';
+import { checkWallBound } from './checkBound/check.wall.bound';
+import { checkPaddleBound } from './checkBound/check.paddle.bound';
+import { checkEndOfRound, RoundResult } from './checkStatus/check.end-of-round';
+import { checkEndOfGame, GameResult } from './checkStatus/check.end-of-game';
 
 @Injectable()
 export class SimulationService {
@@ -52,15 +51,15 @@ export class SimulationService {
           this.eventRunner.emit('game:render', roomId, inGameData.renderData);
 
           /** check wall bound */
-          const wallCollision = checkWallCollision(gameData);
+          const wallCollision = checkWallBound(gameData);
           if (wallCollision) inGameData.ball.velocity.y *= (-1);
           // check paddle bound
-          const paddleBound = checkPaddleCollision(gameData);
+          const paddleBound = checkPaddleBound(gameData);
           if (paddleBound) inGameData.ball.velocity.x *= (-1);
           /* checking scoring player */
-          const checker: ScorePosition = checkScorePosition(gameData);
-          if (checker === ScorePosition.blueWin) inGameData.scoreBlue += 1;
-          if (checker === ScorePosition.redWin) inGameData.scoreRed += 1;
+          const checker: RoundResult = checkEndOfRound(gameData);
+          if (checker === RoundResult.blueWin) inGameData.scoreBlue += 1;
+          if (checker === RoundResult.redWin) inGameData.scoreRed += 1;
           this.eventRunner.emit('game:score', roomId, inGameData.scoreData);
 
           this.resetBallAndPaddle(gameData);

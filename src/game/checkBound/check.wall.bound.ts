@@ -5,7 +5,7 @@ import { GameData } from '../dto/game-data';
  * @param game game data
  * @return boolean
  */
-export const checkWallCollision = (game: GameData): boolean => {
+export const checkWallBound = (game: GameData): boolean => {
   const { inGameData: { ball } } = game;
   const BALL = GameData.spec.ball;
   const HALF_OF_ARENA_HEIGHT = GameData.spec.arena.height / 2;
