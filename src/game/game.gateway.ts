@@ -99,17 +99,17 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.logger.debug('game:ready');
     const { ruleData, metaData, metaData: { playerBlue, playerRed } } = gameData;
     const players = [
-      playerBlue.userId.toString(),
-      playerRed.userId.toString(),
+      playerBlue?.userId?.toString(),
+      playerRed?.userId?.toString(),
     ];
     /** emit match data */
     this.server.to(players).emit('game:ready', {
       ruleData,
-      blueUser: metaData.playerBlue.userName,
-      redUser: metaData.playerRed.userName,
+      blueUser: metaData?.playerBlue?.userName,
+      redUser: metaData?.playerRed?.userName,
     });
     /** join in gameRoom */
-    this.server.in(players).socketsJoin(playerBlue.roomId);
+    this.server.in(players).socketsJoin(playerBlue?.roomId);
 
     /** save players session data
      * GameSession이 아니라 GameSocket이나 Socket을 저장하는건 어떨까?
