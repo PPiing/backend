@@ -99,6 +99,7 @@ describe('User E2E Test', () => {
           .get('/users/profile')
           .set('Cookie', userCookie);
 
+        console.log(response.body);
         // then
         expect(response.status).toBe(200);
         expect(response.body).toBeDefined();

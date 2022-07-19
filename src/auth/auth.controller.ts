@@ -19,7 +19,7 @@ export class AuthController {
 
   @Get('login/callback')
   @UseGuards(FtGuard)
-  @Redirect('/', 302)
+  @Redirect('../../../', 302)
   callback(@Req() req: any) {
     if (!this.authService.isSecAuthStatus(req.user)) {
       this.authService.setIsLogin(req.sessionID, 'Y');

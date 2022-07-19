@@ -9,6 +9,10 @@ import { SessionSerializer } from './session.serializer';
 @Module({
   imports: [UserModule, MailModule],
   controllers: [AuthController],
-  providers: [SessionSerializer, FtStrategy, AuthService],
+  providers: [
+    SessionSerializer,
+    FtStrategy,
+    AuthService
+  ],
 })
 export class AuthModule { }
