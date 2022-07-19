@@ -25,7 +25,7 @@ export class AuthController {
       this.authService.setIsLogin(req.sessionID, 'Y');
       return { url: '../../../' };
     }
-    return ({ url : '../../../auth/redirect' });
+    return ({ url: '../../../auth/redirect' });
   }
 
   @Get('logout')

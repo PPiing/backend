@@ -12,7 +12,7 @@ import { SessionSerializer } from './session.serializer';
   providers: [
     SessionSerializer,
     FtStrategy,
-    AuthService
+    AuthService,
   ],
 })
 export class AuthModule { }

@@ -1,11 +1,12 @@
-import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  CACHE_MANAGER, Inject, Injectable, Logger,
+} from '@nestjs/common';
 import { MailService } from 'src/mail/mail.service';
 import { readFileSync, writeFileSync } from 'fs';
 import { Cache } from 'cache-manager';
 
 @Injectable()
 export class AuthService {
-
   private logger: Logger = new Logger(AuthService.name);
 
   constructor(

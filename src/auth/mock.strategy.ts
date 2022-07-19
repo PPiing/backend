@@ -8,7 +8,7 @@ import MockStrategy from './custom.mock';
 export class MyMockStrategy extends PassportStrategy(MockStrategy, '42') {
   constructor(
     private readonly userService: UserService,
-    private readonly authService:  AuthService,
+    private readonly authService: AuthService,
   ) {
     super();
   }

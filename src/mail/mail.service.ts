@@ -3,7 +3,6 @@ import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class MailService {
-
   private logger: Logger = new Logger(MailService.name);
 
   constructor(private readonly mailerService: MailerService) {}
@@ -21,7 +20,7 @@ export class MailService {
         this.logger.log('success!');
       })
       .catch((e) => {
-        this.logger.log('failure!');
+        this.logger.log(`failure! : ${e}`);
       });
   }
 }
