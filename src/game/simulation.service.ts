@@ -128,22 +128,12 @@ export class SimulationService {
     /* add game in simulation game queue */
     this.games.set(game.metaData.roomId, game);
 
-    const { metaData, ruleData } = game;
-    const newLog = this.gameLogRepository.create({
-      roomId: metaData.roomId,
-      isRankGame: metaData.isRankGame,
-      blueUserSeq: metaData.playerBlue.userId,
-      redUserSeq: metaData.playerRed.userId,
-      blueUserName: metaData.playerBlue.userName,
-      redUserName: metaData.playerRed.userName,
-      paddleSize: ruleData.paddleSize,
-      ballSpeed: ruleData.ballSpeed,
-      matchScore: ruleData.matchScore,
-    });
-    const savedLog = await this.gameLogRepository.save(newLog);
-    metaData.gameLogSeq = savedLog.gameLogSeq;
+    const { metaData } = game;
+    const logSeq = await this.gameLogRepository.saveInitGame(game);
+    metaData.gameLogSeq = logSeq;
   }
 
+  /** NOTE: will be deleted */
   initBeforeStartTestGame(client: GameSocket) {
     this.logger.debug('startGame:');
     /* add game in simulation game queue */
@@ -161,11 +151,7 @@ export class SimulationService {
   async initAfterEndGame(roomId: string) {
     const { metaData, inGameData } = this.games.get(roomId);
     if (metaData?.gameLogSeq && inGameData.status === GameStatus.End) {
-      await this.gameLogRepository.update(metaData.gameLogSeq, {
-        winnerSeq: inGameData.winnerSeq,
-        blueScore: inGameData.scoreBlue,
-        redScore: inGameData.scoreRed,
-      });
+      this.gameLogRepository.saveUpdatedGame(metaData, inGameData);
       this.games.delete(roomId);
     }
   }
@@ -191,6 +177,7 @@ export class SimulationService {
     }
   }
 
+  /** NOTE: will be deleted */
   handleTestPaddle(
     roomId: string,
     userId: string,
