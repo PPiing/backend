@@ -1,10 +1,13 @@
-import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
 import { MailService } from 'src/mail/mail.service';
 import { readFileSync, writeFileSync } from 'fs';
 import { Cache } from 'cache-manager';
 
 @Injectable()
 export class AuthService {
+
+  private logger: Logger = new Logger(AuthService.name);
+
   constructor(
     private readonly mailService: MailService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -33,8 +36,8 @@ export class AuthService {
   checkLogin(user: any, sessionID: string): boolean {
     const fileName = `sessions/${sessionID}.json`;
     const sessionData = this.cvtFileDataToObject(fileName);
-    if (!user || sessionData === {}) {
-      console.log('로그인을 다시 해야합니다.');
+    if (!user || Object.keys(sessionData).length === 0) {
+      this.logger.log('로그인을 다시 해야합니다.');
       return false;
     }
     return true;
@@ -42,7 +45,7 @@ export class AuthService {
 
   isSecAuthStatus(user: any): boolean {
     if (!user.secAuthStatus) {
-      console.log('two factor 인증을 하지 않아도 되는 계정입니다.');
+      this.logger.log('two factor 인증을 하지 않아도 되는 계정입니다.');
       return false;
     }
     return true;
@@ -81,13 +84,13 @@ export class AuthService {
     const authCode = await this.cacheManager.get(sessionID);
     if (code === authCode) {
       // NOTE: 이차인증을 성공하는 경우로, 드디어 is_login을 'Y'로 설정합니다.
-      console.log('코드를 제대로 입력하였습니다.');
+      this.logger.log('코드를 제대로 입력하였습니다.');
       sessionData.passport.user.is_login = 'Y';
       this.cvtObjectDataToFile(fileName, sessionData);
       return true;
     }
     // NOTE: 이차인증 코드가 잘못된 경우입니다. 다시 인증 화면으로 리다이렉션 시킵니다.
-    console.log('코드를 잘못입력하였습니다.');
+    this.logger.log('코드를 잘못입력하였습니다.');
     sessionData.passport.user.is_login = 'N';
     this.cvtObjectDataToFile(fileName, sessionData);
     return false;
