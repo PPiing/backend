@@ -17,6 +17,7 @@ import { ProfileModule } from './profile/profile.module';
 import { SessionMiddleware } from './session-middleware';
 import { AlarmModule } from './alarm/alarm.module';
 import { UploadModule } from './upload/upload.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { UploadModule } from './upload/upload.module';
     AlarmModule,
     ProfileModule,
     UploadModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService, SessionMiddleware],
