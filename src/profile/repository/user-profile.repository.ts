@@ -31,13 +31,13 @@ export class UserProfileRepository extends Repository<User> {
     const user = await this.findOne(userSeq);
     user.nickName = userData.nickName;
     user.email = userData.email;
-    user.secAuthStatuc = userData.secAuthStatus;
+    user.secAuthStatus = userData.secAuthStatus;
     user.avatarImgUri = userData.avatarImgUri;
     await this.save(user);
     return ({
       nickName: user.nickName,
       email: user.email,
-      secAuthStatus: user.secAuthStatuc,
+      secAuthStatus: user.secAuthStatus,
       avatarImgUri: user.avatarImgUri,
     });
   }

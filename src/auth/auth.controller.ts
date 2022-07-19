@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Redirect, Req, UseGuards, Query, ParseIntPipe, Inject, CACHE_MANAGER,
+  Controller, Get, Redirect, Req, UseGuards, Query, ParseIntPipe,
 } from '@nestjs/common';
 import { CheckLogin } from 'src/guards/check-login.guard';
 import { FtGuard } from 'src/guards/ft.guard';
@@ -10,7 +10,6 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   @Get('login')
@@ -21,11 +20,12 @@ export class AuthController {
   @UseGuards(FtGuard)
   @Redirect('../../../', 302)
   callback(@Req() req: any) {
+    // TODO : requset의 is_login으로 확인해볼 것
     if (!this.authService.isSecAuthStatus(req.user)) {
       this.authService.setIsLogin(req.sessionID, 'Y');
-      return { url: '/home' };
+      return { url: '../../../' };
     }
-    return { url: '/auth/redirect' };
+    return ({ url : '../../../auth/redirect' });
   }
 
   @Get('logout')

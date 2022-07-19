@@ -87,6 +87,7 @@ export class ProfileController {
       @Body() userData: UpdateUserDto,
   ): Promise<UpdateUserDto> {
     const { userSeq } = user;
+
     this.logger.log(`나의 정보 수정 요청: ${userSeq}`);
 
     const check = await this.userProfileService.checkUser(userSeq);
