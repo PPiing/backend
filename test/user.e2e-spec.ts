@@ -1,14 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import AppModule from 'src/app.module.e2e-spec';
-import * as session from 'express-session';
-import * as passport from 'passport';
 import * as request from 'supertest';
-import * as sess from 'session-file-store';
 
 describe('User E2E Test', () => {
   let app: INestApplication;
-  let cookie: string;
+  let cookie: string[];
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -16,18 +13,6 @@ describe('User E2E Test', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    const FileStore = sess(session);
-    app.use(
-      session({
-        secret: 'secret key',
-        resave: false,
-        saveUninitialized: true,
-        store: new FileStore(),
-      }),
-    );
-
-    app.use(passport.initialize());
-    app.use(passport.session());
 
     await app.init();
 
@@ -54,10 +39,10 @@ describe('User E2E Test', () => {
         // then
         expect(response.status).toBe(200);
         expect(response.body).toBeDefined();
-        expect(response.body.userName).toBeDefined();
-        expect(response.body.userEmail).toBeDefined();
-        expect(response.body.userStatus).toBeDefined();
-        expect(response.body.userImage).toBeDefined();
+        expect(response.body.user_info.userName).toBeDefined();
+        expect(response.body.user_info.userEmail).toBeDefined();
+        expect(response.body.user_info.userStatus).toBeDefined();
+        expect(response.body.user_info.userImage).toBeDefined();
         // expect(response.body.isFriend).toBeDefined();
         // expect(response.body.isBlock).toBeDefined();
         // NOTE: 다른 테이블과의 조인이 필요한 부분이므로 추후에 검증
@@ -102,10 +87,10 @@ describe('User E2E Test', () => {
         // then
         expect(response.status).toBe(200);
         expect(response.body).toBeDefined();
-        expect(response.body.userName).toBeDefined();
-        expect(response.body.userEmail).toBeDefined();
-        expect(response.body.userStatus).toBeDefined();
-        expect(response.body.userImage).toBeDefined();
+        expect(response.body.user_info.userName).toBeDefined();
+        expect(response.body.user_info.userEmail).toBeDefined();
+        expect(response.body.user_info.userStatus).toBeDefined();
+        expect(response.body.user_info.userImage).toBeDefined();
       });
 
       test('비정상적인 요청 - 잘못된 세션', async () => {
@@ -127,16 +112,20 @@ describe('User E2E Test', () => {
     describe('/users/search/:nickname', () => {
       test('유저 닉네임 검색', async () => {
         // given
-        const nickname = 'kim';
+        const nickname = 'skim';
+        const userCookie = cookie;
 
         // when
         const response = await request(app.getHttpServer())
-          .get(`/users/search/${nickname}`);
+          .get(`/users/search/${nickname}`)
+          .set('Cookie', userCookie);
 
-        // then (skim, kkim)
+        // then (skim)
         expect(response.status).toBe(200);
-        expect(response.body).toBeDefined();
-        expect(response.body.length).toBe(2);
+        expect(response.body.user_info.userName).toBeDefined();
+        expect(response.body.user_info.userEmail).toBeDefined();
+        expect(response.body.user_info.userStatus).toBeDefined();
+        expect(response.body.user_info.userImage).toBeDefined();
       });
     });
   });

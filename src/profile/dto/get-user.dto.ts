@@ -30,7 +30,7 @@ export class GetUserDto {
   @ApiProperty({
     description: '유저 상태',
     enum: ['USST10', 'USST20', 'USST30', 'USST40'],
-    example: 'skim',
+    example: 'USST10',
   })
   @IsNotEmpty()
     userStatus: UserStatus;

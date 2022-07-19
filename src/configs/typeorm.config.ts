@@ -16,8 +16,7 @@ export default class TypeOrmConfigService implements TypeOrmOptionsFactory {
       password: this.configService.get('database.password'),
       database: this.configService.get('database.database'),
       entities: [`${__dirname}/../**/entities/*.entity.{js,ts}`],
-      synchronize: true,
-      cache: true,
+      synchronize: false,
     };
   }
 }

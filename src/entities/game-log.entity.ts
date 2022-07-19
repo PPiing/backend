@@ -2,8 +2,6 @@ import {
   Column, CreateDateColumn,
   Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn,
 } from 'typeorm';
-import GameOption from 'src/enums/mastercode/game-option.enum';
-import GameType from 'src/enums/mastercode/game-type.enum';
 import User from './user.entity';
 
 @Entity()
@@ -15,39 +13,39 @@ export default class GameLog {
     roomId: string;
 
   @Column()
-    topUserName: string;
-
-  @Column()
-    btmUserName: string;
+    isRankGame: boolean;
 
   @ManyToOne(() => User)
   @JoinColumn()
-    topUserSeq: number;
+    blueUserSeq: number;
 
   @ManyToOne(() => User)
   @JoinColumn()
-    btmUserSeq: number;
+    redUserSeq: number;
 
   @Column()
-    gameType: GameType;
+    blueUserName: string;
+
+  @Column()
+    redUserName: string;
 
   @ManyToOne(() => User)
     winnerSeq: number;
 
   @Column({ default: 0 })
-    topSideScore: number;
+    blueScore: number;
 
   @Column({ default: 0 })
-    btmSideScore: number;
+    redScore: number;
 
   @Column()
-    option1: GameOption; // racket size
+    paddleSize: number;
 
   @Column()
-    option2: GameOption; // ball speed
+    ballSpeed: number;
 
   @Column()
-    option3: GameOption; // match score
+    matchScore: number;
 
   @CreateDateColumn()
     createdAt: Date;

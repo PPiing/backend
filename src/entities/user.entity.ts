@@ -24,7 +24,7 @@ export default class User {
   @Column({ default: false })
     secAuthStatus: boolean; // 이차인증 여부
 
-  @Column({ default: 'defaultavatar.jpeg' })
+  @Column({ default: 'DefaultProfile.jpg' })
     avatarImgUri: string; // 프로필 이미지 URI
 
   @Column({ default: UserStatus.USST10 })
@@ -54,9 +54,9 @@ export default class User {
   @OneToMany(() => GameLog, (gameLog) => gameLog.winnerSeq)
     winner: GameLog[];
 
-  @OneToMany(() => GameLog, (gameLog) => gameLog.topUserSeq)
-    topUser: GameLog[];
+  @OneToMany(() => GameLog, (gameLog) => gameLog.blueUserSeq)
+    blueUser: GameLog[];
 
-  @OneToMany(() => GameLog, (gameLog) => gameLog.btmUserSeq)
-    btmUser: GameLog[];
+  @OneToMany(() => GameLog, (gameLog) => gameLog.redUserSeq)
+    redUser: GameLog[];
 }

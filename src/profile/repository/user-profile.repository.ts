@@ -1,6 +1,7 @@
 import User from 'src/entities/user.entity';
 import { EntityRepository, Repository, Like } from 'typeorm';
 import { GetUserDto } from '../dto/get-user.dto';
+import { SearchUserDto } from '../dto/search-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
 @EntityRepository(User)
@@ -15,7 +16,7 @@ export class UserProfileRepository extends Repository<User> {
       userName: user.nickName,
       userEmail: user.email,
       userStatus: user.status,
-      userImage: user.avatarImgUri,
+      userImage: `./api/upload/${user.avatarImgUri}`,
     });
   }
 
@@ -38,7 +39,7 @@ export class UserProfileRepository extends Repository<User> {
       nickName: user.nickName,
       email: user.email,
       secAuthStatus: user.secAuthStatus,
-      avatarImgUri: user.avatarImgUri,
+      avatarImgUri: `./api/upload/${user.avatarImgUri}`,
     });
   }
 
@@ -48,7 +49,7 @@ export class UserProfileRepository extends Repository<User> {
     await this.save(user);
   }
 
-  async searchUsersByNickname(nickname: string): Promise<GetUserDto[]> {
+  async searchUsersByKeyword(nickname: string): Promise<SearchUserDto[]> {
     if (nickname === '') {
       return [];
     }
@@ -59,10 +60,9 @@ export class UserProfileRepository extends Repository<User> {
     });
     return users.map((user) => ({
       userSeq: user.userSeq,
-      userName: user.nickName,
-      userEmail: user.email,
+      nickName: user.nickName,
       userStatus: user.status,
-      userImage: user.avatarImgUri,
+      userImage: `./api/upload/${user.avatarImgUri}`,
     }));
   }
 }

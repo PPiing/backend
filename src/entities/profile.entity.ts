@@ -1,9 +1,9 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany,
 } from 'typeorm';
-import ProfileAchiv from './profile-achiv.entity';
 import Rank from './rank.entity';
 import User from './user.entity';
+import UserAchiv from './user-achiv.entity';
 
 @Entity()
 export default class Profile {
@@ -24,6 +24,6 @@ export default class Profile {
   @JoinColumn({ name: 'userSeq', referencedColumnName: 'userSeq' })
     user: User; // 유저 엔티티
 
-  @OneToMany(() => ProfileAchiv, (profileAchiv) => profileAchiv.profile)
-    profileAchiv: ProfileAchiv[]; // 프로필 업적 엔티티
+  @OneToMany(() => UserAchiv, (userAchiv) => userAchiv.userAchivSeq)
+    userAchiv: UserAchiv[]; // 프로필 업적 엔티티
 }

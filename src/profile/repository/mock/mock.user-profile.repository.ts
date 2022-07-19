@@ -73,7 +73,7 @@ export default class MockUserProfileRepository {
     this.MockEntity.splice(userIdx, userIdx + 1);
   }
 
-  async searchUsersByNickname(nickname: string): Promise<GetUserDto[]> {
+  async searchUsersByKeyword(nickname: string): Promise<GetUserDto[]> {
     const users = this.MockEntity.filter((u) => u.nickName.indexOf(nickname) >= 0);
     return users.map((user) => ({
       userSeq: user.nickName,
