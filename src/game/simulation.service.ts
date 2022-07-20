@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Interval } from '@nestjs/schedule';
-import { GameData } from './dto/game-data';
+import { GameData, MetaData } from './dto/game-data';
 import { GameStatus, InGameData, PaddleDirective } from './dto/in-game.dto';
 import { GameLogRepository } from './repository/game-log.repository';
 import { calculateBallDisplacement } from './calPosition/calculate.ball.displacement';
@@ -140,8 +140,10 @@ export class SimulationService {
     const tmp = new GameData();
     tmp.inGameData = new InGameData();
     tmp.ruleData = new RuleDto();
-    tmp.metaData = null;
+    tmp.metaData = new MetaData(client.id, client.session, null, tmp.ruleData.isRankGame);
+
     this.games.set(client.id, tmp);
+    this.eventRunner.emit('game:ready', tmp);
   }
 
   /**
