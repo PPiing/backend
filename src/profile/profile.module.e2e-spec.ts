@@ -15,6 +15,7 @@ import { UserGameService } from './user-game.service';
 import { RankRepository } from './repository/rank.repository';
 import MockRankRepository from './repository/mock/mock.rank.repository';
 import { UserRankService } from './user-rank.service';
+import { CommunityBarModule } from 'src/community-bar/community-bar.module.e2e-spec';
 
 const repositories = [
   {
@@ -37,7 +38,8 @@ const repositories = [
 @Module({
   imports: [
     forwardRef(() => GameModule),
-    UserModule,
+    forwardRef(() => CommunityBarModule),
+    forwardRef(() => UserModule),
   ],
   controllers: [ProfileController],
   providers: [

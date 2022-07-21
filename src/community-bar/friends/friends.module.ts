@@ -25,5 +25,8 @@ import { FriendsGateway } from './friends.gateway';
     FriendsGateway,
     FriendsService,
   ],
+  exports: [
+    FriendsService,
+  ]
 })
 export class FriendsModule {}

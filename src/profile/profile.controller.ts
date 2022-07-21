@@ -8,6 +8,8 @@ import {
 import { User } from 'src/auth/user.decorator';
 import { CheckLogin } from 'src/guards/check-login.guard';
 import { UserService } from 'src/user/user.service';
+import { FriendsService } from 'src/community-bar/friends/friends.service';
+import { ProfileRelation } from 'src/enums/profile-relation.enum';
 import { GetUserDto } from './dto/get-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDto } from '../user/dto/user.dto';
@@ -30,6 +32,7 @@ export class ProfileController {
     private readonly userGameService : UserGameService,
     private readonly userRankService : UserRankService,
     private readonly userService: UserService,
+    private readonly friendService: FriendsService,
   ) {}
 
   /**
@@ -45,7 +48,10 @@ export class ProfileController {
     name: 'user_seq', type: Number, example: 1, description: '유저 시퀀스',
   })
   @Get('/profile/:user_seq')
-  async getUser(@Param('user_seq') userSeq: number): Promise<GetProfileDto> {
+  async getUser(
+    @User(new ValidationPipe({ validateCustomDecorators: true })) me: UserDto,
+      @Param('user_seq') userSeq: number,
+  ): Promise<GetProfileDto> {
     this.logger.log(`유저 정보 조회 요청: ${userSeq}`);
     if (userSeq === 0) {
       throw new ForbiddenException('허가되지 않은 동작입니다.');
@@ -59,7 +65,9 @@ export class ProfileController {
     const achiv = await this.userAchivService.getUserAchiv(userSeq);
     const rank = await this.userRankService.getUserRank(userSeq);
     const game = await this.userGameService.geUserGame(userSeq);
+    const relation = await this.friendService.checkRelation(me.userSeq, userSeq);
     return ({
+      relation_info: relation,
       user_info: user,
       achiv_info: achiv,
       rank_info: rank,
@@ -91,6 +99,7 @@ export class ProfileController {
     const rank = await this.userRankService.getUserRank(user.userSeq);
     const game = await this.userGameService.geUserGame(user.userSeq);
     return ({
+      relation_info: ProfileRelation.R01,
       user_info: userInfo,
       achiv_info: achiv,
       rank_info: rank,
@@ -148,43 +157,6 @@ export class ProfileController {
     }
 
     await this.userProfileService.deleteUser(userSeq);
-  }
-
-  /**
-   * 유저를 (full)닉네임으로 검색합니다.
-   *
-   * @param nickname 닉네임
-   */
-  @ApiOperation({ summary: '닉네임 검색', description: '닉네임으로 유저를 검색합니다.' })
-  @ApiResponse({ status: 200, type: GetProfileDto, description: '닉네임 검색 성공' })
-  @UseGuards(CheckLogin)
-  @Get('/search/:nickname')
-  async searchUser(
-    @Param('nickname') nickname: string,
-  ): Promise<GetProfileDto> {
-    this.logger.log(`닉네임 정보 조회 요청: ${nickname}`);
-
-    const findUser = await this.userService.findByNickname(nickname);
-    const { userSeq } = findUser;
-
-    if (userSeq === 0) {
-      throw new ForbiddenException('허가되지 않은 동작입니다.');
-    }
-
-    const check = await this.userProfileService.checkUser(userSeq);
-    if (!check) {
-      throw new BadRequestException('유저 정보가 존재하지 않습니다.');
-    }
-    const user = await this.userProfileService.getUserInfo(userSeq);
-    const achiv = await this.userAchivService.getUserAchiv(userSeq);
-    const rank = await this.userRankService.getUserRank(userSeq);
-    const game = await this.userGameService.geUserGame(userSeq);
-    return ({
-      user_info: user,
-      achiv_info: achiv,
-      rank_info: rank,
-      game_log: game,
-    });
   }
 
   /**

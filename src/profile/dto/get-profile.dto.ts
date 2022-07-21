@@ -1,11 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
+import { ProfileRelation } from 'src/enums/profile-relation.enum';
 import { GetAchivDto } from './get-achiv.dto';
 import { GetGameDto } from './get-game.dto';
 import { GetRankDto } from './get-rank.dto';
 import { GetUserDto } from './get-user.dto';
 
 export class GetProfileDto {
+  @ApiProperty({
+    description: '유저와의 관계',
+    example: ProfileRelation.R02,
+    enum: [ProfileRelation.R01, ProfileRelation.R02, ProfileRelation.R03, ProfileRelation.R04],
+  })
+  @IsNotEmpty()
+    relation_info : ProfileRelation;
+
   @ApiProperty({
     description: '유저 정보',
     example: GetUserDto,

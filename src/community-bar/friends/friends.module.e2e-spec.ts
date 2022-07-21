@@ -31,5 +31,8 @@ const repositories = [
     FriendsGateway,
     ...repositories,
   ],
+  exports: [
+    FriendsService,
+  ]
 })
 export class FriendsModule {}

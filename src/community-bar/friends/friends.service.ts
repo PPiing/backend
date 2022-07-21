@@ -121,7 +121,7 @@ export class FriendsService {
   }
 
   /**
-   * 친구가 차단되어 있는지 확인합니다.
+   * 친구와 어떤 관계인지 확인합니다.
    *
    * @param target
    */
