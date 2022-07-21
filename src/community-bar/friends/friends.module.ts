@@ -1,4 +1,4 @@
-import { CacheModule, Module } from '@nestjs/common';
+import { CacheModule, forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from 'src/user/user.module';
 import { ProfileModule } from 'src/profile/profile.module';
@@ -10,9 +10,9 @@ import { FriendsGateway } from './friends.gateway';
 
 @Module({
   imports: [
-    UserModule,
-    ProfileModule,
-    AlarmModule,
+    forwardRef(() =>  UserModule),
+    forwardRef(() =>  ProfileModule),
+    forwardRef(() =>  AlarmModule),
     CacheModule.register({ ttl: 0 }),
     TypeOrmModule.forFeature([
       FriendsRepository,
