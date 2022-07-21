@@ -23,6 +23,7 @@ export class FriendsRepository extends Repository<Friends> {
       where: {
         followerSeq: userSeq,
         status: RelationStatus.FRST10,
+        isBlocked: false,
       },
     });
     return friends.map((friend) => friend.followeeSeq);

@@ -136,7 +136,9 @@ export class FriendsService {
    * @param target
    */
   async blockFriend(userSeq: number, target: number) {
-    // TODO
+    this.logger.log(`${userSeq}가 ${target}을 차단합니다`);
+
+    await this.friendsRepository.blockedFriend(userSeq, target);
   }
 
   /**
@@ -145,6 +147,8 @@ export class FriendsService {
    * @param target
    */
   async unblockFriend(userSeq: number, target: number) {
-    // TODO
+    this.logger.log(`${userSeq}가 ${target}의 차단을 해지합니다`);
+
+    await this.friendsRepository.unblockedFriend(userSeq, target);
   }
 }
