@@ -3,6 +3,7 @@ import {
 } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Socket } from 'socket.io';
+import { ProfileRelation } from 'src/enums/profile-relation.enum';
 import { FriendsRepository } from './repository/friends.repository';
 
 @Injectable()
@@ -117,5 +118,33 @@ export class FriendsService {
   async removeFriend(userSeq: number, target: number) {
     this.logger.log(`친구 삭제 요청: ${userSeq} -> ${target}`);
     await this.friendsRepository.removeFriend(userSeq, target);
+  }
+
+  /**
+   * 친구가 차단되어 있는지 확인합니다.
+   *
+   * @param target
+   */
+  async checkRelation(userSeq: number, target: number): Promise<ProfileRelation> {
+    this.logger.log(`친구 관계 확인 요청: ${userSeq} -> ${target}`);
+    return this.friendsRepository.getRelation(userSeq, target);
+  }
+
+  /**
+   * 친구를 차단합니다.
+   *
+   * @param target
+   */
+  async blockFriend(userSeq: number, target: number) {
+    // TODO
+  }
+
+  /**
+   * 친구를 차단 해제합니다.
+   *
+   * @param target
+   */
+  async unblockFriend(userSeq: number, target: number) {
+    // TODO
   }
 }

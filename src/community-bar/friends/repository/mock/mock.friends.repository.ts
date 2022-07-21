@@ -1,4 +1,6 @@
+import { BadRequestException } from '@nestjs/common';
 import RelationStatus from 'src/enums/mastercode/relation-status.enum';
+import { ProfileRelation } from 'src/enums/profile-relation.enum';
 
 export default class MockFriendsRepository {
   MockEntity: any[] = [];
@@ -77,5 +79,51 @@ export default class MockFriendsRepository {
       throw new Error('친구가 아닙니다.');
     }
     friend.status = RelationStatus.FRST50;
+  }
+
+  async getRelation(userSeq: number, target: number) : Promise<ProfileRelation | undefined> {
+    if (userSeq === target) {
+      return ProfileRelation.R01;
+    }
+
+    const friend = await this.MockEntity.filter((e) => e.followerSeq === userSeq
+      && e.followeeSeq === target);
+
+    if (friend.length !== 1) {
+      return ProfileRelation.R04;
+    } if (friend[0].isBlocked === true) {
+      return ProfileRelation.R03;
+    } if (friend[0].status === RelationStatus.FRST10) {
+      return ProfileRelation.R02;
+    }
+    return ProfileRelation.R04;
+  }
+
+  async blockedFriend(userSeq: number, target: number) {
+    const friend = await this.MockEntity.filter((e) => e.followerSeq === userSeq
+      && e.followeeSeq === target);
+
+    if (friend.length === 0) { // 아무런 사이가 아니었다면
+      this.MockEntity.push({
+        friendSeq: this.MockEntity.length + 1,
+        followerSeq: userSeq,
+        followeeSeq: target,
+        isBlocked: true,
+        status: RelationStatus.FRST30,
+      });
+    } else {
+      friend[0].isBlocked = true;
+    }
+  }
+
+  async unblockedFriend(userSeq: number, target: number) {
+    const friend = await this.MockEntity.filter((e) => e.followerSeq === userSeq
+      && e.followeeSeq === target);
+
+    if (friend === undefined) {
+      throw new BadRequestException(`${userSeq} 와 ${target} 은 block 상태가 아닙니다.`);
+    } else {
+      friend[0].isBlocked = false;
+    }
   }
 }
