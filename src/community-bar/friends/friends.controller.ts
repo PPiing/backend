@@ -178,4 +178,48 @@ export class FriendsController {
     await this.friendsService.removeFriend(user.userSeq, target);
     this.eventEitter.emit('friends:update', user.userSeq, target);
   }
+
+  @ApiOperation({ summary: '블락 요청', description: '요청 상대를 블락합니다.' })
+  @ApiResponse({ status: 200, description: '블락 요청 성공' })
+  @ApiResponse({ status: 400, description: '블락 요청 실패' })
+  @ApiParam({
+    name: 'target', type: Number, example: 1, description: '블락 대상 유저',
+  })
+  @UseGuards(CheckLogin)
+  @Get('/block/:target')
+  async blockFriend(
+  @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+    target: number,
+  ) {
+    this.logger.log(`블락 요청 : ${user.userSeq} -> ${target}`);
+
+    const check = await this.userProfileService.checkUser(user.userSeq);
+    if (!check) {
+      throw new Error('유저 정보가 존재하지 않습니다.');
+    }
+
+    await this.friendsService.blockFriend(user.userSeq, target);
+  }
+
+  @ApiOperation({ summary: '블락 해지 요청', description: '요청 상대를 블락 해지합니다.' })
+  @ApiResponse({ status: 200, description: '블락 해지 요청 성공' })
+  @ApiResponse({ status: 400, description: '블락 해지 요청 실패' })
+  @ApiParam({
+    name: 'target', type: Number, example: 1, description: '블락 대상 유저',
+  })
+  @UseGuards(CheckLogin)
+  @Get('/unblock/:target')
+  async unblockFriend(
+  @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+    target: number,
+  ) {
+    this.logger.log(`블락 해지 요청 : ${user.userSeq} -> ${target}`);
+
+    const check = await this.userProfileService.checkUser(user.userSeq);
+    if (!check) {
+      throw new Error('유저 정보가 존재하지 않습니다.');
+    }
+
+    await this.friendsService.unblockFriend(user.userSeq, target);
+  }
 }

@@ -1,4 +1,4 @@
-import { CacheModule, Module } from '@nestjs/common';
+import { CacheModule, forwardRef, Module } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AlarmModule } from 'src/alarm/alarm.module.e2e-spec';
 import { ProfileModule } from 'src/profile/profile.module.e2e-spec';
@@ -18,9 +18,9 @@ const repositories = [
 
 @Module({
   imports: [
-    UserModule,
-    ProfileModule,
-    AlarmModule,
+    forwardRef(() => UserModule),
+    forwardRef(() => ProfileModule),
+    forwardRef(() => AlarmModule),
     CacheModule.register({ ttl: 0 }),
   ],
   controllers: [
@@ -30,6 +30,9 @@ const repositories = [
     FriendsService,
     FriendsGateway,
     ...repositories,
+  ],
+  exports: [
+    FriendsService,
   ],
 })
 export class FriendsModule {}

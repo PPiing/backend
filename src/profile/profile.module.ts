@@ -1,5 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { FriendsModule } from 'src/community-bar/friends/friends.module';
 import { GameModule } from 'src/game/game.module';
 import { UserModule } from 'src/user/user.module';
 import { ProfileController } from './profile.controller';
@@ -21,7 +22,8 @@ import { UserRankService } from './user-rank.service';
       RankRepository,
     ]),
     forwardRef(() => GameModule),
-    UserModule,
+    forwardRef(() => FriendsModule),
+    forwardRef(() => UserModule),
   ],
   controllers: [ProfileController],
   providers: [

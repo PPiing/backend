@@ -2,6 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { GameModule } from 'src/game/game.module.e2e-spec';
 import { UserModule } from 'src/user/user.module.e2e-spec';
+import { FriendsModule } from 'src/community-bar/friends/friends.module.e2e-spec';
 import { ProfileController } from './profile.controller';
 import { UserProfileService } from './user-profile.service';
 import MockUserProfileRepository from './repository/mock/mock.user-profile.repository';
@@ -37,7 +38,8 @@ const repositories = [
 @Module({
   imports: [
     forwardRef(() => GameModule),
-    UserModule,
+    forwardRef(() => FriendsModule),
+    forwardRef(() => UserModule),
   ],
   controllers: [ProfileController],
   providers: [
