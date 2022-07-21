@@ -24,7 +24,7 @@ export default class User {
   @Column({ default: false })
     secAuthStatus: boolean; // 이차인증 여부
 
-  @Column({ default: 'DefaultProfile.jpg' })
+  @Column({ default: '/api/upload/DefaultProfile.jpg' })
     avatarImgUri: string; // 프로필 이미지 URI
 
   @Column({ default: UserStatus.USST10 })

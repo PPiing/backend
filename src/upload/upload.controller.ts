@@ -55,7 +55,7 @@ export default class UploadController {
     if (file === undefined) {
       throw new BadRequestException('잘못된 업로드 방법입니다.');
     }
-    return file.filename;
+    return `/api/upload/${file.filename}`;
   }
 
   @ApiOperation({
