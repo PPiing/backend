@@ -18,9 +18,9 @@ const repositories = [
 
 @Module({
   imports: [
-    forwardRef(() =>  UserModule),
-    forwardRef(() =>  ProfileModule),
-    forwardRef(() =>  AlarmModule),
+    forwardRef(() => UserModule),
+    forwardRef(() => ProfileModule),
+    forwardRef(() => AlarmModule),
     CacheModule.register({ ttl: 0 }),
   ],
   controllers: [
@@ -33,6 +33,6 @@ const repositories = [
   ],
   exports: [
     FriendsService,
-  ]
+  ],
 })
 export class FriendsModule {}

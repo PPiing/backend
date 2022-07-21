@@ -10,9 +10,9 @@ import { FriendsGateway } from './friends.gateway';
 
 @Module({
   imports: [
-    forwardRef(() =>  UserModule),
-    forwardRef(() =>  ProfileModule),
-    forwardRef(() =>  AlarmModule),
+    forwardRef(() => UserModule),
+    forwardRef(() => ProfileModule),
+    forwardRef(() => AlarmModule),
     CacheModule.register({ ttl: 0 }),
     TypeOrmModule.forFeature([
       FriendsRepository,
@@ -27,6 +27,6 @@ import { FriendsGateway } from './friends.gateway';
   ],
   exports: [
     FriendsService,
-  ]
+  ],
 })
 export class FriendsModule {}

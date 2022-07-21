@@ -31,10 +31,12 @@ describe('User E2E Test', () => {
       test('정상적인 요청', async () => {
         // given
         const userSeq = 1;
+        const userCookie = cookie;
 
         // when
         const response = await request(app.getHttpServer())
-          .get(`/users/profile/${userSeq}`);
+          .get(`/users/profile/${userSeq}`)
+          .set('Cookie', userCookie);
 
         // then
         expect(response.status).toBe(200);
