@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Redirect, Req, UseGuards, Query, ParseIntPipe,
+  Controller, Get, Redirect, Req, UseGuards, Query, ParseIntPipe, Logger,
 } from '@nestjs/common';
 import { CheckLogin } from 'src/guards/check-login.guard';
 import { FtGuard } from 'src/guards/ft.guard';
@@ -7,6 +7,8 @@ import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
+  private logger: Logger = new Logger(AuthController.name);
+
   constructor(
     private readonly authService: AuthService,
   ) {}
@@ -30,7 +32,13 @@ export class AuthController {
   @UseGuards(CheckLogin)
   @Redirect('../../../', 302)
   logout(@Req() req: any) {
-    req.logout();
+    this.authService.setIsLogin(req.sessionID, 'N');
+
+    req.logout((err) => {
+      if (err) {
+        this.logger.error(err);
+      }
+    });
   }
 
   @Get('twofactor/check')
