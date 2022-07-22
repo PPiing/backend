@@ -17,7 +17,7 @@ export class UserGameService {
    * @param userSeq 유저 PK
    * @return 게임 전적 list
    */
-  async geUserGame(userSeq: number): Promise<GetGameDto[]> {
+  async getUserGame(userSeq: number): Promise<GetGameDto[]> {
     this.logger.debug(`getUserGane : ${userSeq}`);
 
     const allGames : GameLog[] = await this.gameLogService.findRecentGameLog(userSeq, -1);

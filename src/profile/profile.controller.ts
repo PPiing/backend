@@ -64,7 +64,7 @@ export class ProfileController {
     const user = await this.userProfileService.getUserInfo(userSeq);
     const achiv = await this.userAchivService.getUserAchiv(userSeq);
     const rank = await this.userRankService.getUserRank(userSeq);
-    const game = await this.userGameService.geUserGame(userSeq);
+    const game = await this.userGameService.getUserGame(userSeq);
     const relation = await this.friendService.checkRelation(me.userSeq, userSeq);
     return ({
       relation_info: relation,
@@ -97,7 +97,7 @@ export class ProfileController {
     const userInfo = await this.userProfileService.getUserInfo(user.userSeq);
     const achiv = await this.userAchivService.getUserAchiv(user.userSeq);
     const rank = await this.userRankService.getUserRank(user.userSeq);
-    const game = await this.userGameService.geUserGame(user.userSeq);
+    const game = await this.userGameService.getUserGame(user.userSeq);
     return ({
       relation_info: ProfileRelation.R01,
       user_info: userInfo,
