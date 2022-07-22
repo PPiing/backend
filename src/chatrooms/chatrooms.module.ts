@@ -1,7 +1,7 @@
-import { CacheModule, Module } from '@nestjs/common';
+import { CacheModule, Module, forwardRef } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
-import { getRepositoryToken } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import ChatParticipantRepository from './repository/chat-participant.repository';
 import ChatRepository from './repository/chat.repository';
 import ChatroomsController from './chatrooms.controller';
@@ -10,37 +10,18 @@ import ChatroomsService from './chatrooms.service';
 import MessageRepository from './repository/message.repository';
 import ChatEventRepository from './repository/chat-event.repository';
 import FriendsRepository from './repository/friends.repository';
-import MockChatRepository from './repository/mock/mock.chat.repository';
-import MockChatEventRepository from './repository/mock/mock.chat-event.repository';
-import MockMessageRepository from './repository/mock/mock.message.repository';
-import MockChatParticipantRepository from './repository/mock/mock.chat-participant.repository';
-import MockFriendsRepository from './repository/mock/mock.friends.repository';
-
-const repositories = [
-  {
-    provide: getRepositoryToken(ChatRepository),
-    useClass: MockChatRepository,
-  },
-  {
-    provide: getRepositoryToken(ChatEventRepository),
-    useClass: MockChatEventRepository,
-  },
-  {
-    provide: getRepositoryToken(MessageRepository),
-    useClass: MockMessageRepository,
-  },
-  {
-    provide: getRepositoryToken(ChatParticipantRepository),
-    useClass: MockChatParticipantRepository,
-  },
-  {
-    provide: getRepositoryToken(FriendsRepository),
-    useClass: MockFriendsRepository,
-  },
-];
+import { AppModule } from 'src/app.module';
 
 @Module({
   imports: [
+    forwardRef(() => AppModule),
+    TypeOrmModule.forFeature([
+      ChatRepository,
+      ChatEventRepository,
+      ChatParticipantRepository,
+      FriendsRepository,
+      MessageRepository,
+    ]),
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
     CacheModule.register({ ttl: 0 }),
@@ -51,7 +32,6 @@ const repositories = [
   providers: [
     ChatroomsGateway,
     ChatroomsService,
-    ...repositories,
   ],
 })
 export class ChatroomsModule { }
