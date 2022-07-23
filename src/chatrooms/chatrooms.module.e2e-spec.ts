@@ -1,7 +1,8 @@
-import { CacheModule, Module } from '@nestjs/common';
+import { CacheModule, Module, forwardRef } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import AppModule from 'src/app.module.e2e-spec';
 import ChatParticipantRepository from './repository/chat-participant.repository';
 import ChatRepository from './repository/chat.repository';
 import ChatroomsController from './chatrooms.controller';
@@ -41,6 +42,7 @@ const repositories = [
 
 @Module({
   imports: [
+    forwardRef(() => AppModule),
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
     CacheModule.register({ ttl: 0 }),

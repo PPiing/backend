@@ -1,10 +1,16 @@
 import { Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import {
-  OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
+import { SessionMiddleware } from 'src/session-middleware';
 import ChatroomsService from './chatrooms.service';
 import ISocketRecv from './interface/socket-recv';
 import ISocketSend from './interface/socket-send';
@@ -16,12 +22,25 @@ import ISocketSend from './interface/socket-send';
  * @author joohongpark
  */
 @WebSocketGateway({ namespace: 'chatrooms' })
-export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class ChatroomsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(ChatroomsGateway.name);
 
   constructor(
+    private sessionMiddleware: SessionMiddleware,
     private readonly chatroomsService: ChatroomsService,
   ) { }
+
+  /**
+   * 소켓에도 세션을 적용하기 위한 미들웨어 적용
+   *
+   * @param server 소켓 서버측 객체
+   */
+  afterInit(server: any) {
+    const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next);
+    server.use(wrap(this.sessionMiddleware.expressSession));
+    server.use(wrap(this.sessionMiddleware.passportInit));
+    server.use(wrap(this.sessionMiddleware.passportSession));
+  }
 
   /**
    * 서버 측 소켓 객체
@@ -36,14 +55,15 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
    *
    * @param client 클라이언트 소켓 객체
    */
-  async handleConnection(client: Socket) {
-    this.logger.debug(`handleConnection: ${client.id} connected`);
-    // TODO
-    // 사용자 인증을 분리하는 방안 필요 (인증 실패 시 연결 끊기)
-    const userID = this.chatroomsService.getUserId(client);
-    if (userID === undefined) {
+  async handleConnection(client: any) {
+    const isLogin = client.request.isAuthenticated();
+    if (!isLogin) {
+      client.disconnect();
       throw new Error('Auth Error');
     }
+    const { userSeq } = client.request.user;
+    const userID = userSeq;
+    this.logger.debug(`handleConnection: ${userID} connected`);
 
     // 현재 접속 세션이 생성된 소켓의 고유 ID와 사용자 식별 ID를 저장합니다.
     await this.chatroomsService.onlineUserAdd(client, userID);
@@ -66,8 +86,10 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
    *
    * @param client 클라이언트 소켓 객체
    */
-  async handleDisconnect(client: Socket) {
-    this.logger.debug(`handleDisconnect: ${client.id} disconnected`);
+  async handleDisconnect(client: any) {
+    const { userSeq } = client.request.user;
+    const userID = userSeq;
+    this.logger.debug(`handleDisconnect: ${userID} disconnected`);
     // 본인이 속한 룸에서 나갑니다.
     await this.chatroomsService.roomLeave(client);
 
@@ -81,12 +103,14 @@ export class ChatroomsGateway implements OnGatewayConnection, OnGatewayDisconnec
    * @param client 클라이언트 소켓 객체
    */
   @SubscribeMessage('chat')
-  async handleChat(client: Socket, message: ISocketRecv) {
-    this.logger.debug(`handleChat: ${client.id} sent message: ${message.content}`);
+  async handleChat(client: any, message: ISocketRecv) {
+    const { userSeq } = client.request.user;
+    const userID = userSeq;
+    this.logger.debug(`handleChat: ${userID} sent message: ${message.content}`);
     // client.rooms은 클라이언트가 속한 룸 리스트를 담고 있습니다.
     const adminId = 0;
     const { rooms } = client;
-    const name = await this.chatroomsService.whoAmI(client.id);
+    const name = await this.chatroomsService.whoAmI(userID);
     const muted = await this.chatroomsService.isMuted(message.at, name);
     if (rooms.has(message.at.toString()) && name !== undefined) {
       if (muted === 0) {
