@@ -11,7 +11,16 @@ export default class MessageRepository extends Repository<Message> {
    *
    * @param messages 메시지 객체들
    */
-  async saveMessages(messages: any[]): Promise<void> {
+  async saveMessages(messages: MessageDataDto[]): Promise<void> {
+    const newRows = messages.map((msg) => {
+      const newMessage = new Message();
+      newMessage.message = msg.msg;
+      newMessage.createdAt = msg.createAt;
+      newMessage.chatSeq = msg.chatSeq;
+      newMessage.userSeq = msg.userSeq;
+      return newMessage;
+    });
+    await this.save(newRows);
   }
 
   /**
@@ -24,6 +33,13 @@ export default class MessageRepository extends Repository<Message> {
    * @returns 메시지 객체들
    */
   async getMessages(chatSeq: number, messageId: number, limit: number, blockedUsers: number[]): Promise<MessageDataDto[]> {
+    const results = await this.createQueryBuilder('message')
+    .where('message.chatSeq = :chatSeq AND message.userSeq NOT IN (:blockedUsers) AND message.chatSeq < :messageId', {
+      chatSeq,
+      blockedUsers,
+      messageId,
+    })
+    .limit(limit);
     return [];
   }
 
@@ -33,6 +49,7 @@ export default class MessageRepository extends Repository<Message> {
    * @returns 메시지 ID (PK)
    */
   async getLastChatIndex(): Promise<number> {
-    return 0;
+    const latest = await this.createQueryBuilder('message').getOne();
+    return latest.chatSeq ? latest.chatSeq : 0;
   }
 }

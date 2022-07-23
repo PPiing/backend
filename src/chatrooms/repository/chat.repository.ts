@@ -14,7 +14,17 @@ export default class ChatRepository extends Repository<Chat> {
    * @returns 방 객체 or null
    */
   async findRoomByRoomId(chatSeq: number): Promise<ChatDto | null> {
-    return null;
+    const result = await this.findOne(chatSeq);
+    if (result === null || result === undefined) {
+      return null;
+    }
+    return ({
+      chatSeq: result.chatSeq,
+      chatType: result.chatType,
+      chatName: result.chatName,
+      password: result.password,
+      isDirected: result.isDirected,
+    });
   }
 
   /**
@@ -24,7 +34,21 @@ export default class ChatRepository extends Repository<Chat> {
    * @returns 방 객체 or null
    */
   async findRoomByRoomName(chatName: string): Promise<ChatDto | null> {
-    return null;
+    const result = await this.find({
+      where: {
+        chatName,
+      }
+    });
+    if (result === null || result === undefined) {
+      return null;
+    }
+    return ({
+      chatSeq: result[0].chatSeq,
+      chatType: result[0].chatType,
+      chatName: result[0].chatName,
+      password: result[0].password,
+      isDirected: result[0].isDirected,
+    });
   }
 
   /**
@@ -34,7 +58,13 @@ export default class ChatRepository extends Repository<Chat> {
    * @returns 생성된 방 고유 ID
    */
   async addRoom(room: ChatDto): Promise<number> {
-    return 0;
+    const newChat = new Chat();
+    newChat.chatType = room.chatType;
+    newChat.chatName = room.chatName;
+    newChat.password = room.password;
+    newChat.isDirected = room.isDirected;
+    const result = await this.save(newChat);
+    return result.chatSeq;
   }
 
   /**
@@ -44,7 +74,25 @@ export default class ChatRepository extends Repository<Chat> {
    * @returns 채팅방 객체 배열
    */
   async searchChatroomsByChatType(chatTypes: ChatType[]): Promise<ChatDto[]> {
-    return [];
+    const resultLists = await Promise.all(
+      chatTypes.map((chatType) => this.find({
+        where: {
+          chatType,
+        }
+      })
+    ));
+    let rtn = [];
+    for (let result of resultLists) {
+      const conv = result.map(i => ({
+        chatSeq: i.chatSeq,
+        chatType: i.chatType,
+        chatName: i.chatName,
+        password: i.password,
+        isDirected: i.isDirected,
+      }));
+      rtn = [...rtn, ...conv];
+    }
+    return rtn;
   }
 
   /**
@@ -53,5 +101,6 @@ export default class ChatRepository extends Repository<Chat> {
    * @param chatSeq 방 고유 ID
    */
   async deleteRoom(chatSeq: number): Promise<void> {
+    await this.delete(chatSeq);
   }
 }

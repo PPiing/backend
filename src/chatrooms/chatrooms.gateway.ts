@@ -91,7 +91,7 @@ export class ChatroomsGateway implements OnGatewayInit, OnGatewayConnection, OnG
     const userID = userSeq;
     this.logger.debug(`handleDisconnect: ${userID} disconnected`);
     // 본인이 속한 룸에서 나갑니다.
-    await this.chatroomsService.roomLeave(client);
+    await this.chatroomsService.roomLeave(client, userID);
 
     // 클라이언트와 채팅 소켓 연결이 끊어지면 정보를 제거합니다.
     await this.chatroomsService.onlineUserRemove(client);

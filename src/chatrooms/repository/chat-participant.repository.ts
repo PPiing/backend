@@ -15,6 +15,10 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
    * @param auth 권한
    */
   async saveChatParticipants(userid: number, roomid: number, auth: PartcAuth): Promise<void> {
+    const newChatParticipants = new ChatParticipant();
+    newChatParticipants.userSeq = userid;
+    newChatParticipants.chatSeq = roomid;
+    newChatParticipants.partcAuth = auth;
   }
 
   /**
@@ -24,7 +28,19 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
    * @returns 상세 정보 배열
    */
   async getChatParticipantsByRoomid(roomid: number): Promise<ChatParticipantDto[]> {
-    return [];
+    const results = await this.find({
+      where: {
+        chatSeq: roomid,
+      }
+    });
+    return results.map(result => ({
+      partcSeq: result.partcSeq,
+      userSeq: result.userSeq,
+      chatSeq: result.chatSeq,
+      partcAuth: result.partcAuth,
+      enteredAt: result.enteredAt,
+      leavedAt: result.leavedAt,
+    }));
   }
 
   /**
@@ -34,7 +50,19 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
    * @returns 상세 정보 배열
    */
   async getChatParticipantsByUserid(userid: number): Promise<ChatParticipantDto[]> {
-    return [];
+    const results = await this.find({
+      where: {
+        partcSeq: userid,
+      }
+    });
+    return results.map(result => ({
+      partcSeq: result.partcSeq,
+      userSeq: result.userSeq,
+      chatSeq: result.chatSeq,
+      partcAuth: result.partcAuth,
+      enteredAt: result.enteredAt,
+      leavedAt: result.leavedAt,
+    }));
   }
 
   /**
@@ -44,7 +72,12 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
    * @returns 채팅방 ID 배열
    */
   async findRoomsByUserId(id: number): Promise<number[]> {
-    return [];
+    const results = await this.find({
+      where: {
+        userSeq: id,
+      }
+    });
+    return results.map(result => result.chatSeq);
   }
 
   /**
@@ -58,7 +91,23 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
     chatSeq: number,
     userId: number,
   ): Promise<ChatParticipantDto | undefined> {
-    return undefined;
+    const result = await this.findOne({
+      where: {
+        chatSeq: chatSeq,
+        userSeq: userId,
+      }
+    });
+    if (result === null || result === undefined) {
+      return undefined;
+    }
+    return ({
+      partcSeq: result.partcSeq,
+      userSeq: result.userSeq,
+      chatSeq: result.chatSeq,
+      partcAuth: result.partcAuth,
+      enteredAt: result.enteredAt,
+      leavedAt: result.leavedAt,
+    });
   }
 
   /**
@@ -68,6 +117,14 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
    * @param users 유저 ID 배열
    */
   async addUsers(chatSeq: number, users: number[]): Promise<void> {
+    const newRows = users.map((user) => {
+      const newChatParticipant = new ChatParticipant();
+      newChatParticipant.userSeq = user;
+      newChatParticipant.chatSeq = chatSeq;
+      newChatParticipant.partcAuth = PartcAuth.CPAU10;
+      return newChatParticipant;
+    });
+    await this.save(newRows);
   }
 
   /**
@@ -78,6 +135,15 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
    * @param partcAuth 권한
    */
   async changeUserAuth(chatSeq: number, user: number, partcAuth: PartcAuth): Promise<void> {
+    const result = await this.findOne({
+      where: {
+        chatSeq: chatSeq,
+        userSeq: user,
+      }
+    });
+    if (result !== null && result !== undefined) {
+      result.partcAuth = partcAuth;
+    }
   }
 
   /**
@@ -87,6 +153,16 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
    * @param user 유저 ID
    */
   async removeUser(chatSeq: number, user: number): Promise<boolean> {
+    const result = await this.findOne({
+      where: {
+        chatSeq: chatSeq,
+        userSeq: user,
+      }
+    });
+    if (result === null || result === undefined) {
+      return false;
+    }
+    this.delete(result);
     return true;
   }
 }
