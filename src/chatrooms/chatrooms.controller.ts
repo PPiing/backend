@@ -46,7 +46,7 @@ export default class ChatroomsController {
   @HttpCode(204)
   async addRoom(
     @Body() reqData: ChatRequestDto,
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+      @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<void> {
     const { userSeq } = user;
     this.logger.debug(`addRoom: ${reqData.chatName}`);
@@ -72,7 +72,7 @@ export default class ChatroomsController {
   @HttpCode(204)
   async addDM(
     @Param('target', ParseIntPipe) target: number,
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+      @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<void> {
     const { userSeq } = user;
     this.logger.debug(`addDM: ${userSeq}`);
@@ -102,7 +102,7 @@ export default class ChatroomsController {
   @HttpCode(204)
   async joinRoom(
     @Param('roomId', ParseIntPipe) roomId: number,
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+      @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
       @Body() data: JoinRoomDto,
   ): Promise<void> {
     const { userSeq } = user;
@@ -140,7 +140,7 @@ export default class ChatroomsController {
   @HttpCode(204)
   async leaveRoom(
     @Param('roomId', ParseIntPipe) roomId: number,
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+      @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<void> {
     const { userSeq } = user;
     this.logger.debug(`leaveRoom: ${roomId} -> ${userSeq}`);
@@ -186,7 +186,7 @@ export default class ChatroomsController {
   async inviteUser(
     @Param('target', ParseIntPipe) target: number,
       @Param('roomId', ParseIntPipe) roomId: number,
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+      @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<void> {
     const { userSeq } = user;
     this.logger.debug(`inviteUser: ${target} -> ${roomId} -> ${userSeq}`);
@@ -233,7 +233,7 @@ export default class ChatroomsController {
   async kickUser(
     @Param('target', ParseIntPipe) target: number,
       @Param('roomId', ParseIntPipe) roomId: number,
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+      @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<void> {
     const { userSeq } = user;
     this.logger.debug(`kickUser: ${target} -> ${roomId} -> ${userSeq}`);
@@ -276,7 +276,7 @@ export default class ChatroomsController {
   async setManager(
     @Param('target', ParseIntPipe) target: number,
       @Param('roomId', ParseIntPipe) roomId: number,
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+      @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<void> {
     const { userSeq } = user;
     await this.chatroomsService.checkUsers([target, userSeq]);
@@ -313,7 +313,7 @@ export default class ChatroomsController {
   async unsetManager(
     @Param('target', ParseIntPipe) target: number,
       @Param('roomId', ParseIntPipe) roomId: number,
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+      @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<void> {
     const { userSeq } = user;
     await this.chatroomsService.checkUsers([target, userSeq]);
@@ -349,7 +349,7 @@ export default class ChatroomsController {
   async banUser(
     @Param('target', ParseIntPipe) target: number,
       @Param('roomId', ParseIntPipe) roomId: number,
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+      @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<void> {
     const { userSeq } = user;
     this.logger.debug(`banUser: ${target} -> ${roomId} -> ${userSeq}`);
@@ -387,7 +387,7 @@ export default class ChatroomsController {
   async unbanUser(
     @Param('target', ParseIntPipe) target: number,
       @Param('roomId', ParseIntPipe) roomId: number,
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+      @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<void> {
     const { userSeq } = user;
     this.logger.debug(`unbanUser: ${target} -> ${roomId} -> ${userSeq}`);
@@ -428,7 +428,7 @@ export default class ChatroomsController {
     @Param('target', ParseIntPipe) target: number,
       @Param('roomId', ParseIntPipe) roomId: number,
       @Param('time', ParseIntPipe) time: number,
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+      @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<void> {
     const { userSeq } = user;
     this.logger.debug(`muteUser: ${target} -> ${roomId} -> ${userSeq}`);
@@ -472,7 +472,7 @@ export default class ChatroomsController {
   async unmuteUser(
     @Param('target', ParseIntPipe) target: number,
       @Param('roomId', ParseIntPipe) roomId: number,
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+      @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<void> {
     const { userSeq } = user;
     this.logger.debug(`unmuteUser: ${target} -> ${roomId} -> ${userSeq}`);
@@ -509,7 +509,7 @@ export default class ChatroomsController {
   @HttpCode(204)
   async blockUser(
     @Param('target', ParseIntPipe) target: number,
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+      @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<void> {
     const { userSeq } = user;
     this.logger.debug(`blockUser: ${target} -> ${userSeq}`);
@@ -540,7 +540,7 @@ export default class ChatroomsController {
   @HttpCode(204)
   async unblockUser(
     @Param('target', ParseIntPipe) target: number,
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+      @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<void> {
     const { userSeq } = user;
     this.logger.debug(`blockUser: ${target} -> ${userSeq}`);
@@ -580,7 +580,7 @@ export default class ChatroomsController {
     @Param('roomId', ParseIntPipe) roomId: number,
       @Param('msgID', ParseIntPipe) msgID: number,
       @Param('count', ParseIntPipe) count: number,
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+      @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<Array<MessageDataDto>> {
     const { userSeq } = user;
     await this.chatroomsService.checkUsers([userSeq]);
