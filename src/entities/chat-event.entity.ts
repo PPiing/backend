@@ -15,15 +15,15 @@ export class ChatEvent {
 
   @ManyToOne(() => ChatParticipant)
   @JoinColumn({ name: 'fromWho' })
-    fromWho: ChatParticipant;
+    fromWho: number;
 
   @ManyToOne(() => ChatParticipant)
   @JoinColumn({ name: 'toWho' })
-    toWho: ChatParticipant;
+    toWho: number;
 
   @ManyToOne(() => Chat)
   @JoinColumn({ name: 'chatSeq' })
-    chatSeq: Chat;
+    chatSeq: number;
 
   @CreateDateColumn({ default: new Date() })
     createdAt: Date;

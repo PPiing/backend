@@ -19,6 +19,7 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
     newChatParticipants.userSeq = userid;
     newChatParticipants.chatSeq = roomid;
     newChatParticipants.partcAuth = auth;
+    this.save(newChatParticipants);
   }
 
   /**
@@ -143,6 +144,7 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
     });
     if (result !== null && result !== undefined) {
       result.partcAuth = partcAuth;
+      await this.save(result);
     }
   }
 
