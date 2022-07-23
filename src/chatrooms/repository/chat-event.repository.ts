@@ -24,6 +24,16 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
     where: number,
     expired?: number,
   ): Promise<void> {
+    const e = expired ? expired : 0;
+    const newChatEvent = new ChatEvent();
+    newChatEvent.fromWho = from;
+    newChatEvent.toWho = to;
+    newChatEvent.eventType = what;
+    newChatEvent.chatSeq = where;
+    newChatEvent.createdAt = new Date();
+    newChatEvent.deletedCheck = false;
+    newChatEvent.expiredAt = new Date((new Date()).getTime() + e * 1000);
+    this.save(newChatEvent);
   }
 
   /**
@@ -34,7 +44,21 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
    * @returns ChatEventResultDto 배열
    */
   async getChatEvents(to: number, where: number): Promise<ChatEventResultDto[]> {
-    return [];
+    const results = await this.find({
+      where: {
+        toWho: to,
+        chatSeq: where,
+      }
+    });
+    return results.map(result => ({
+      eventSeq: result.eventSeq,
+      eventType: result.eventType,
+      fromWho: result.fromWho,
+      toWho: result.toWho,
+      chatSeq: result.chatSeq,
+      createdAt: result.createdAt,
+      expiredAt: result.expiredAt,
+    }));
   }
 
   /**
@@ -43,6 +67,7 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
    * @param eventSeq 채팅 이벤트 PK
    */
   async delChatEvent(eventSeq: number): Promise<void> {
+    await this.delete(eventSeq);
   }
 
   /**
@@ -51,6 +76,19 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
    * @returns ChatEventResultDto 배열
    */
   async getAllAvailableChatEvents(): Promise<ChatEventResultDto[]> {
-    return [];
+    const results = await this.find({
+      where: {
+        deleteCheck: false,
+      }
+    });
+    return results.map(result => ({
+      eventSeq: result.eventSeq,
+      eventType: result.eventType,
+      fromWho: result.fromWho,
+      toWho: result.toWho,
+      chatSeq: result.chatSeq,
+      createdAt: result.createdAt,
+      expiredAt: result.expiredAt,
+    }));
   }
 }

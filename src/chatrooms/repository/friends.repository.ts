@@ -12,7 +12,15 @@ export default class FriendsRepository extends Repository<Friends> {
    * @returns BlockDto 배열
    */
   async getAllBlockedFriends(): Promise<BlockDto[]> {
-    return [];
+    const results = await this.find({
+      where: {
+        isBlocked: true,
+      }
+    });
+    return results.map(result => ({
+      from: result.followerSeq,
+      to: result.followeeSeq,
+    }));
   }
 
   /**
@@ -21,6 +29,15 @@ export default class FriendsRepository extends Repository<Friends> {
    * @param relation 관계
    */
   async setUnblock(relation: BlockDto): Promise<void> {
+    const result = await this.findOne({
+      followerSeq: relation.from,
+      followeeSeq: relation.to,
+    });
+    if (result === null || result === undefined) {
+      return;
+    }
+    result.isBlocked = false;
+    this.save(result);
   }
 
   /**
@@ -29,6 +46,17 @@ export default class FriendsRepository extends Repository<Friends> {
    * @param relation 관계
    */
   async setBlock(relation: BlockDto): Promise<void> {
+    let result = await this.findOne({
+      followerSeq: relation.from,
+      followeeSeq: relation.to,
+    });
+    if (result === null || result === undefined) {
+      result = new Friends();
+      result.followerSeq = relation.from;
+      result.followeeSeq = relation.to;
+    }
+    result.isBlocked = true;
+    this.save(result);
   }
 
   /**
@@ -38,7 +66,14 @@ export default class FriendsRepository extends Repository<Friends> {
    * @returns 차단 여부
    */
   async blocked(relation: BlockDto): Promise<boolean> {
-    return false;
+    const result = await this.findOne({
+      followerSeq: relation.from,
+      followeeSeq: relation.to,
+    });
+    if (result === null || result === undefined) {
+      return false;
+    }
+    return result.isBlocked;
   }
 
   /**
@@ -48,6 +83,12 @@ export default class FriendsRepository extends Repository<Friends> {
    * @returns 차단당한 사람들
    */
   async blockedUsers(from: number): Promise<number[]> {
-    return [];
+    const results = await this.find({
+      where: {
+        followerSeq: from,
+        isBlocked: true,
+      }
+    });
+    return results.map(result => result.followerSeq);
   }
 }
