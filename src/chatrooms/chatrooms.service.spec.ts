@@ -784,21 +784,6 @@ describe('Chatrooms 테스트', () => {
       clientSocket.close();
     });
 
-    describe('getUserId', () => {
-      test('auth에 주입된 인증 정보 검증 (추후 리팩터링 필요)', (done) => {
-        io.on('connection', async (socket: Socket) => {
-          // when
-          const userId = chatroomsService.getUserId(socket);
-          // then
-          expect(userId).toEqual(123);
-          done();
-        });
-        // given
-        clientSocket.auth = { username: 123 };
-        clientSocket.connect();
-      });
-    });
-
     describe('onlineUserAdd / onlineUserRemove / whoAmI', () => {
       test('사용자 접속 및 접속 해제', (done) => {
         // given
