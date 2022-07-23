@@ -339,18 +339,6 @@ export default class ChatroomsService implements OnModuleInit {
   }
 
   /**
-   * 소켓 연결 단계에서 클라이언트로부터 전송된 사용자 ID를 가져옵니다.
-   * 추후에 사용자 검증을 하는 함수로 리펙터링해야 합니다.
-   *
-   * @param user 클라이언트 소켓
-   * @returns 사용자 ID (없으면 undefined)
-   */
-  getUserId(user: Socket): number | undefined {
-    return Number.isNaN(user.handshake.auth.username)
-      ? undefined : Number(user.handshake.auth.username);
-  }
-
-  /**
    * 접속한 클라이언트 소켓을 소속되어 있는 모든 룸에 추가하고 소속된 룸을 반환합니다.
    *
    * @param user 클라이언트 소켓
@@ -412,9 +400,8 @@ export default class ChatroomsService implements OnModuleInit {
    *
    * @param user 클라이언트 소켓
    */
-  async roomLeave(user: Socket): Promise<void> {
-    const username = this.getUserId(user);
-    const rooms = await this.chatParticipantRepository.findRoomsByUserId(username);
+  async roomLeave(user: Socket, userID: number): Promise<void> {
+    const rooms = await this.chatParticipantRepository.findRoomsByUserId(userID);
     rooms.forEach((room) => {
       user.leave(room.toString()); // 본인이 속한 룸에서 떠나기
     });
