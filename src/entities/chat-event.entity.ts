@@ -22,6 +22,7 @@ export class ChatEvent {
     toWho: ChatParticipant;
 
   @ManyToOne(() => Chat)
+  @JoinColumn({ name: 'chatSeq' })
     chatSeq: Chat;
 
   @CreateDateColumn({ default: new Date() })
