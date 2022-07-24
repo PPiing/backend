@@ -78,7 +78,7 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
   async getAllAvailableChatEvents(): Promise<ChatEventResultDto[]> {
     const results = await this.find({
       where: {
-        deleteCheck: false,
+        deletedCheck: false,
       }
     });
     return results.map(result => ({
