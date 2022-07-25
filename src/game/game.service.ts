@@ -27,6 +27,11 @@ export class GameService {
     private simulator: SimulationService,
   ) {}
 
+  checkPresenceOf(roomId: string): boolean {
+    if (this.games.get(roomId)) return true;
+    return false;
+  }
+
   findCurrentGame(userSeq: number): GameData | undefined {
     const roomId = this.users.get(userSeq);
     return this.games.get(roomId);
