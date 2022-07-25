@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { randomUUID } from 'crypto';
 import {
-  GameData, MetaData,
-} from './dto/game-data';
+  GameDataDto, MetaData,
+} from './dto/game-data.dto';
 import { InGameData, PaddleDirective } from './dto/in-game.dto';
 import { SimulationService } from './simulation.service';
 import { GameQueue } from './game-queue';
@@ -16,7 +16,7 @@ export class GameService {
   private readonly logger: Logger = new Logger('GameService');
 
   /** game list  */
-  private games: Map<string, GameData> = new Map();
+  private games: Map<string, GameDataDto> = new Map();
 
   /** To quickly get roomId which is participanted by the userSeq */
   private users: Map<number, string> = new Map();
@@ -32,7 +32,7 @@ export class GameService {
     return false;
   }
 
-  findCurrentGame(userSeq: number): GameData | undefined {
+  findCurrentGame(userSeq: number): GameDataDto | undefined {
     const roomId = this.users.get(userSeq);
     return this.games.get(roomId);
   }
@@ -46,7 +46,7 @@ export class GameService {
 
     /** after Matching players */
     const [[bluePlayer, blueRule], [redPlayer, redRule]] = [...matchedPlayers];
-    const newGame = new GameData();
+    const newGame = new GameDataDto();
     /** metaData */
     newGame.metaData = new MetaData(
       randomUUID(),

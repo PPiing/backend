@@ -2,14 +2,15 @@
 import { Logger } from '@nestjs/common';
 import GameLog from 'src/entities/game-log.entity';
 import { EntityRepository, Repository } from 'typeorm';
-import { GameData } from '../dto/game-data';
+import { GameDataDto } from '../dto/game-data.dto';
+import { GameLogDto } from '../dto/game-log.dto';
 import { GameRecordDto } from '../dto/game-record.dts';
 
 @EntityRepository(GameLog)
 export class GameLogRepository extends Repository<GameLog> {
   private readonly logger = new Logger('GameLogRepository');
 
-  async findRecentGameLog(userSeq: number, limit: number): Promise<GameLog[]> {
+  async findRecentGameLog(userSeq: number, limit: number): Promise<GameLogDto[]> {
     this.logger.debug('findRecentGameLog');
     let ret;
     if (limit > 0) { // limit 지정해서 가져올 때
@@ -51,7 +52,7 @@ export class GameLogRepository extends Repository<GameLog> {
     return { total: count, win: winGames };
   }
 
-  async saveInitGame(game:GameData): Promise<number> {
+  async saveInitGame(game:GameDataDto): Promise<number> {
     const { metaData, ruleData } = game;
     const newLog = this.create({
       roomId: metaData.roomId,

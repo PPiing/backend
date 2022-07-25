@@ -1,4 +1,4 @@
-import { GameData } from '../dto/game-data';
+import { GameDataDto } from '../dto/game-data.dto';
 
 export type BallDisplacement = {
   dx : number,
@@ -10,9 +10,9 @@ export type BallDisplacement = {
  * @param game game data
  * @return BallDisplacement
  */
-export const calculateBallDisplacement = (game: GameData) : BallDisplacement => {
+export const calculateBallDisplacement = (game: GameDataDto) : BallDisplacement => {
   const { inGameData: { ball }, ruleData: { ballSpeed } } = game;
-  const BALL = GameData.spec.ball;
+  const BALL = GameDataDto.spec.ball;
 
   return {
     dx: ball.velocity.x * BALL.speed * ballSpeed,

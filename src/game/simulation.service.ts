@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Interval } from '@nestjs/schedule';
-import { GameData, MetaData } from './dto/game-data';
+import { GameDataDto, MetaData } from './dto/game-data.dto';
 import { GameStatus, InGameData, PaddleDirective } from './dto/in-game.dto';
 import { calculateBallDisplacement } from './calPosition/calculate.ball.displacement';
 import { GameSocket } from './dto/game-socket.dto';
@@ -17,7 +17,7 @@ import { GameLogService } from './game-log.service';
 export class SimulationService {
   private readonly logger: Logger = new Logger('SimulationService');
 
-  private games: Map<string, GameData> = new Map();
+  private games: Map<string, GameDataDto> = new Map();
 
   constructor(
     private readonly eventRunner: EventEmitter2,
@@ -92,7 +92,7 @@ export class SimulationService {
  * 한쪽이 승리하게 되면, 공과 패들의 위치를 초기화 시킨다.
  * @param game game data
  */
-  resetBallAndPaddle(game: GameData) {
+  resetBallAndPaddle(game: GameDataDto) {
     this.logger.debug('resetBallAndPaddle');
     const { inGameData: { ball, paddleBlue, paddleRed } } = game;
 
@@ -112,7 +112,7 @@ export class SimulationService {
  * @returns 게임 시작 여부.
  */
   delayGameStart(
-    gameData: GameData,
+    gameData: GameDataDto,
   ): boolean {
     const { inGameData } = gameData;
     if (inGameData.frame > 800) return true;
@@ -123,7 +123,7 @@ export class SimulationService {
    * 시뮬레이션 큐에 해당 게임을 등록한다.
    * @param game 등록할 게임 데이터
    */
-  async initBeforeStartGame(game: GameData) {
+  async initBeforeStartGame(game: GameDataDto) {
     this.logger.debug(`startGame: ${game.metaData}`);
     /* add game in simulation game queue */
     this.games.set(game.metaData.roomId, game);
@@ -142,7 +142,7 @@ export class SimulationService {
   initBeforeStartTestGame(client: GameSocket) {
     this.logger.debug('startGame:');
     /* add game in simulation game queue */
-    const tmp = new GameData();
+    const tmp = new GameDataDto();
     tmp.inGameData = new InGameData();
     tmp.ruleData = new RuleDto();
     tmp.metaData = new MetaData(client.id, client.session, null, tmp.ruleData.isRankGame);

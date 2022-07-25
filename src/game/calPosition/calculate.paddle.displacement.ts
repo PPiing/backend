@@ -1,4 +1,4 @@
-import { GameData } from '../dto/game-data';
+import { GameDataDto } from '../dto/game-data.dto';
 
 export type PaddleDisplacement = {
   dBlue: number;
@@ -9,9 +9,9 @@ export type PaddleDisplacement = {
  * 매 프레임 마다 패들의 위치를 계산해 반환한다.
  * @param game game data
  */
-export const calculatePaddleDisplacement = (game: GameData) => {
-  const PADDLE = GameData.spec.paddle;
-  const ARENA = GameData.spec.arena;
+export const calculatePaddleDisplacement = (game: GameDataDto) => {
+  const PADDLE = GameDataDto.spec.paddle;
+  const ARENA = GameDataDto.spec.arena;
   const { ruleData, inGameData: { paddleBlue, paddleRed } } = game;
   const halfPaddleHeight = ruleData.paddleSize * (PADDLE.height / 2);
   let dBlue = paddleBlue.velocity.y * PADDLE.speed;

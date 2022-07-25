@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean, IsNumber, Max, Min,
 } from 'class-validator';
@@ -12,21 +13,37 @@ import {
  * 2. 후자는 데이터를 전달 받을때 철저히 검증해야 비정상적인 게임 진행을 맞을 수 있을듯.
  */
 export class RuleDto {
+  @ApiProperty({
+    description: '승리 조건 점수',
+    example: 10,
+  })
   @IsNumber()
   @Min(1)
   @Max(10)
     matchScore = 5;
 
+  @ApiProperty({
+    description: '공 속도',
+    example: 1,
+  })
   @IsNumber()
   @Min(0.8)
   @Max(1.2)
     ballSpeed = 1;
 
+  @ApiProperty({
+    description: '라켓 크기',
+    example: 1,
+  })
   @IsNumber()
   @Min(0.5)
   @Max(1.5)
     paddleSize = 1;
 
+  @ApiProperty({
+    description: '랭크 게임 유무',
+    example: false,
+  })
   @IsBoolean()
     isRankGame = false;
 }

@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { GameData } from './game-data';
+import { GameDataDto } from './game-data.dto';
 
 export interface Position {
   x: number;
@@ -37,7 +37,7 @@ export class InGameData {
 
   paddleBlue: MovementInfo = {
     position: {
-      x: (GameData.spec.arena.width / 2) * (-1) + 10,
+      x: (GameDataDto.spec.arena.width / 2) * (-1) + 10,
       y: 0,
     },
     velocity: {
@@ -48,7 +48,7 @@ export class InGameData {
 
   paddleRed: MovementInfo = {
     position: {
-      x: (GameData.spec.arena.width / 2) - 10,
+      x: (GameDataDto.spec.arena.width / 2) - 10,
       y: 0,
     },
     velocity: {

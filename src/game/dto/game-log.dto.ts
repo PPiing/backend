@@ -1,38 +1,113 @@
-import GameOption from 'src/enums/mastercode/game-option.enum';
-import GameType from 'src/enums/mastercode/game-type.enum';
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsBoolean, IsDate, IsNotEmpty, IsNumber, IsString,
+} from 'class-validator';
+import { randomUUID } from 'crypto';
 
 export class GameLogDto {
-  gameLogSeq: number;
+  @ApiProperty({
+    description: '게임 로그 시퀀스(PK)',
+    example: 1,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+    gameLogSeq: number;
 
-  gameType: GameType;
+  @ApiProperty({
+    description: '게임 후 생성된 소켓 룸 ID',
+    example: randomUUID(),
+  })
+  @IsString()
+    roomId: string;
 
-  topUserSeq: number;
+  @ApiProperty({
+    description: '랭크 게임유무',
+    example: false,
+  })
+  @IsBoolean()
+    isRankGame: boolean;
 
-  btmUserSeq: number;
+  @ApiProperty({
+    description: '블루 유저 시퀀스',
+    example: 1,
+  })
+  @IsNumber()
+    blueUserSeq: number;
 
-  winnerSeq: number;
+  @ApiProperty({
+    description: '레드 유저 시퀀스',
+    example: 2,
+  })
+  @IsNumber()
+    redUserSeq: number;
 
-  topSideScore: number;
+  @ApiProperty({
+    description: '블루 유저 이름',
+    example: 'skim',
+  })
+  @IsString()
+    blueUserName: string;
 
-  btmSideScore: number;
+  @ApiProperty({
+    description: '레드 유저 이름',
+    example: 'jinbekim',
+  })
+  @IsString()
+    redUserName: string;
 
-  matchScoe: number;
+  @ApiProperty({
+    description: '이긴 유저 시퀀스',
+    example: 1,
+  })
+  @IsNumber()
+    winnerSeq: number;
 
-  barSize: number;
+  @ApiProperty({
+    description: '블루 유저 점수',
+    example: 10,
+  })
+  @IsNumber()
+    blueScore: number;
 
-  option1: GameOption; // racket size
+  @ApiProperty({
+    description: '레드 유저 점수',
+    example: 5,
+  })
+  @IsNumber()
+    redScore: number;
 
-  option2: GameOption; // ball speed
+  @ApiProperty({
+    description: '라켓 사이즈',
+    example: 3,
+  })
+  @IsNumber()
+    paddleSize: number;
 
-  option3: GameOption; // match score
+  @ApiProperty({
+    description: '볼 스피드',
+    example: 10,
+  })
+  @IsNumber()
+    ballSpeed: number;
 
-  topUserName: string;
+  @ApiProperty({
+    description: '승리 조건 점수',
+    example: 10,
+  })
+  @IsNumber()
+    matchScore: number;
 
-  btmUserName: string;
+  @ApiProperty({
+    description: '게임 시작 시간',
+    example: '2022-06-16T00:26:58.205Z',
+  })
+  @IsDate()
+    createdAt: Date;
 
-  roomId: string;
-
-  createdAt: Date;
-
-  updatedAt: Date;
+  @ApiProperty({
+    description: '마지막 업데이트 시간',
+    example: '2022-06-16T00:26:58.205Z',
+  })
+  @IsDate()
+    updatedAt: Date;
 }

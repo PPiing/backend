@@ -1,15 +1,15 @@
-import { GameData } from '../dto/game-data';
+import { GameDataDto } from '../dto/game-data.dto';
 
 /**
  * 패들과의 충돌을 판단한다.
  * @param game game data
  * @return boolean
  */
-export const checkPaddleBound = (game: GameData): boolean => {
+export const checkPaddleBound = (game: GameDataDto): boolean => {
   const { inGameData: { ball, paddleBlue, paddleRed } } = game;
-  const HALF_OF_PADDLE_HEIGHT = GameData.spec.paddle.height / 2;
-  const HALF_OF_PADDLE_WIDTH = GameData.spec.paddle.width / 2;
-  const BALL = GameData.spec.ball;
+  const HALF_OF_PADDLE_HEIGHT = GameDataDto.spec.paddle.height / 2;
+  const HALF_OF_PADDLE_WIDTH = GameDataDto.spec.paddle.width / 2;
+  const BALL = GameDataDto.spec.ball;
 
   /** Check bluePaddle collision */
   if (ball.position.x + BALL.radius < paddleBlue.position.x + HALF_OF_PADDLE_WIDTH

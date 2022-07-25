@@ -1,4 +1,4 @@
-import { GameData } from '../dto/game-data';
+import { GameDataDto } from '../dto/game-data.dto';
 
 export const enum RoundResult {
   blueWin = 'blueWin',
@@ -10,10 +10,10 @@ export const enum RoundResult {
  * @param game game data
  * @returns win or lose
  */
-export const checkEndOfRound = (game: GameData) : RoundResult => {
+export const checkEndOfRound = (game: GameDataDto) : RoundResult => {
   const { inGameData: { ball } } = game;
-  const BALL = GameData.spec.ball;
-  const ARENA = GameData.spec.arena;
+  const BALL = GameDataDto.spec.ball;
+  const ARENA = GameDataDto.spec.arena;
 
   // left(blue) lose
   if (ball.position.x - BALL.radius < ((ARENA.width / 2) * -1)) {

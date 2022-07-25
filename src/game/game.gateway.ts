@@ -8,8 +8,8 @@ import { Server } from 'socket.io';
 import { SocketGuard } from 'src/guards/socket.guard';
 import { SessionMiddleware } from 'src/session-middleware';
 import {
-  PaddleDirective, RenderData, GameData,
-} from './dto/game-data';
+  PaddleDirective, RenderData, GameDataDto,
+} from './dto/game-data.dto';
 import { GameSocket } from './dto/game-socket.dto';
 import { ScoreData } from './dto/in-game.dto';
 import { RuleDto } from './dto/rule.dto';
@@ -95,7 +95,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @OnEvent('game:ready')
-  handleMatch(gameData: GameData) {
+  handleMatch(gameData: GameDataDto) {
     this.logger.debug('game:ready');
     const { ruleData, metaData, metaData: { playerBlue, playerRed } } = gameData;
     const players = [
@@ -225,7 +225,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param roomId 게임의 roomId
    */
   @OnEvent('game:end')
-  handleGameEnd(roomId: string, data: GameData) {
+  handleGameEnd(roomId: string, data: GameDataDto) {
     this.logger.debug(`game ${roomId} ended with data: ${data}`);
     const { metaData } = data;
     this.gameService.endGame(roomId);

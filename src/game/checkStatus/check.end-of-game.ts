@@ -1,4 +1,4 @@
-import { GameData } from '../dto/game-data';
+import { GameDataDto } from '../dto/game-data.dto';
 
 /**
  * checkEndOfGame 의 return type
@@ -14,7 +14,7 @@ export const enum GameResult {
  * @param game game data
  * @returns game result
  */
-export const checkEndOfGame = (game: GameData) : GameResult => {
+export const checkEndOfGame = (game: GameDataDto) : GameResult => {
   const { ruleData: { matchScore }, inGameData: { scoreBlue, scoreRed } } = game;
 
   if (matchScore === scoreBlue) return GameResult.blueWin;
