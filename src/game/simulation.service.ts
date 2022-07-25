@@ -47,6 +47,7 @@ export class SimulationService {
           const { dx, dy } = calculateBallDisplacement(gameData);
           inGameData.ball.position.x += dx;
           inGameData.ball.position.y += dy;
+          if (inGameData.frame % 120 === 0) { this.logger.debug('log every 2second, game:render', inGameData.renderData); }
           this.eventRunner.emit('game:render', roomId, inGameData.renderData);
 
           /** check wall bound */
@@ -140,7 +141,7 @@ export class SimulationService {
 
   /** NOTE: will be deleted */
   initBeforeStartTestGame(client: GameSocket) {
-    this.logger.debug('startGame:');
+    this.logger.debug('TEST!!! TEST!!! startGame:');
     /* add game in simulation game queue */
     const tmp = new GameData();
     tmp.inGameData = new InGameData();
@@ -189,6 +190,7 @@ export class SimulationService {
     userId: string,
     direction: PaddleDirective,
   ) {
+    this.logger.debug('TEST!!!! TEST!! moved paddle');
     const { metaData, inGameData } = this.games.get(roomId);
     if (!metaData || !inGameData) return;
     if (metaData.playerBlue.userId.toString() === userId) {
