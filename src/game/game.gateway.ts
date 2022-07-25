@@ -205,7 +205,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   @OnEvent('game:render')
   handleGameData(roomId: string, renderData: RenderData) {
-    this.logger.debug(`game ${roomId} was rendered renderData: ${renderData}`);
+    // this.logger.debug(`game ${roomId} was rendered renderData: ${renderData}`);
     this.server.to(roomId).emit('game:render', renderData);
   }
 

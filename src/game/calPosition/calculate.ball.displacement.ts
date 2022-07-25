@@ -13,9 +13,24 @@ export type BallDisplacement = {
 export const calculateBallDisplacement = (game: GameData) : BallDisplacement => {
   const { inGameData: { ball }, ruleData: { ballSpeed } } = game;
   const BALL = GameData.spec.ball;
-
-  return {
+  const ARENA = GameData.spec.arena;
+  const displacement = {
     dx: ball.velocity.x * BALL.speed * ballSpeed,
     dy: ball.velocity.y * BALL.speed * ballSpeed,
   };
+  const calculatedPositionX = ball.position.x + displacement.dx;
+  const calculatedPositionY = ball.position.y + displacement.dy;
+  if (calculatedPositionX > (ARENA.width / 2)) {
+    displacement.dx -= calculatedPositionX - (ARENA.width / 2);
+  }
+  if (calculatedPositionX < -(ARENA.width / 2)) {
+    displacement.dx -= calculatedPositionX + (ARENA.width / 2);
+  }
+  if (calculatedPositionY > (ARENA.height / 2)) {
+    displacement.dy -= calculatedPositionY - (ARENA.height / 2);
+  }
+  if (calculatedPositionY < -(ARENA.height / 2)) {
+    displacement.dy -= calculatedPositionY + (ARENA.height / 2);
+  }
+  return displacement;
 };

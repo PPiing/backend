@@ -11,7 +11,7 @@ export const checkWallBound = (game: GameData): boolean => {
   const HALF_OF_ARENA_HEIGHT = GameData.spec.arena.height / 2;
 
   if (ball.position.y + BALL.radius > HALF_OF_ARENA_HEIGHT
-    && ball.position.y - BALL.radius < (-1) * HALF_OF_ARENA_HEIGHT) {
+    || ball.position.y - BALL.radius < (-1) * HALF_OF_ARENA_HEIGHT) {
     return true;
   }
   return false;
