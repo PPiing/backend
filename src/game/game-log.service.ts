@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import GameLog from 'src/entities/game-log.entity';
+import { GameData } from './dto/game-data';
 import { GameRecordDto } from './dto/game-record.dts';
+import { GameStatus } from './dto/in-game.dto';
 import { GameLogRepository } from './repository/game-log.repository';
 
 @Injectable()
@@ -22,5 +24,17 @@ export class GameLogService {
 
   async findUserGameLog(userSeq: number): Promise<GameRecordDto> {
     return this.gameLogRepository.fundUserGameLog(userSeq);
+  }
+
+  async saveInitGame(game: GameData) {
+    return this.gameLogRepository.saveInitGame(game);
+  }
+
+  async saveFinishedGame(game: GameData) {
+    const { metaData, inGameData } = game;
+    if (metaData?.gameLogSeq && inGameData?.status === GameStatus.End) {
+      return this.gameLogRepository.saveUpdatedGame(metaData, inGameData);
+    }
+    return false;
   }
 }

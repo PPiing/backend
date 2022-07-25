@@ -69,10 +69,12 @@ export class GameLogRepository extends Repository<GameLog> {
   }
 
   async saveUpdatedGame(metaData, inGameData) {
-    await this.update(metaData.gameLogSeq, {
+    const result = await this.update(metaData.gameLogSeq, {
       winnerSeq: inGameData.winnerSeq,
       blueScore: inGameData.scoreBlue,
       redScore: inGameData.scoreRed,
     });
+    this.logger.debug(result);
+    return result;
   }
 }
