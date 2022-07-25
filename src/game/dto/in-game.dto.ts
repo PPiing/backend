@@ -22,6 +22,8 @@ export const enum GameStatus {
   Ready = 'ready',
   Playing = 'playing',
   End = 'end',
+  ScoreBlue = 'scoreBlue',
+  ScoreRed = 'scoreRed',
 }
 
 export class InGameData {
