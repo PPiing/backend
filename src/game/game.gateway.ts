@@ -161,6 +161,44 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   /**
+   * 해당 방이 존재하는지 체크후에 소켓룸에 조인한다.
+   * @param client 관전하고 싶어하는 사람
+   * @param data 방아이디
+   */
+  @SubscribeMessage('game:watch')
+  watchGameByRoomId(client: GameSocket, data: { roomId: string }) {
+    this.logger.debug(`game:watch ${client.session.userId} to ${data.roomId}`);
+    const presence = this.gameService.checkPresenceOf(data.roomId);
+    if (presence === true) {
+      this.server.in(client.session.userId.toString()).socketsJoin(data.roomId);
+      client.in(data.roomId).emit('watcher:enter', client.session.userId.toString());
+      this.logger.debug(`userId: ${client.session.userId} join in ${data.roomId}`);
+    } else {
+      this.server.in(client.session.userId.toString()).emit('failure');
+      this.logger.debug(`userId: ${client.session.userId} failt to join in ${data.roomId}`);
+    }
+  }
+
+  /**
+   * 해당 방이 존재하는지를 체크하고 소켓룸에서 나온다.
+   * @param client 관전에서 나가고 싶어하는 사람
+   * @param data 방아이디
+   */
+  @SubscribeMessage('game:unwatch')
+  unwatchGameByRoomId(client: GameSocket, data: { roomId: string }) {
+    this.logger.debug(`game:unwatch ${client.session.userId} from ${data.roomId}`);
+    const presence = this.gameService.checkPresenceOf(data.roomId);
+    if (presence) {
+      this.server.in(client.session.userId.toString()).socketsLeave(data.roomId);
+      client.in(data.roomId).emit('watcher:leave', client.session.userId.toString());
+      this.logger.debug(`userId: ${client.session.userId} left from ${data.roomId}`);
+    } else {
+      this.server.in(client.session.userId.toString()).emit('failure');
+      this.logger.debug(`userId: ${client.session.userId} failt to leave from ${data.roomId}`);
+    }
+  }
+
+  /**
    * 데이터를 랜더한다.
    * @param roomId 게임의 roomId
    * @param renderData RenderData
