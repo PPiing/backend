@@ -12,11 +12,11 @@ export const checkPaddleBound = (game: GameData): boolean => {
   const BALL = GameData.spec.ball;
 
   /** Check bluePaddle collision */
-  if (ball.position.x + BALL.radius < paddleBlue.position.x + HALF_OF_PADDLE_WIDTH
-    && ball.position.x + BALL.radius > paddleBlue.position.x - HALF_OF_PADDLE_WIDTH
+  if (ball.position.x - BALL.radius < paddleBlue.position.x + HALF_OF_PADDLE_WIDTH
+    && ball.position.x - BALL.radius > paddleBlue.position.x - HALF_OF_PADDLE_WIDTH
     && ball.position.y < paddleBlue.position.y + HALF_OF_PADDLE_HEIGHT
     && ball.position.y > paddleBlue.position.y - HALF_OF_PADDLE_HEIGHT) { return true; }
-  /** Check bluePaddle collision */
+  /** Check redPaddle collision */
   if (ball.position.x + BALL.radius < paddleRed.position.x + HALF_OF_PADDLE_WIDTH
     && ball.position.x + BALL.radius > paddleRed.position.x - HALF_OF_PADDLE_WIDTH
     && ball.position.y < paddleRed.position.y + HALF_OF_PADDLE_HEIGHT
