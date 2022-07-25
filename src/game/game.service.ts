@@ -96,7 +96,7 @@ export class GameService {
     this.games.delete(roomId);
     this.users.delete(playerRed.userId);
     this.users.delete(playerBlue.userId);
-    this.simulator.initAfterEndGame(roomId);
+    this.simulator.saveAfterEndGame(roomId);
   }
 
   /**
