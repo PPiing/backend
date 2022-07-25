@@ -3,7 +3,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Interval } from '@nestjs/schedule';
 import { GameData, MetaData } from './dto/game-data';
 import { GameStatus, InGameData, PaddleDirective } from './dto/in-game.dto';
-import { GameLogRepository } from './repository/game-log.repository';
 import { calculateBallDisplacement } from './calPosition/calculate.ball.displacement';
 import { GameSocket } from './dto/game-socket.dto';
 import { RuleDto } from './dto/rule.dto';
@@ -12,6 +11,7 @@ import { checkWallBound } from './checkBound/check.wall.bound';
 import { checkPaddleBound } from './checkBound/check.paddle.bound';
 import { checkEndOfRound, RoundResult } from './checkStatus/check.end-of-round';
 import { checkEndOfGame, GameResult } from './checkStatus/check.end-of-game';
+import { GameLogService } from './game-log.service';
 
 @Injectable()
 export class SimulationService {
@@ -21,7 +21,7 @@ export class SimulationService {
 
   constructor(
     private readonly eventRunner: EventEmitter2,
-    private readonly gameLogRepository: GameLogRepository,
+    private readonly gameLogService: GameLogService,
   ) {}
 
   @Interval(17) // TODO: games가 변경되면 이벤트를 발생시킨다.로 수정. 아니면 다이나믹 모듈로 변경해도 될듯.
@@ -129,8 +129,13 @@ export class SimulationService {
     this.games.set(game.metaData.roomId, game);
 
     const { metaData } = game;
-    const logSeq = await this.gameLogRepository.saveInitGame(game);
-    metaData.gameLogSeq = logSeq;
+    const logSeq = await this.gameLogService.saveInitGame(game);
+    if (logSeq) {
+      metaData.gameLogSeq = logSeq;
+      this.logger.debug('success to save game b4 start');
+    } else {
+      this.logger.debug('failure to save game b4 start');
+    }
   }
 
   /** NOTE: will be deleted */
@@ -151,11 +156,10 @@ export class SimulationService {
   * @param roomId 방 아이디
   */
   async initAfterEndGame(roomId: string) {
-    const { metaData, inGameData } = this.games.get(roomId);
-    if (metaData?.gameLogSeq && inGameData.status === GameStatus.End) {
-      this.gameLogRepository.saveUpdatedGame(metaData, inGameData);
-      this.games.delete(roomId);
-    }
+    this.logger.debug('initAfterEndGame', roomId);
+    const gameData = this.games.get(roomId);
+    const result = await this.gameLogService.saveFinishedGame(gameData);
+    if (result) this.games.delete(roomId);
   }
 
   /**
