@@ -215,7 +215,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param scoreData ScoreData
    */
   @OnEvent('game:score')
-  handleGaemtScore(roomId: string, scoreData: ScoreData) {
+  handleGameScore(roomId: string, scoreData: ScoreData) {
     this.logger.debug(`game ${roomId} was scored scoreData: ${scoreData}`);
     this.server.to(roomId).emit('game:score', scoreData);
   }
@@ -225,9 +225,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param roomId 게임의 roomId
    */
   @OnEvent('game:end')
-  handleGameEnd(roomId: string, data: GameData) {
-    this.logger.debug(`game ${roomId} ended with data: ${data}`);
-    const { metaData } = data;
+  handleGameEnd(gameData: GameData) {
+    const { metaData, metaData: { roomId } } = gameData;
+    this.logger.debug(`game ${roomId} ended with data: ${gameData}`);
     this.gameService.endGame(roomId);
     this.socketSession.saveSession(metaData.playerBlue.sessionId, {
       ...metaData.playerBlue,
@@ -237,7 +237,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       ...metaData.playerRed,
       roomId: null,
     });
-    this.server.to(roomId).emit('game:end', data);
+    this.server.to(roomId).emit('game:end', gameData);
     this.server.in(roomId).socketsLeave(roomId);
   }
 }

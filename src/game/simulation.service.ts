@@ -1,17 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Interval } from '@nestjs/schedule';
+import { SchedulerRegistry } from '@nestjs/schedule';
 import { GameData, MetaData } from './dto/game-data';
 import { GameStatus, InGameData, PaddleDirective } from './dto/in-game.dto';
-import { calculateBallDisplacement } from './calPosition/calculate.ball.displacement';
 import { GameSocket } from './dto/game-socket.dto';
 import { RuleDto } from './dto/rule.dto';
-import { calculatePaddleDisplacement } from './calPosition/calculate.paddle.displacement';
-import { checkWallBound } from './checkBound/check.wall.bound';
-import { checkPaddleBound } from './checkBound/check.paddle.bound';
-import { checkEndOfRound, RoundResult } from './checkStatus/check.end-of-round';
-import { checkEndOfGame, GameResult } from './checkStatus/check.end-of-game';
+import { RoundResult } from './checkStatus/check.end-of-round';
+import { GameResult } from './checkStatus/check.end-of-game';
 import { GameLogService } from './game-log.service';
+import readyToStart from './gameStatus/ready';
+import handlePlaying from './gameStatus/playing';
+import handleScore from './gameStatus/score';
 
 @Injectable()
 export class SimulationService {
@@ -22,62 +21,52 @@ export class SimulationService {
   constructor(
     private readonly eventRunner: EventEmitter2,
     private readonly gameLogService: GameLogService,
+    private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
 
-  @Interval(17) // TODO: games가 변경되면 이벤트를 발생시킨다.로 수정. 아니면 다이나믹 모듈로 변경해도 될듯.
-  handleGames() {
-    this.games.forEach((gameData, roomId) => {
+  addInterval(roomId: string, gameData:GameData, milliseconds: number) {
+    const callback = () => {
       const { inGameData, metaData } = gameData;
       inGameData.frame += 1;
       switch (inGameData.status) {
         case GameStatus.Ready: {
-          const isDelayedEnough: boolean = this.delayGameStart(gameData);
-          if (isDelayedEnough) {
-            inGameData.status = GameStatus.Playing;
+          const isReady: boolean = readyToStart(gameData);
+
+          if (isReady === false) inGameData.status = GameStatus.Ready;
+          if (isReady === true) inGameData.status = GameStatus.Playing;
+          if (inGameData.status === GameStatus.Playing) {
             this.eventRunner.emit('game:start', roomId);
           }
           break;
         }
         case GameStatus.Playing: {
-          /** calculatePaddleDisplacement and add it to the position */
-          const { dBlue, dRed } = calculatePaddleDisplacement(gameData);
-          inGameData.paddleBlue.position.y += dBlue;
-          inGameData.paddleRed.position.y += dRed;
-          /* calculateBallDisplacement and add it to the position */
-          const { dx, dy } = calculateBallDisplacement(gameData);
-          inGameData.ball.position.x += dx;
-          inGameData.ball.position.y += dy;
-          if (inGameData.frame % 120 === 0) { this.logger.debug('log every 2second, game:render', inGameData.renderData); }
+          const roundResult: RoundResult = handlePlaying(gameData);
           this.eventRunner.emit('game:render', roomId, inGameData.renderData);
 
-          /** check wall bound */
-          const wallCollision = checkWallBound(gameData);
-          if (wallCollision) inGameData.ball.velocity.y *= (-1);
-          // check paddle bound
-          const paddleBound = checkPaddleBound(gameData);
-          if (paddleBound) inGameData.ball.velocity.x *= (-1);
-          /* check end of Round and return winner of the round */
-          const roundResult: RoundResult = checkEndOfRound(gameData);
-          if (roundResult === RoundResult.playing) break;
-          if (roundResult === RoundResult.blueWin) inGameData.scoreBlue += 1;
-          if (roundResult === RoundResult.redWin) inGameData.scoreRed += 1;
+          if (roundResult === RoundResult.playing) inGameData.status = GameStatus.Playing;
+          if (roundResult === RoundResult.blueWin) inGameData.status = GameStatus.ScoreBlue;
+          if (roundResult === RoundResult.redWin) inGameData.status = GameStatus.ScoreRed;
+          break;
+        }
+        case GameStatus.ScoreBlue:
+        case GameStatus.ScoreRed:
+        {
+          const gameResult = handleScore(gameData);
           this.eventRunner.emit('game:score', roomId, inGameData.scoreData);
 
-          /** reset object to default position */
-          this.resetBallAndPaddle(gameData);
-          /** check end of Game and wiiner of the game */
-          const gameResult: GameResult = checkEndOfGame(gameData);
-          if (gameResult === GameResult.playing) break;
-          if (gameResult === GameResult.redWin) inGameData.winnerSeq = metaData.playerRed.userId;
-          if (gameResult === GameResult.blueWin) inGameData.winnerSeq = metaData.playerBlue.userId;
-          inGameData.status = GameStatus.End;
+          if (gameResult === GameResult.playing) inGameData.status = GameStatus.Playing;
+          if (gameResult === GameResult.redWin) {
+            inGameData.status = GameStatus.End;
+            inGameData.winnerSeq = metaData.playerRed.userId;
+          }
+          if (gameResult === GameResult.blueWin) {
+            inGameData.status = GameStatus.End;
+            inGameData.winnerSeq = metaData.playerBlue.userId;
+          }
           break;
         }
         case GameStatus.End: {
-          this.eventRunner.emit('game:end', roomId, {
-            metaData,
-            inGameData,
-          });
+          this.eventRunner.emit('game:end', { metaData, inGameData });
           break;
         }
         default: {
@@ -86,38 +75,9 @@ export class SimulationService {
           break;
         }
       }
-    });
-  }
-
-  /**
- * 한쪽이 승리하게 되면, 공과 패들의 위치를 초기화 시킨다.
- * @param game game data
- */
-  resetBallAndPaddle(game: GameData) {
-    this.logger.debug('resetBallAndPaddle');
-    const { inGameData: { ball, paddleBlue, paddleRed } } = game;
-
-    paddleBlue.position.y = 0;
-    paddleRed.position.x = 0;
-    ball.position.x = 0;
-    ball.position.y = 0;
-    ball.velocity.x = 0; // TODO(jinbekim): apply rand
-    ball.velocity.y = 1; // TODO(jinbekim): apply rand
-  }
-
-  /**
- * 게임이 시작되기 전에 준비할 시간을 주기 위해
- * 일정 시간동안 딜레이(지연)시간을 준다.
- * @param roomId 방 아이디
- * @param gameData
- * @returns 게임 시작 여부.
- */
-  delayGameStart(
-    gameData: GameData,
-  ): boolean {
-    const { inGameData } = gameData;
-    if (inGameData.frame > 800) return true;
-    return false;
+    };
+    const interval = setInterval(callback, milliseconds);
+    this.schedulerRegistry.addInterval(roomId, interval);
   }
 
   /**
@@ -128,6 +88,7 @@ export class SimulationService {
     this.logger.debug(`startGame: ${game.metaData}`);
     /* add game in simulation game queue */
     this.games.set(game.metaData.roomId, game);
+    this.addInterval(game.metaData.roomId, game, 17);
 
     const { metaData } = game;
     const logSeq = await this.gameLogService.saveInitGame(game);
@@ -156,8 +117,10 @@ export class SimulationService {
   * 게임 종료 후에 메모리상에 있는 게임을 레파지토리로 저장한다.
   * @param roomId 방 아이디
   */
-  async initAfterEndGame(roomId: string) {
-    this.logger.debug('initAfterEndGame', roomId);
+  async saveAfterEndGame(roomId: string) {
+    this.logger.debug('saveAfterEndGame', roomId);
+    /** gamedata map을 유지할 필요가 있나? */
+    this.schedulerRegistry.deleteInterval(roomId);
     const gameData = this.games.get(roomId);
     const result = await this.gameLogService.saveFinishedGame(gameData);
     if (result) this.games.delete(roomId);
