@@ -1,18 +1,6 @@
-import {
-  IsNumber, IsString, IsUUID,
-} from 'class-validator';
+import { UserDto } from 'src/user/dto/user.dto';
 
 /** TODO: add userName in session */
-export class GameSession {
-  @IsUUID()
-    sessionId: string;
-
-  @IsNumber()
-    userId: number;
-
-  @IsString()
-    roomId: string;
-
-  @IsString()
-    userName: string;
+export class GameSession extends UserDto {
+  roomId: string;
 }

@@ -39,9 +39,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   afterInit(server: any) {
     this.logger.debug('Initialize');
-    server.use((socket, next) => {
-      this.socketSession.joinSession(socket, next);
-    });
     const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next);
     server.use(wrap(this.sessionMiddleware.expressSession));
     server.use(wrap(this.sessionMiddleware.passportInit));
@@ -50,15 +47,24 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   /**
    * 첫 접속시에 session에 저장되어 있던
-   * userId와 RoomId(game)에 접속을 시켜준다.
+   * userSeq와 RoomId(game)에 접속을 시켜준다.
    * @param client 서버에 접속하는 클라이언트
    */
-  handleConnection(client: GameSocket) {
-    this.logger.debug(`user ${client.session.userId} connected`);
-    client.join(client.session.userId.toString());
-    if (client.session.roomId) { // 게임중에 나갔을 경우 재접.
-      client.join(client.session.roomId);
-      this.server.to(client.session.roomId).emit('player:join', client.session.userId);
+  handleConnection(client: any) {
+    const { userSeq, roomId } = client.session;
+    const isLogin = client.request.isAuthenticated();
+    if (!isLogin) {
+      client.disconnect();
+      return;
+    }
+    this.logger.debug(`user ${userSeq} connected`);
+    //* * persennel room */
+    client.join(userSeq);
+
+    const presence = this.gameService.checkPresenceOf(roomId);
+    if (presence) {
+      client.join(roomId);
+      this.server.to(roomId).emit('player:join', userSeq);
     }
   }
 
@@ -68,29 +74,33 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param client 클라이언트 접속을 끊었을 때
    */
   async handleDisconnect(client: any) {
-    this.logger.debug(`user ${client.session.userId} disconnected`);
-    const matchingSocket = await this.server.in(client.session.userId.toString()).allSockets();
+    const { userSeq, roomId } = client.session;
+    this.logger.debug(`user ${userSeq} disconnected`);
+    const matchingSocket = await this.server.in(userSeq.toString()).allSockets();
     const isDisconnected = matchingSocket.size === 0;
+
     if (isDisconnected) {
-      if (client.session.roomId !== null) {
-        client.to(client.session.roomId).emit('player:leave', client.session.userId);
+      if (roomId !== null) {
+        client.to(roomId).emit('player:leave', userSeq);
       }
     }
   }
 
-  /** TODO(jinbekim): rename subscribeMessage
-   */
   @UseGuards(SocketGuard)
   @SubscribeMessage('enQ')
   async handleEnqueue(client: GameSocket, ruleData: RuleDto) {
-    this.logger.debug(`user ${client.session.userId} enqueued`);
+    const { userSeq } = client.session;
+
+    this.logger.debug(`user ${userSeq} enqueued`);
     return this.gameService.handleEnqueue(client.session, ruleData);
   }
 
   @UseGuards(SocketGuard)
   @SubscribeMessage('deQ')
   handleDequeue(client: GameSocket, ruleData: RuleDto) {
-    this.logger.debug(`user ${client.session.userId} request dequeued`);
+    const { userSeq } = client.session;
+
+    this.logger.debug(`user ${userSeq} request dequeued`);
     return this.gameService.handleDequeue(client.session, ruleData);
   }
 
@@ -99,25 +109,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.logger.debug('game:ready');
     const { ruleData, metaData, metaData: { playerBlue, playerRed } } = gameData;
     const players = [
-      playerBlue?.userId?.toString(),
-      playerRed?.userId?.toString(),
+      playerBlue?.userSeq?.toString(),
+      playerRed?.userSeq?.toString(),
     ];
     /** emit match data */
     this.server.to(players).emit('game:ready', {
       ruleData,
-      blueUser: metaData?.playerBlue?.userName,
-      redUser: metaData?.playerRed?.userName,
+      blueUser: metaData?.playerBlue?.nickName,
+      redUser: metaData?.playerRed?.nickName,
     });
     /** join in gameRoom */
     this.server.in(players).socketsJoin(playerBlue?.roomId);
 
-    /** save players session data
-     * GameSession이 아니라 GameSocket이나 Socket을 저장하는건 어떨까?
-    */
-    const blueSession = { ...playerBlue, roomId: metaData.roomId };
-    const redSession = { ...playerRed, roomId: metaData.roomId };
-    this.socketSession.saveSession(playerBlue.sessionId, blueSession);
-    this.socketSession.saveSession(playerRed.sessionId, redSession);
+    playerRed.roomId = metaData.roomId;
+    playerBlue.roomId = metaData.roomId;
   }
 
   /**
@@ -138,8 +143,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   // @UseGuards(SocketGuard)
   // @SubscribeMessage('game:paddle')
   // handlePaddleControl(client: GameSocket, data: { direction: PaddleDirective }) {
-  //   this.logger.debug(`user ${client.session.userId} moved paddle ${data}`);
-  //   this.gameService.handlePaddle(client.session.roomId, client.session.userId, data.direction);
+  //   this.logger.debug(`user ${client.session.userSeq} moved paddle ${data}`);
+  //   this.gameService.handlePaddle(client.session.roomId, client.session.userSeq, data.direction);
   // }
 
   /**
@@ -150,7 +155,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @UseGuards(SocketGuard)
   @SubscribeMessage('game:paddle')
   handlePaddleTestControl(client: GameSocket, data: { direction: PaddleDirective }) {
-    this.logger.debug(`user ${client.session.userId} moved paddle ${data}`);
+    this.logger.debug(`user ${client.session.userSeq} moved paddle ${data}`);
     this.gameService.handleTestPaddle(client.id, client.id, data.direction);
   }
 
@@ -167,15 +172,19 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   @SubscribeMessage('game:watch')
   watchGameByRoomId(client: GameSocket, data: { roomId: string }) {
-    this.logger.debug(`game:watch ${client.session.userId} to ${data.roomId}`);
+    const { userSeq } = client.session;
+
+    this.logger.debug(`game:watch ${userSeq} to ${data.roomId}`);
+
     const presence = this.gameService.checkPresenceOf(data.roomId);
     if (presence === true) {
-      this.server.in(client.session.userId.toString()).socketsJoin(data.roomId);
-      client.in(data.roomId).emit('watcher:enter', client.session.userId.toString());
-      this.logger.debug(`userId: ${client.session.userId} join in ${data.roomId}`);
+      this.server.in(userSeq.toString()).socketsJoin(data.roomId);
+
+      client.in(data.roomId).emit('watcher:enter', userSeq.toString());
+      this.logger.debug(`userSeq: ${userSeq} join in ${data.roomId}`);
     } else {
-      this.server.in(client.session.userId.toString()).emit('failure');
-      this.logger.debug(`userId: ${client.session.userId} failt to join in ${data.roomId}`);
+      this.server.in(userSeq.toString()).emit('failure');
+      this.logger.debug(`userSeq: ${userSeq} failt to join in ${data.roomId}`);
     }
   }
 
@@ -186,15 +195,17 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   @SubscribeMessage('game:unwatch')
   unwatchGameByRoomId(client: GameSocket, data: { roomId: string }) {
-    this.logger.debug(`game:unwatch ${client.session.userId} from ${data.roomId}`);
+    const { userSeq } = client.session;
+
+    this.logger.debug(`game:unwatch ${userSeq} from ${data.roomId}`);
     const presence = this.gameService.checkPresenceOf(data.roomId);
     if (presence) {
-      this.server.in(client.session.userId.toString()).socketsLeave(data.roomId);
-      client.in(data.roomId).emit('watcher:leave', client.session.userId.toString());
-      this.logger.debug(`userId: ${client.session.userId} left from ${data.roomId}`);
+      this.server.in(userSeq.toString()).socketsLeave(data.roomId);
+      client.in(data.roomId).emit('watcher:leave', userSeq.toString());
+      this.logger.debug(`userSeq: ${userSeq} left from ${data.roomId}`);
     } else {
-      this.server.in(client.session.userId.toString()).emit('failure');
-      this.logger.debug(`userId: ${client.session.userId} failt to leave from ${data.roomId}`);
+      this.server.in(userSeq.toString()).emit('failure');
+      this.logger.debug(`userSeq: ${userSeq} failt to leave from ${data.roomId}`);
     }
   }
 
@@ -229,15 +240,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const { metaData, metaData: { roomId } } = gameData;
     this.logger.debug(`game ${roomId} ended with data: ${gameData}`);
     this.gameService.endGame(roomId);
-    this.socketSession.saveSession(metaData.playerBlue.sessionId, {
-      ...metaData.playerBlue,
-      roomId: null,
-    });
-    this.socketSession.saveSession(metaData.playerRed.sessionId, {
-      ...metaData.playerRed,
-      roomId: null,
-    });
+    /** remove roomid from session */
+    metaData.playerBlue.roomId = null;
+    metaData.playerRed.roomId = null;
     this.server.to(roomId).emit('game:end', gameData);
+
+    /** remove player from socketroom */
     this.server.in(roomId).socketsLeave(roomId);
   }
 }

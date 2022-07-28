@@ -1,9 +1,9 @@
 import UserStatus from 'src/enums/mastercode/user-status.enum';
 
 export class UserDto {
-  userSeq: number;
+  userSeq: number; // transcendence id
 
-  userId: number;
+  userId: number;// 42seoul id
 
   nickName: string;
 
@@ -18,4 +18,6 @@ export class UserDto {
   deleteStatus: boolean;
 
   createdAt: Date;
+
+  is_login: string;
 }
