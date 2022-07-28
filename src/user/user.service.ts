@@ -31,6 +31,7 @@ export class UserService {
         status: user.status,
         deleteStatus: user.deleteStatus,
         createdAt: user.createdAt,
+        is_login: 'N',
       };
       return userDto;
     }
@@ -73,6 +74,7 @@ export class UserService {
       status: userInstance.status,
       deleteStatus: userInstance.deleteStatus,
       createdAt: userInstance.createdAt,
+      is_login: 'N',
     };
   }
 
@@ -103,6 +105,7 @@ export class UserService {
         status: user.status,
         deleteStatus: user.deleteStatus,
         createdAt: user.createdAt,
+        is_login: 'N',
       };
     }
     return undefined;

@@ -13,7 +13,6 @@ import {
 import { GameSocket } from './dto/game-socket.dto';
 import { ScoreData } from './dto/in-game.dto';
 import { RuleDto } from './dto/rule.dto';
-import { GameSocketSession } from './game-socket-session';
 import { GameService } from './game.service';
 
 @WebSocketGateway({
@@ -28,7 +27,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @WebSocketServer() private readonly server: Server;
 
   constructor(
-    private readonly socketSession: GameSocketSession,
     private readonly gameService: GameService,
     private readonly sessionMiddleware: SessionMiddleware,
   ) { }

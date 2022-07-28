@@ -38,6 +38,6 @@ export class UserRepository extends Repository<User> {
     if (target.length !== 0) {
       return undefined;
     }
-    return target[0];
+    return { ...target[0], is_login: 'N' };
   }
 }
