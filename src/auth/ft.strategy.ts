@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-42';
+import { UserDto } from 'src/user/dto/user.dto';
 import { UserService } from 'src/user/user.service';
 
 @Injectable()
@@ -24,7 +25,7 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
   }
 
   async validate(req, at, rt, profile, cb) {
-    const userInstance:any = await this.userService.findOrCreateByUserId(
+    const userInstance:UserDto = await this.userService.findOrCreateByUserId(
       profile.userId,
       profile.email,
       profile.login,

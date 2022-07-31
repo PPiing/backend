@@ -7,7 +7,6 @@ import { GameService } from './game.service';
 import { GameLogRepository } from './repository/game-log.repository';
 import { GameQueue } from './game-queue';
 import { SimulationService } from './simulation.service';
-import { GameSocketSession } from './game-socket-session';
 import { GameLogController } from './game-log.controller';
 import { GameLogService } from './game-log.service';
 import { MockGameLogRepository } from './repository/mock/mock.game-log.repository';
@@ -27,7 +26,6 @@ import { MockGameLogRepository } from './repository/mock/mock.game-log.repositor
       useClass: MockGameLogRepository,
     },
     SimulationService,
-    GameSocketSession,
     GameLogService,
   ],
   controllers: [GameLogController],
