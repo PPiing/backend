@@ -10,7 +10,7 @@ import { SessionMiddleware } from 'src/session-middleware';
 import {
   PaddleDirective, RenderData, GameData,
 } from './dto/game-data';
-import { GameSocket } from './dto/game-socket.dto';
+import { GameSocket as any } from './dto/game-socket.dto';
 import { ScoreData } from './dto/in-game.dto';
 import { RuleDto } from './dto/rule.dto';
 import { GameService } from './game.service';
@@ -42,19 +42,19 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     server.use(wrap(this.sessionMiddleware.passportInit));
     server.use(wrap(this.sessionMiddleware.passportSession));
   }
-
+  
   /**
    * 첫 접속시에 session에 저장되어 있던
    * userSeq와 RoomId(game)에 접속을 시켜준다.
    * @param client 서버에 접속하는 클라이언트
    */
   handleConnection(client: any) {
-    const { userSeq, roomId } = client.session;
     const isLogin = client.request.isAuthenticated();
     if (!isLogin) {
       client.disconnect();
       return;
     }
+    const { userSeq, roomId } = client.request.user;
     this.logger.debug(`user ${userSeq} connected`);
     //* * persennel room */
     client.join(userSeq);
@@ -72,7 +72,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param client 클라이언트 접속을 끊었을 때
    */
   async handleDisconnect(client: any) {
-    const { userSeq, roomId } = client.session;
+    const { userSeq, roomId } = client.request.user;
     this.logger.debug(`user ${userSeq} disconnected`);
     const matchingSocket = await this.server.in(userSeq.toString()).allSockets();
     const isDisconnected = matchingSocket.size === 0;
@@ -86,20 +86,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   @UseGuards(SocketGuard)
   @SubscribeMessage('enQ')
-  async handleEnqueue(client: GameSocket, ruleData: RuleDto) {
-    const { userSeq } = client.session;
+  async handleEnqueue(client: any, ruleData: RuleDto) {
+    const { userSeq } = client.request.user;
 
     this.logger.debug(`user ${userSeq} enqueued`);
-    return this.gameService.handleEnqueue(client.session, ruleData);
+    return this.gameService.handleEnqueue(client.request.user, ruleData);
   }
 
   @UseGuards(SocketGuard)
   @SubscribeMessage('deQ')
-  handleDequeue(client: GameSocket, ruleData: RuleDto) {
-    const { userSeq } = client.session;
+  handleDequeue(client: any, ruleData: RuleDto) {
+    const { userSeq } = client.request.user;
 
     this.logger.debug(`user ${userSeq} request dequeued`);
-    return this.gameService.handleDequeue(client.session, ruleData);
+    return this.gameService.handleDequeue(client.request.user, ruleData);
   }
 
   @OnEvent('game:ready')
@@ -141,8 +141,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   // @UseGuards(SocketGuard)
   // @SubscribeMessage('game:paddle')
   // handlePaddleControl(client: GameSocket, data: { direction: PaddleDirective }) {
-  //   this.logger.debug(`user ${client.session.userSeq} moved paddle ${data}`);
-  //   this.gameService.handlePaddle(client.session.roomId, client.session.userSeq, data.direction);
+  //   this.logger.debug(`user ${client.request.user.userSeq} moved paddle ${data}`);
+  //   this.gameService.handlePaddle(client.request.user.roomId, client.request.user.userSeq, data.direction);
   // }
 
   /**
@@ -152,13 +152,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   @UseGuards(SocketGuard)
   @SubscribeMessage('game:paddle')
-  handlePaddleTestControl(client: GameSocket, data: { direction: PaddleDirective }) {
-    this.logger.debug(`user ${client.session.userSeq} moved paddle ${data}`);
+  handlePaddleTestControl(client: any, data: { direction: PaddleDirective }) {
+    this.logger.debug(`user ${client.request.user.userSeq} moved paddle ${data}`);
     this.gameService.handleTestPaddle(client.id, client.id, data.direction);
   }
 
   @SubscribeMessage('test:render')
-  forTestPurpose(client: GameSocket) {
+  forTestPurpose(client: any) {
     this.logger.debug(`test:render ${client}`);
     this.gameService.createTestGame(client);
   }
@@ -169,8 +169,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param data 방아이디
    */
   @SubscribeMessage('game:watch')
-  watchGameByRoomId(client: GameSocket, data: { roomId: string }) {
-    const { userSeq } = client.session;
+  watchGameByRoomId(client: any, data: { roomId: string }) {
+    const { userSeq } = client.request.user;
 
     this.logger.debug(`game:watch ${userSeq} to ${data.roomId}`);
 
@@ -192,8 +192,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param data 방아이디
    */
   @SubscribeMessage('game:unwatch')
-  unwatchGameByRoomId(client: GameSocket, data: { roomId: string }) {
-    const { userSeq } = client.session;
+  unwatchGameByRoomId(client: any, data: { roomId: string }) {
+    const { userSeq } = client.request.user;
 
     this.logger.debug(`game:unwatch ${userSeq} from ${data.roomId}`);
     const presence = this.gameService.checkPresenceOf(data.roomId);
