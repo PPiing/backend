@@ -10,7 +10,6 @@ import { SessionMiddleware } from 'src/session-middleware';
 import {
   PaddleDirective, RenderData, GameData,
 } from './dto/game-data';
-import { GameSocket as any } from './dto/game-socket.dto';
 import { ScoreData } from './dto/in-game.dto';
 import { RuleDto } from './dto/rule.dto';
 import { GameService } from './game.service';
@@ -42,7 +41,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     server.use(wrap(this.sessionMiddleware.passportInit));
     server.use(wrap(this.sessionMiddleware.passportSession));
   }
-  
+
   /**
    * 첫 접속시에 session에 저장되어 있던
    * userSeq와 RoomId(game)에 접속을 시켜준다.
@@ -142,7 +141,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   // @SubscribeMessage('game:paddle')
   // handlePaddleControl(client: GameSocket, data: { direction: PaddleDirective }) {
   //   this.logger.debug(`user ${client.request.user.userSeq} moved paddle ${data}`);
-  //   this.gameService.handlePaddle(client.request.user.roomId, client.request.user.userSeq, data.direction);
+  //   this.gameService.handlePaddle(
+  //   client.request.user.roomId,
+  //   client.request.user.userSeq,
+  //   data.direction
+  // );
   // }
 
   /**
