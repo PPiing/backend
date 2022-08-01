@@ -109,6 +109,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       playerBlue?.userSeq?.toString(),
       playerRed?.userSeq?.toString(),
     ];
+
     /** emit match data */
     this.server.to(players).emit('game:ready', {
       ruleData,

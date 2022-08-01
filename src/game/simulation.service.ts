@@ -3,7 +3,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { GameData, MetaData } from './dto/game-data';
 import { GameStatus, InGameData, PaddleDirective } from './dto/in-game.dto';
-import { GameSocket } from './dto/game-socket.dto';
 import { RuleDto } from './dto/rule.dto';
 import { RoundResult } from './checkStatus/check.end-of-round';
 import { GameResult } from './checkStatus/check.end-of-game';
@@ -101,15 +100,20 @@ export class SimulationService {
   }
 
   /** NOTE: will be deleted */
-  initBeforeStartTestGame(client: GameSocket) {
+  initBeforeStartTestGame(client: any) {
     this.logger.debug('TEST!!! TEST!!! startGame:');
     /* add game in simulation game queue */
     const tmp = new GameData();
     tmp.inGameData = new InGameData();
     tmp.ruleData = new RuleDto();
-    tmp.metaData = new MetaData(client.id, client.session, null, tmp.ruleData.isRankGame);
-
+    tmp.metaData = new MetaData(
+      client.id,
+      client.request.session,
+      client.request.session,
+      tmp.ruleData.isRankGame,
+    );
     this.games.set(client.id, tmp);
+    this.addInterval(tmp.metaData.roomId, tmp, 17);
     this.eventRunner.emit('game:ready', tmp);
   }
 
