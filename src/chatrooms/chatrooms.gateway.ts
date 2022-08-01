@@ -70,10 +70,15 @@ export class ChatroomsGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     // 본인이 속한 룸에 조인시킵니다. 그리고 본인이 속한 룸의 리스트를 리턴합니다.
     const roomList = await this.chatroomsService.roomJoin(client, userID);
+    const roomDataList = await Promise.all(
+      roomList.map((room) => this.chatroomsService.getRoomInfo(room)),
+    );
 
-    const data: ISocketSend = {
-      rooms: roomList,
-    };
+    const data = roomDataList.map((room) => ({
+      seq: room.chatSeq,
+      type: room.chatType,
+      name: room.chatName,
+    }));
 
     // 룸 리스트를 클라이언트에 전송합니다.
     client.emit('chat:init', data);
