@@ -39,8 +39,15 @@ export default class MessageRepository extends Repository<Message> {
       blockedUsers,
       messageId,
     })
-    .limit(limit);
-    return [];
+    .limit(limit)
+    .getMany();
+    return results.map(result => ({
+      msgSeq: result.msgSeq,
+      chatSeq: result.chatSeq,
+      userSeq: result.userSeq,
+      msg: result.message,
+      createAt: result.createdAt,
+    }));
   }
 
   /**

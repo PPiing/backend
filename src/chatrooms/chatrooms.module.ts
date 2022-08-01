@@ -11,6 +11,7 @@ import ChatroomsService from './chatrooms.service';
 import MessageRepository from './repository/message.repository';
 import ChatEventRepository from './repository/chat-event.repository';
 import FriendsRepository from './repository/friends.repository';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import FriendsRepository from './repository/friends.repository';
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
     CacheModule.register({ ttl: 0 }),
+    UserModule,
   ],
   controllers: [
     ChatroomsController,

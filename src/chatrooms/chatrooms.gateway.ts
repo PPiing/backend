@@ -109,13 +109,13 @@ export class ChatroomsGateway implements OnGatewayInit, OnGatewayConnection, OnG
    */
   @SubscribeMessage('chat')
   async handleChat(client: any, message: ISocketRecv) {
-    const { userSeq } = client.request.user;
+    const { userSeq, nickName } = client.request.user;
     const userID = userSeq;
     this.logger.debug(`handleChat: ${userID} sent message: ${message.content}`);
     // client.rooms은 클라이언트가 속한 룸 리스트를 담고 있습니다.
     const adminId = 0;
     const { rooms } = client;
-    const name = await this.chatroomsService.whoAmI(userID);
+    const name = userID;
     const muted = await this.chatroomsService.isMuted(message.at, name);
     if (rooms.has(message.at.toString()) && name !== undefined) {
       if (muted === 0) {
@@ -125,11 +125,12 @@ export class ChatroomsGateway implements OnGatewayInit, OnGatewayConnection, OnG
           message.at,
           this.server,
         );
-        const data: ISocketSend = {
+        const data = {
           chatSeq: message.at,
           userIDs: [name],
           msg: message.content,
           id: seq,
+          nickname: nickName,
         };
         this.server.to(message.at.toString()).except(exceptUsers).emit('room:chat', data);
       } else {
