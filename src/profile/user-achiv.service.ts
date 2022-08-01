@@ -26,14 +26,14 @@ export class UserAchivService {
       throw new BadRequestException('등록된 업적이 없습니다.');
     }
     const result : GetAchivDto[] = [];
-    achives.forEach(async (achiv) => {
+    for (const achiv of achives) {
       result.push({
         achiv_seq: achiv.achivSeq,
         achiv_title: achiv.achivTitle,
         achiv_image: achiv.achivImgUri,
         achiv_complete: await this.userAchivRepository.getUserAchiv(achiv.achivSeq, userSeq),
       });
-    });
+    }
 
     return result;
   }
