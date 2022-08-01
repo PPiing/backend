@@ -23,7 +23,7 @@ export class AuthController {
     if (!this.authService.isSecAuthStatus(req.user)) {
       this.authService.setIsLogin(req.sessionID, 'Y');
       res.redirect('../../../');
-      return ;
+      return;
     }
     res.redirect('../../../auth/redirect');
   }
