@@ -17,9 +17,11 @@ export default class Friends {
 
   @ManyToOne(() => User, (user) => user.userSeq)
   @JoinColumn({ name: 'followerSeq' })
+  @Column()
     followerSeq: number;
 
   @ManyToOne(() => User, (user) => user.userSeq)
   @JoinColumn({ name: 'followeeSeq' })
+  @Column()
     followeeSeq: number;
 }
