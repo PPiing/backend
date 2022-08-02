@@ -19,6 +19,7 @@ import { GameService } from './game.service';
     origin: '*',
   },
   namespace: '',
+  // namespace: 'game',
 })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger('GameGateway');
@@ -83,6 +84,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
   }
 
+  // TODO(jinbe): 게임초대
+  //
+  // TODO(jinbe): 초대 수락 & 게임생성
+
   @UseGuards(SocketGuard)
   @SubscribeMessage('enQ')
   async handleEnqueue(client: any, ruleData: RuleDto) {
@@ -140,13 +145,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   //  */
   // @UseGuards(SocketGuard)
   // @SubscribeMessage('game:paddle')
-  // handlePaddleControl(client: GameSocket, data: { direction: PaddleDirective }) {
+  // handlePaddleControl(client: any, data: { direction: PaddleDirective }) {
   //   this.logger.debug(`user ${client.request.user.userSeq} moved paddle ${data}`);
   //   this.gameService.handlePaddle(
-  //   client.request.user.roomId,
-  //   client.request.user.userSeq,
-  //   data.direction
-  // );
+  //     client.request.user.roomId,
+  //     client.request.user.userSeq,
+  //     data.direction,
+  //   );
   // }
 
   /**
