@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Redirect, Req, UseGuards, Query, ParseIntPipe, Logger,
+  Controller, Get, Redirect, Req, Res, UseGuards, Query, ParseIntPipe, Logger,
 } from '@nestjs/common';
 import { CheckLogin } from 'src/guards/check-login.guard';
 import { FtGuard } from 'src/guards/ft.guard';
@@ -19,13 +19,13 @@ export class AuthController {
 
   @Get('login/callback')
   @UseGuards(FtGuard)
-  @Redirect('../../../', 302)
-  callback(@Req() req: any) {
+  callback(@Res() req: any, @Res() res: any) {
     if (!this.authService.isSecAuthStatus(req.user)) {
       this.authService.setIsLogin(req.sessionID, 'Y');
-      return { url: '../../../' };
+      res.redirect('../../../');
+      return;
     }
-    return ({ url: '../../../auth/redirect' });
+    res.redirect('../../../auth/redirect');
   }
 
   @Get('logout')
