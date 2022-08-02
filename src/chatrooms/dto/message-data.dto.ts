@@ -1,46 +1,11 @@
-import {
-  IsString, IsNotEmpty, IsOptional, IsNumber, IsDate,
-} from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-
 export class MessageDataDto {
-  @ApiPropertyOptional({
-    description: '메시지 고유 ID',
-    example: 1,
-  })
-  @IsNumber()
-  @IsOptional()
-    msgSeq: number;
+  msgSeq: number;
 
-  @ApiProperty({
-    description: '채팅방 고유 ID',
-    example: 1,
-  })
-  @IsNumber()
-  @IsNotEmpty()
-    chatSeq: number;
+  chatSeq: number;
 
-  @ApiProperty({
-    description: '유저 ID',
-    example: 1,
-  })
-  @IsString()
-  @IsNotEmpty()
-    userSeq: number;
+  userSeq: number;
 
-  @ApiProperty({
-    description: '채팅 내용',
-    example: '안녕하세요',
-  })
-  @IsString()
-  @IsNotEmpty()
-    msg: string;
+  msg: string;
 
-  @ApiProperty({
-    description: '메시지 생성 시간',
-    example: '2020-01-01T00:00:00.000Z',
-  })
-  @IsDate()
-  @IsNotEmpty()
-    createAt: Date;
+  createAt: Date;
 }

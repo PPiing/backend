@@ -17,9 +17,11 @@ export default class Message {
 
   @ManyToOne(() => Chat, (chat) => chat.msgSeq)
   @JoinColumn({ name: 'chatSeq' })
+  @Column()
     chatSeq: number;
 
   @ManyToOne(() => User, (user) => user.userSeq)
   @JoinColumn({ name: 'userSeq' })
+  @Column()
     userSeq: number;
 }

@@ -15,11 +15,12 @@ import ChatType from 'src/enums/mastercode/chat-type.enum';
 import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
 import { CheckLogin } from 'src/guards/check-login.guard';
 import { UserDto } from 'src/user/dto/user.dto';
+import { UserService } from 'src/user/user.service';
 import ChatroomsService from './chatrooms.service';
 import { ChatRequestDto } from './dto/chat-request.dto';
 import { ChatResponseDto } from './dto/chat-response.dto';
 import { JoinRoomDto } from './dto/join-room.dto';
-import { MessageDataDto } from './dto/message-data.dto';
+import { MessageResponseDto } from './dto/message-response.dto';
 
 @ApiTags('채팅방')
 @Controller('chatrooms')
@@ -30,6 +31,7 @@ export default class ChatroomsController {
 
   constructor(
     private chatroomsService: ChatroomsService,
+    private userService: UserService,
     private eventRunner: EventEmitter2,
   ) {}
 
@@ -565,7 +567,7 @@ export default class ChatroomsController {
     summary: '채팅 메시지 조회',
     description: '채팅 메시지 조회 기능입니다. 기준이 되는 메시지 (msgID) 이전의 채팅을 가져오며, msgID가 -1일시 가장 최신의 메시지부터 가져옵니다.',
   })
-  @ApiResponse({ status: 200, type: [MessageDataDto], description: '채팅 메시지 조회 성공' })
+  @ApiResponse({ status: 200, type: [MessageResponseDto], description: '채팅 메시지 조회 성공' })
   @ApiParam({
     name: 'roomId', type: Number, example: 1, description: '방 ID',
   })
@@ -581,7 +583,7 @@ export default class ChatroomsController {
       @Param('msgID', ParseIntPipe) msgID: number,
       @Param('count', ParseIntPipe) count: number,
       @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
-  ): Promise<Array<MessageDataDto>> {
+  ): Promise<Array<MessageResponseDto>> {
     const { userSeq } = user;
     await this.chatroomsService.checkUsers([userSeq]);
     await this.chatroomsService.checkRooms([roomId]);
@@ -591,7 +593,20 @@ export default class ChatroomsController {
       count,
       userSeq,
     );
-    return messages;
+    const userIdLists = [...new Set(messages.map((m) => m.userSeq))];
+    const userLists = await Promise.all(userIdLists.map((id) => this.userService.findByUserId(id)));
+    const maps = new Map();
+    for (let index = 0; index < userLists.length; index += 1) {
+      maps.set(userIdLists[index], userLists[index]);
+    }
+    return messages.map((message) => ({
+      msgSeq: message.msgSeq,
+      chatSeq: message.chatSeq,
+      userSeq: message.userSeq,
+      msg: message.msg,
+      createAt: message.createAt,
+      nickname: maps.get(message.userSeq).nickName,
+    }));
   }
 
   /**
