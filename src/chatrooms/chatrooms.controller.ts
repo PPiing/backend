@@ -20,7 +20,6 @@ import ChatroomsService from './chatrooms.service';
 import { ChatRequestDto } from './dto/chat-request.dto';
 import { ChatResponseDto } from './dto/chat-response.dto';
 import { JoinRoomDto } from './dto/join-room.dto';
-import { MessageDataDto } from './dto/message-data.dto';
 import { MessageResponseDto } from './dto/message-response.dto';
 
 @ApiTags('채팅방')
@@ -585,7 +584,7 @@ export default class ChatroomsController {
       @Param('count', ParseIntPipe) count: number,
       @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
   ): Promise<Array<MessageResponseDto>> {
-    const { userSeq, nickName } = user;
+    const { userSeq } = user;
     await this.chatroomsService.checkUsers([userSeq]);
     await this.chatroomsService.checkRooms([roomId]);
     const messages = await this.chatroomsService.getMessages(
@@ -594,19 +593,19 @@ export default class ChatroomsController {
       count,
       userSeq,
     );
-    const userIdLists = [...new Set(messages.map(m => m.userSeq))];
-    const userLists = await Promise.all(userIdLists.map(id => this.userService.findByUserId(id)));
+    const userIdLists = [...new Set(messages.map((m) => m.userSeq))];
+    const userLists = await Promise.all(userIdLists.map((id) => this.userService.findByUserId(id)));
     const maps = new Map();
-    for (let index = 0; index < userLists.length; index =+ 1) {
+    for (let index = 0; index < userLists.length; index += 1) {
       maps.set(userIdLists[index], userLists[index]);
     }
-    return messages.map(message => ({
+    return messages.map((message) => ({
       msgSeq: message.msgSeq,
       chatSeq: message.chatSeq,
       userSeq: message.userSeq,
       msg: message.msg,
       createAt: message.createAt,
-      nickname: maps[message.userSeq].nickName,
+      nickname: maps.get(message.userSeq).nickName,
     }));
   }
 

@@ -33,14 +33,20 @@ export default class MessageRepository extends Repository<Message> {
    * @returns 메시지 객체들
    */
   async getMessages(chatSeq: number, messageId: number, limit: number, blockedUsers: number[]): Promise<MessageDataDto[]> {
-    const results = await this.createQueryBuilder('message')
-    .where('message.chatSeq = :chatSeq AND message.userSeq NOT IN (:blockedUsers) AND message.chatSeq < :messageId', {
+    const query = this.createQueryBuilder('message')
+    .where('message.chatSeq = :chatSeq', {
       chatSeq,
-      blockedUsers,
+    })
+    .andWhere('message.chatSeq < :messageId', {
       messageId,
     })
-    .limit(limit)
-    .getMany();
+    .limit(limit);
+    if (blockedUsers.length > 0) {
+      query.andWhere('message.userSeq NOT IN (:blockedUsers)', {
+        blockedUsers,
+      });
+    }
+    const results = await query.getMany();
     return results.map(result => ({
       msgSeq: result.msgSeq,
       chatSeq: result.chatSeq,
@@ -56,7 +62,6 @@ export default class MessageRepository extends Repository<Message> {
    * @returns 메시지 ID (PK)
    */
   async getLastChatIndex(): Promise<number> {
-    const latest = await this.createQueryBuilder('message').getOne();
-    return latest.chatSeq ? latest.chatSeq : 0;
+    return await this.createQueryBuilder('message').getCount();
   }
 }

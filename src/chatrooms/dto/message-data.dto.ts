@@ -1,7 +1,11 @@
 export class MessageDataDto {
-    msgSeq: number;
-    chatSeq: number;
-    userSeq: number;
-    msg: string;
-    createAt: Date;
+  msgSeq: number;
+
+  chatSeq: number;
+
+  userSeq: number;
+
+  msg: string;
+
+  createAt: Date;
 }
