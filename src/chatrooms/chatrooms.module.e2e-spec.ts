@@ -16,6 +16,7 @@ import MockMessageRepository from './repository/mock/mock.message.repository';
 import MockChatParticipantRepository from './repository/mock/mock.chat-participant.repository';
 import MockFriendsRepository from './repository/mock/mock.friends.repository';
 import ChatroomsService from './chatrooms.service';
+import { UserModule } from 'src/user/user.module.e2e-spec';
 
 const repositories = [
   {
@@ -46,6 +47,7 @@ const repositories = [
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
     CacheModule.register({ ttl: 0 }),
+    UserModule,
   ],
   controllers: [
     ChatroomsController,
