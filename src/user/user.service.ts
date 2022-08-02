@@ -119,6 +119,7 @@ export class UserService {
    */
   async getFriendsInfo(userIds: number[]): Promise<GetFriendsDto[]> {
     this.logger.debug(`UserService.getFriendsInfo: ${userIds}`);
+
     const users = await this.userRepository.getFriendsInfo(userIds);
     return users;
   }

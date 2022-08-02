@@ -19,15 +19,19 @@ export class UserRepository extends Repository<User> {
 
   async getFriendsInfo(userList: number[]): Promise<GetFriendsDto[]> {
     const friendsInfo: GetFriendsDto[] = [];
-    userList.map(async (user) => {
-      const findUser = await this.findOne({ userSeq: user });
+    const findUsers = await Promise.all(
+      userList.map((user) => this.findOne({ userSeq: user })),
+    );
+
+    for (let i = 0; i < userList.length; i += 1) {
       friendsInfo.push({
-        userSeq: findUser.userSeq,
-        nickname: findUser.nickName,
-        avatarImgUri: findUser.avatarImgUri,
-        status: findUser.status,
+        userSeq: findUsers[i].userSeq,
+        nickname: findUsers[i].nickName,
+        avatarImgUri: findUsers[i].avatarImgUri,
+        status: findUsers[i].status,
       });
-    });
+    }
+
     return friendsInfo;
   }
 
