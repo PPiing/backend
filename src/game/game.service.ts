@@ -43,6 +43,19 @@ export class GameService {
 
     /** if not matched return */
     if (matchedPlayers === false) return;
+    this.createGame(matchedPlayers);
+  }
+
+  handleDequeue(client: GameSession, ruleData: RuleDto) {
+    this.logger.debug('handleDequeue', ruleData);
+    return this.gameQueue.deQueue(client, ruleData);
+  }
+
+  /**
+   * @param roomId 방 아이디
+   */
+  async createGame(matchedPlayers: [GameSession, RuleDto][]) {
+    this.logger.debug('createGame(matchedPlayers): creating');
 
     /** after Matching players */
     const [[bluePlayer, blueRule], [redPlayer, redRule]] = [...matchedPlayers];
@@ -52,7 +65,7 @@ export class GameService {
       randomUUID(),
       bluePlayer,
       redPlayer,
-      ruleData.isRankGame,
+      blueRule.isRankGame,
     );
     /** temporarily apply bluePlayer's rule */
     newGame.ruleData.ballSpeed = blueRule.ballSpeed;
@@ -67,22 +80,9 @@ export class GameService {
     bluePlayer.roomId = newGame.metaData.roomId;
     redPlayer.roomId = newGame.metaData.roomId;
 
+    /** add gameData into simulator */
+    this.simulator.initBeforeStartGame(newGame);
     this.eventRunner.emit('game:ready', newGame.metaData);
-  }
-
-  handleDequeue(client: GameSession, ruleData: RuleDto) {
-    this.logger.debug('handleDequeue', ruleData);
-    return this.gameQueue.deQueue(client, ruleData);
-  }
-
-  /**
-   * simulatior에 게임을 등록하고 임시 방은 삭제한다.
-   * @param roomId 방 아이디
-   */
-  async createGame(roomId: string) {
-    this.logger.debug(`createGame(roomId: ${roomId}): creating`);
-    const game = this.games.get(roomId);
-    this.simulator.initBeforeStartGame(game);
   }
 
   createTestGame(client: GameSocket) {
