@@ -1,4 +1,5 @@
 import Alarm from 'src/entities/alarm.entity';
+import User from 'src/entities/user.entity';
 import AlarmCode from 'src/enums/mastercode/alarm-code.enum';
 import AlarmType from 'src/enums/mastercode/alarm-type.enum';
 import { EntityRepository, Repository } from 'typeorm';

@@ -1,6 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { randomUUID } from 'crypto';
+import { UserDto } from 'src/user/dto/user.dto';
+import { UserService } from 'src/user/user.service';
+import { AlarmService } from 'src/alarm/alarm.service';
 import {
   GameData, MetaData,
 } from './dto/game-data';
@@ -25,6 +28,8 @@ export class GameService {
     private eventRunner: EventEmitter2,
     private gameQueue: GameQueue,
     private simulator: SimulationService,
+    private readonly userService: UserService,
+    private readonly alarmService: AlarmService,
   ) {}
 
   checkPresenceOf(roomId: string): boolean {
@@ -49,6 +54,22 @@ export class GameService {
   handleDequeue(client: GameSession, ruleData: RuleDto) {
     this.logger.debug('handleDequeue', ruleData);
     return this.gameQueue.deQueue(client, ruleData);
+  }
+
+  /**
+   * 게임 초대 수락시에 일단 룰을 설정하는 기능은 없음.
+   */
+  async handleAcceptInvite(alarmSeq: number) {
+    this.logger.debug('handle Invite');
+    const alarm = await this.alarmService.getAlarmBySeq(alarmSeq);
+    const user1 = await this.userService.findByUserId(alarm.receiverSeq);
+    const user2 = await this.userService.findByUserId(alarm.senderSeq);
+    if (user1 === undefined || user2 === undefined) { throw new NotFoundException('해당 유저가 존재하지 않습니다.'); }
+    const rule = new RuleDto();
+    const roomId = randomUUID();
+    const bluePlayer: GameSession = { ...user1, roomId };
+    const redPlayer: GameSession = { ...user2, roomId };
+    this.createGame([[bluePlayer, rule], [redPlayer, rule]]);
   }
 
   /**

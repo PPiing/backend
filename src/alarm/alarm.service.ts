@@ -3,6 +3,7 @@ import {
 } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Socket } from 'socket.io';
+import Alarm from 'src/entities/alarm.entity';
 import AlarmCode from 'src/enums/mastercode/alarm-code.enum';
 import AlarmType from 'src/enums/mastercode/alarm-type.enum';
 import { AlarmResponseDto } from './dto/alarm-response.dto';
@@ -135,6 +136,19 @@ export class AlarmService {
    */
   async getAllConfirms(userSeq: number): Promise<AlarmResponseDto[]> {
     return this.alarmRepository.getAlarms(userSeq, AlarmType.ALTP20);
+  }
+
+  /**
+   * 알람을 가져옵니다.
+   *
+   * @param alarmSeq 알람 ID
+   */
+  async getAlarmBySeq(alarmSeq: number): Promise<Alarm> {
+    const result = await this.alarmRepository.findOne(alarmSeq);
+    if (!result) {
+      throw new UnauthorizedException('권한이 없습니다.');
+    }
+    return result;
   }
 
   /**
