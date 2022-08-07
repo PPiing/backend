@@ -69,7 +69,7 @@ export class AuthService {
       this.setIsLogin(sessionID, 'N');
       // NOTE: 인증 이메일 전송
       // NOTE: 전송 후 리다이렉션하여 이메일 전송했다는 문구 띄우기
-      this.mailService.example('dev.yamkim@gmail.com', String(factorCode));
+      this.mailService.example(user.email, String(factorCode));
     } else {
       // NOTE: 이차인증을 수행하지 경우로, 바로 is_login을 'Y'로 설정합니다.
       this.setIsLogin(sessionID, 'Y');

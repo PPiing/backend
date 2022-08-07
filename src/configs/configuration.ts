@@ -13,4 +13,8 @@ export default () => ({
     clientid: process.env.AUTH_CLIENTID,
     clientsecret: process.env.AUTH_CLIENTSECRET,
   },
+  mail: {
+    user: process.env.MAILDEV_INCOMING_USER,
+    pass: process.env.MAILDEV_INCOMING_PASS,
+  },
 });
