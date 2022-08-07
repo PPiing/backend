@@ -1,6 +1,5 @@
 import { CacheModule, forwardRef, Module } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { AlarmModule } from 'src/alarm/alarm.module.e2e-spec';
 import { ProfileModule } from 'src/profile/profile.module.e2e-spec';
 import { UserModule } from 'src/user/user.module.e2e-spec';
 import { FriendsController } from './friends.controller';
@@ -20,7 +19,6 @@ const repositories = [
   imports: [
     forwardRef(() => UserModule),
     forwardRef(() => ProfileModule),
-    forwardRef(() => AlarmModule),
     CacheModule.register({ ttl: 0 }),
   ],
   controllers: [
