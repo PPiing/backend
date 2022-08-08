@@ -119,7 +119,7 @@ describe('User E2E Test', () => {
         // NOTE: 세션 삽입
         const userCookie = cookie;
         const newUserData = {
-          nickName: 'new nickname',
+          nickName: 'newnickname',
           email: '123@gmail.com',
           secAuthStatus: false,
           avatarImgUri: './img/defaultProfile.jpg',
