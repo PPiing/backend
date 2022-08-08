@@ -12,7 +12,6 @@ export class CheckLogin implements CanActivate {
       if (context.switchToHttp().getRequest().session.passport.user.is_login === 'Y') {
         return true;
       }
-      return false;
     }
     throw new HttpException('로그인이 필요합니다.', 401);
   }

@@ -1,10 +1,14 @@
 import {
   Controller, Get, Redirect, Req, Res, UseGuards, Query, ParseIntPipe, Logger,
 } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CheckLogin } from 'src/guards/check-login.guard';
 import { FtGuard } from 'src/guards/ft.guard';
+import { UserDto } from 'src/user/dto/user.dto';
 import { AuthService } from './auth.service';
+import { User } from './user.decorator';
 
+@ApiTags('인가/인증 관련')
 @Controller('auth')
 export class AuthController {
   private logger: Logger = new Logger(AuthController.name);
@@ -13,10 +17,18 @@ export class AuthController {
     private readonly authService: AuthService,
   ) {}
 
+  @ApiOperation({
+    summary: '로그인',
+    description: '42 계정으로 OAuth 로그인을 시도합니다. 성공시 login/callback으로 리다이렉트합니다.',
+  })
   @Get('login')
   @UseGuards(FtGuard)
   login() { }
 
+  @ApiOperation({
+    summary: '로그인 콜백 엔드포인트',
+    description: '로그인 성공시 해당 URI로 자동으로 리다이렉트 되며 http://(host) 로 리다이렉트 합니다. 2FA를 필요로 하는 계정일시 http://(host)/auth/redirect 로 리다이렉트 합니다.',
+  })
   @Get('login/callback')
   @UseGuards(FtGuard)
   callback(@Req() req: any, @Res() res: any) {
@@ -28,6 +40,10 @@ export class AuthController {
     res.redirect('../../../auth/redirect');
   }
 
+  @ApiOperation({
+    summary: '로그아웃',
+    description: '로그아웃을 수행합니다.',
+  })
   @Get('logout')
   @UseGuards(CheckLogin)
   @Redirect('../../../', 302)
@@ -41,21 +57,36 @@ export class AuthController {
     });
   }
 
+  @ApiOperation({
+    summary: '2FA 인증 여부 및 메일 송부',
+    description: '2FA 인증 여부를 true/false로 리턴하며 인증 메일을 송부합니다.',
+  })
   @Get('twofactor/check')
-  async checkFactor(@Req() req: any):Promise<boolean> {
-    if (!this.authService.checkLogin(req.user, req.sessionID)) {
+  @UseGuards(CheckLogin)
+  async checkFactor(
+    @User() user: UserDto,
+  ):Promise<boolean> {
+    if (!this.authService.checkLogin(user)) {
       return false;
     }
-    await this.authService.sendAuthCodeToEmail(req.user, req.sessionID);
+    await this.authService.sendAuthCodeToEmail(user);
     return true;
   }
 
+  @ApiOperation({
+    summary: '2FA 인증 수행',
+    description: '메일로부터 송부받은 코드를 이용하여 2FA 인증을 진행합니다. 진행 성공 여부는 true/false로 리턴합니다.',
+  })
   @Get('twofactor/code')
-  async checkFactorCode(@Req() req: any, @Query('code', ParseIntPipe) code: number): Promise<boolean> {
-    if (!this.authService.checkLogin(req.user, req.sessionID)) {
+  @UseGuards(CheckLogin)
+  async checkFactorCode(
+    @User() user: UserDto,
+      @Query('code', ParseIntPipe) code: number,
+  ): Promise<boolean> {
+    if (!this.authService.checkLogin(user)) {
       return false;
     }
-    const validChk = this.authService.isValidAuthCodeFromEmail(req.sessionID, code);
+    const validChk = this.authService.isValidAuthCodeFromEmail(user, code);
     return validChk;
   }
 }
