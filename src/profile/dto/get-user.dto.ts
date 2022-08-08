@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsBoolean, IsNotEmpty, IsNumber, IsString,
+} from 'class-validator';
 import UserStatus from 'src/enums/mastercode/user-status.enum';
 
 export class GetUserDto {
@@ -49,7 +51,7 @@ export class GetUserDto {
   })
   @IsBoolean()
   @IsNotEmpty()
-  userSecAuthStatus: boolean;
+    userSecAuthStatus: boolean;
 
   // @IsBoolean()
   // isFriend: boolean;
