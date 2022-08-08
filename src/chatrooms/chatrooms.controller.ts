@@ -5,6 +5,7 @@ import {
   Delete, Get, Post, Put,
   Logger,
   UseGuards,
+  Patch,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
@@ -21,6 +22,7 @@ import { ChatRequestDto } from './dto/chat-request.dto';
 import { ChatResponseDto } from './dto/chat-response.dto';
 import { JoinRoomDto } from './dto/join-room.dto';
 import { MessageResponseDto } from './dto/message-response.dto';
+import { UpdateRoomDto } from './dto/update-room.dto';
 
 @ApiTags('채팅방')
 @Controller('chatrooms')
@@ -626,6 +628,28 @@ export default class ChatroomsController {
     this.logger.debug(`getRoom: ${roomId}`);
     const room = await this.chatroomsService.getRoomInfo(Number(roomId));
     return room;
+  }
+
+  /**
+   * 방 정보를 변경합니다.
+   *
+   * @param roomId 방 ID
+   */
+  @ApiOperation({ summary: '방 정보 변경', description: '방 정보를 변경합니다.' })
+  @ApiResponse({ status: 200, description: '방 정보 변경 성공' })
+  @ApiParam({
+    name: 'roomId', type: Number, example: 1, description: '방 ID',
+  })
+  @Patch('room/:roomId')
+  async updateRoom(@Param('roomId') roomId: number, @Body() roomInfo: UpdateRoomDto) {
+    this.logger.debug(`${roomId} 정보 변경`);
+    await this.chatroomsService.checkRooms([roomId]);
+
+    if (roomId !== roomInfo.chatSeq) {
+      throw new BadRequestException('변경될 방의 정보가 유효하지 않습니다.');
+    }
+
+    await this.chatroomsService.updateRoom(roomId, roomInfo);
   }
 
   /**

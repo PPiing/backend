@@ -4,6 +4,7 @@ import Chat from 'src/entities/chat.entity';
 import ChatType from 'src/enums/mastercode/chat-type.enum';
 import { EntityRepository, Repository } from 'typeorm';
 import ChatDto from '../dto/chat.dto';
+import { UpdateRoomDto } from '../dto/update-room.dto';
 
 @EntityRepository(Chat)
 export default class ChatRepository extends Repository<Chat> {
@@ -102,5 +103,23 @@ export default class ChatRepository extends Repository<Chat> {
    */
   async deleteRoom(chatSeq: number): Promise<void> {
     await this.delete(chatSeq);
+  }
+
+  /**
+   * 방 정보를 변경합니다.
+   *
+   * @param roomId 방 식별자
+   * @param roomInfo 변경될 방 정보
+   */
+   async updateRoom(roomId: number, roomInfo: UpdateRoomDto) {
+    const target = await this.findOne(roomId);
+
+    target.chatName = roomInfo.chatName;
+    target.chatType = roomInfo.chatType;
+    if (roomInfo.chatType === 'CHTP40') {
+      target.password = roomInfo.password;
+    }
+
+    await this.save(target);
   }
 }

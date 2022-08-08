@@ -17,6 +17,7 @@ import ChatEventRepository from './repository/chat-event.repository';
 import FriendsRepository from './repository/friends.repository';
 import { ChatRequestDto } from './dto/chat-request.dto';
 import { ChatResponseDto } from './dto/chat-response.dto';
+import { UpdateRoomDto } from './dto/update-room.dto';
 
 @Injectable()
 export default class ChatroomsService implements OnModuleInit {
@@ -961,5 +962,15 @@ export default class ChatroomsService implements OnModuleInit {
     }
     const participant = await this.getUserAuth(chatSeq, user);
     return participant === PartcAuth.CPAU10;
+  }
+
+  /**
+   * 방 정보를 변경합니다.
+   *
+   * @param roomId 방 식별자
+   * @param roomInfo 변경될 방 정보
+   */
+  async updateRoom(roomId: number, roomInfo: UpdateRoomDto) {
+    await this.chatRepository.updateRoom(roomId, roomInfo);
   }
 }

@@ -1,4 +1,5 @@
 import ChatDto from 'src/chatrooms/dto/chat.dto';
+import { UpdateRoomDto } from 'src/chatrooms/dto/update-room.dto';
 import ChatType from 'src/enums/mastercode/chat-type.enum';
 
 /**
@@ -63,5 +64,14 @@ export default class MockChatRepository {
     this.MockEntity = this.MockEntity.filter(
       (entity) => !(entity.chatSeq === chatSeq),
     );
+  }
+
+  async updateRoom(roomId: number, roomInfo: UpdateRoomDto) {
+    const target = this.MockEntity.find((e) => e.chatSeq === roomId);
+    target.chatName = roomInfo.chatName;
+    target.chatType = roomInfo.chatType;
+    if (roomInfo.chatType === 'CHTP40') {
+      target.password = roomInfo.password;
+    }
   }
 }
