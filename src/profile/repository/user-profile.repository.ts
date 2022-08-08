@@ -17,6 +17,7 @@ export class UserProfileRepository extends Repository<User> {
       userEmail: user.email,
       userStatus: user.status,
       userImage: user.avatarImgUri,
+      userSecAuthStatus: user.secAuthStatus,
     });
   }
 

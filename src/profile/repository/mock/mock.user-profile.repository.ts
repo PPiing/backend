@@ -1,5 +1,6 @@
 import UserStatus from 'src/enums/mastercode/user-status.enum';
 import { GetUserDto } from 'src/profile/dto/get-user.dto';
+import { SearchUserDto } from 'src/profile/dto/search-user.dto';
 import { UpdateUserDto } from 'src/profile/dto/update-user.dto';
 
 export default class MockUserProfileRepository {
@@ -41,6 +42,7 @@ export default class MockUserProfileRepository {
       userEmail: user.email,
       userStatus: user.status,
       userImage: user.avatarImgUri,
+      userSecAuthStatus: user.secAuthStatus,
     });
   }
 
@@ -73,12 +75,11 @@ export default class MockUserProfileRepository {
     this.MockEntity.splice(userIdx, userIdx + 1);
   }
 
-  async searchUsersByKeyword(nickname: string): Promise<GetUserDto[]> {
+  async searchUsersByKeyword(nickname: string): Promise<SearchUserDto[]> {
     const users = this.MockEntity.filter((u) => u.nickName.indexOf(nickname) >= 0);
     return users.map((user) => ({
-      userSeq: user.nickName,
-      userName: user.nickName,
-      userEmail: user.email,
+      userSeq: user.userSeq,
+      nickName: user.nickName,
       userStatus: user.status,
       userImage: user.avatarImgUri,
     }));
