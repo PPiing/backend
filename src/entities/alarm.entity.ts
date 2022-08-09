@@ -27,9 +27,11 @@ export default class Alarm {
 
   @ManyToOne(() => User, (user) => user.userSeq)
   @JoinColumn({ name: 'receiverSeq' })
+  @Column()
     receiverSeq: number;
 
   @ManyToOne(() => User, (user) => user.userSeq)
   @JoinColumn({ name: 'senderSeq' })
+  @Column()
     senderSeq: number;
 }
