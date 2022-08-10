@@ -152,7 +152,7 @@ export class FriendsController {
   @Post('/delete/:target')
   async deleteFriend(
   @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
-    @Param() target: number,
+    @Param('target') target: number,
   ) {
     this.logger.log(`친구 삭제: ${user.userSeq}`);
 
@@ -175,7 +175,7 @@ export class FriendsController {
   @Get('/block/:target')
   async blockFriend(
   @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
-    target: number,
+    @Param('target') target: number,
   ) {
     this.logger.log(`블락 요청 : ${user.userSeq} -> ${target}`);
 
@@ -197,7 +197,7 @@ export class FriendsController {
   @Get('/unblock/:target')
   async unblockFriend(
   @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
-    target: number,
+    @Param('target') target: number,
   ) {
     this.logger.log(`블락 해지 요청 : ${user.userSeq} -> ${target}`);
 
