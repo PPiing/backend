@@ -26,8 +26,8 @@ jobs:
         run: npm run build
       - name: 단위 테스트 체크
         run: npm run test
-      - name: 통합 테스트 체크
-        run: npm run test:e2e
+      # - name: 통합 테스트 체크
+      #   run: npm run test:e2e
 
   CD:
     if: github.ref == 'refs/heads/main'
