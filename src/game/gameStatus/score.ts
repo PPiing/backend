@@ -7,7 +7,6 @@ import { GameStatus } from '../dto/in-game.dto';
  * @param game game data
  */
 function resetBallAndPaddle(game: GameData) {
-  this.logger.debug('resetBallAndPaddle');
   const { inGameData: { ball, paddleBlue, paddleRed } } = game;
 
   paddleBlue.position.y = 0;

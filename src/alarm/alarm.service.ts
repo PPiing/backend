@@ -1,8 +1,10 @@
 import {
   CACHE_MANAGER, Inject, Injectable, UnauthorizedException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cache } from 'cache-manager';
 import { Socket } from 'socket.io';
+import Alarm from 'src/entities/alarm.entity';
 import AlarmCode from 'src/enums/mastercode/alarm-code.enum';
 import AlarmType from 'src/enums/mastercode/alarm-type.enum';
 import { AlarmResponseDto } from './dto/alarm-response.dto';
@@ -12,6 +14,7 @@ import AlarmRepository from './repository/alarm.repository';
 export class AlarmService {
   constructor(
     private alarmRepository: AlarmRepository,
+    private eventRunner: EventEmitter2,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
 
@@ -138,6 +141,19 @@ export class AlarmService {
   }
 
   /**
+   * 알람을 가져옵니다.
+   *
+   * @param alarmSeq 알람 ID
+   */
+  async getAlarmBySeq(alarmSeq: number): Promise<Alarm> {
+    const result = await this.alarmRepository.findOne(alarmSeq);
+    if (!result) {
+      throw new UnauthorizedException('권한이 없습니다.');
+    }
+    return result;
+  }
+
+  /**
    * 알람을 읽음 처리합니다.
    *
    * @param alarmSeq 알람 ID
@@ -159,5 +175,7 @@ export class AlarmService {
     if (!result) {
       throw new UnauthorizedException('권한이 없습니다.');
     }
+    // for refreshing alarm.
+    this.eventRunner.emit('alarm:refresh', who);
   }
 }

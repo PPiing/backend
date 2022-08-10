@@ -49,6 +49,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param client 서버에 접속하는 클라이언트
    */
   handleConnection(client: any) {
+    this.logger.debug('try to connect');
     const isLogin = client.request.isAuthenticated();
     if (!isLogin) {
       client.disconnect();
@@ -84,17 +85,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
   }
 
-  // TODO(jinbe): 게임초대
-  //
-  // TODO(jinbe): 초대 수락 & 게임생성
-
   @UseGuards(SocketGuard)
   @SubscribeMessage('enQ')
   async handleEnqueue(client: any, ruleData: RuleDto) {
     const { userSeq } = client.request.user;
 
     this.logger.debug(`user ${userSeq} enqueued`);
-    return this.gameService.handleEnqueue(client.request.user, ruleData);
+    return this.gameService.handleEnqueue(client.request.session.passport.user, ruleData);
   }
 
   @UseGuards(SocketGuard)
@@ -122,10 +119,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       redUser: metaData?.playerRed?.nickName,
     });
     /** join in gameRoom */
-    this.server.in(players).socketsJoin(playerBlue?.roomId);
-
-    playerRed.roomId = metaData.roomId;
-    playerBlue.roomId = metaData.roomId;
+    this.server.in(players).socketsJoin(metaData.roomId);
   }
 
   /**
@@ -155,6 +149,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   // }
 
   /**
+   *  TTTTTTTTEEEEEEEESSSSSSSSTTTTTt
    * 자신의 패들의 움직임 방향을 바꾼다.
    * @param client 유저 소켓
    * @param data paddle의 움직임 방향

@@ -20,4 +20,6 @@ export class UserDto {
   createdAt: Date;
 
   is_login: string;
+
+  roomId?: string;
 }

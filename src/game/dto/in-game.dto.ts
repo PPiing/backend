@@ -65,8 +65,8 @@ export class InGameData {
       y: 0,
     },
     velocity: {
-      x: 0,
-      y: 1,
+      x: 0.8,
+      y: 0.2,
     },
   };
 
