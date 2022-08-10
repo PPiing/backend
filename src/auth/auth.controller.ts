@@ -31,9 +31,12 @@ export class AuthController {
   })
   @Get('login/callback')
   @UseGuards(FtGuard)
-  callback(@Req() req: any, @Res() res: any) {
-    if (!this.authService.isSecAuthStatus(req.user)) {
-      this.authService.setIsLogin(req.sessionID, 'Y');
+  callback(
+  @User() user: UserDto,
+    @Res() res: any,
+  ) {
+    if (!this.authService.isSecAuthStatus(user)) {
+      this.authService.setIsLogin(user, 'Y');
       res.redirect('../../../');
       return;
     }
@@ -47,9 +50,11 @@ export class AuthController {
   @Get('logout')
   @UseGuards(CheckLogin)
   @Redirect('../../../', 302)
-  logout(@Req() req: any) {
-    this.authService.setIsLogin(req.sessionID, 'N');
-
+  logout(
+  @User() user: UserDto,
+    @Req() req: any,
+  ) {
+    this.authService.setIsLogin(user, 'N');
     req.logout((err) => {
       if (err) {
         this.logger.error(err);
@@ -62,7 +67,6 @@ export class AuthController {
     description: '2FA 인증 여부를 true/false로 리턴하며 인증 메일을 송부합니다.',
   })
   @Get('twofactor/check')
-  @UseGuards(CheckLogin)
   async checkFactor(
     @User() user: UserDto,
   ):Promise<boolean> {
