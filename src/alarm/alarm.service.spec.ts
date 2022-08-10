@@ -1,4 +1,5 @@
 import { CacheModule } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { TestingModule, Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AlarmService } from './alarm.service';
@@ -19,6 +20,7 @@ describe('AlarmService 테스트', () => {
     const app: TestingModule = await Test.createTestingModule({
       imports: [
         CacheModule.register({ ttl: 0 }),
+        EventEmitterModule.forRoot(),
       ],
       providers: [
         AlarmService,
