@@ -10,8 +10,8 @@ export class FriendsRepository extends Repository<Friends> {
     : Promise<Friends | undefined> {
     const friend = await this.findOne({
       where: {
-        followerSeq: userSeq,
-        followeeSeq: target,
+        followerSeq: target,
+        followeeSeq: userSeq,
         status,
       },
     });
@@ -52,6 +52,7 @@ export class FriendsRepository extends Repository<Friends> {
     newFriend.status = RelationStatus.FRST10;
 
     await this.save(friend);
+    await this.save(newFriend);
   }
 
   async rejectFriend(userSeq: number, target: number) {

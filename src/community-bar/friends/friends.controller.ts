@@ -100,7 +100,6 @@ export class FriendsController {
     @Param('target') target: number,
   ) {
     this.logger.log(`친구 요청 - 수락: ${user.userSeq} 가 ${target} 의 친구요정을 수락하였습니다.`);
-
     const check = await this.userProfileService.checkUser(user.userSeq);
     if (!check) {
       throw new Error('유저 정보가 존재하지 않습니다.');
