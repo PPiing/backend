@@ -67,7 +67,6 @@ export class AuthController {
     description: '2FA 인증 여부를 true/false로 리턴하며 인증 메일을 송부합니다.',
   })
   @Get('twofactor/check')
-  @UseGuards(CheckLogin)
   async checkFactor(
     @User() user: UserDto,
   ):Promise<boolean> {
