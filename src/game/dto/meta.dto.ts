@@ -3,13 +3,13 @@ import {
   IsNumber,
   IsObject, IsString,
 } from 'class-validator';
-import { GameSession } from './game-session.dto';
+import { UserDto } from 'src/user/dto/user.dto';
 
 export class MetaData {
   constructor(
     roomId: string,
-    playerBlue: GameSession,
-    playerRed: GameSession,
+    playerBlue: UserDto,
+    playerRed: UserDto,
     isRankGame: boolean,
   ) {
     this.roomId = roomId;
@@ -25,10 +25,10 @@ export class MetaData {
     roomId: string;
 
   @IsObject()
-    playerBlue: GameSession;
+    playerBlue: UserDto;
 
   @IsObject()
-    playerRed: GameSession;
+    playerRed: UserDto;
 
   @IsBoolean()
     isRankGame: boolean;

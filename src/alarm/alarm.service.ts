@@ -1,6 +1,7 @@
 import {
   CACHE_MANAGER, Inject, Injectable, UnauthorizedException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cache } from 'cache-manager';
 import { Socket } from 'socket.io';
 import Alarm from 'src/entities/alarm.entity';
@@ -13,6 +14,7 @@ import AlarmRepository from './repository/alarm.repository';
 export class AlarmService {
   constructor(
     private alarmRepository: AlarmRepository,
+    private eventRunner: EventEmitter2,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
 
@@ -173,5 +175,7 @@ export class AlarmService {
     if (!result) {
       throw new UnauthorizedException('권한이 없습니다.');
     }
+    // for refreshing alarm.
+    this.eventRunner.emit('alarm:refresh', who);
   }
 }

@@ -1,11 +1,12 @@
 import {
-  Controller, HttpCode, Param, Post, Put, Req,
+  Controller, HttpCode, Param, Post, Put, UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { AlarmService } from 'src/alarm/alarm.service';
 import { User } from 'src/auth/user.decorator';
 import AlarmCode from 'src/enums/mastercode/alarm-code.enum';
 import AlarmType from 'src/enums/mastercode/alarm-type.enum';
+import { CheckLogin } from 'src/guards/check-login.guard';
 import { UserDto } from 'src/user/dto/user.dto';
 import { GameService } from './game.service';
 
@@ -29,6 +30,7 @@ export default class GameController {
   @ApiParam({
     name: 'player', type: Number, example: 1, description: '초대할 사용자 Seq',
   })
+  @UseGuards(CheckLogin)
   @Post('invite/:playerSeq')
   @HttpCode(204)
   async invitePlayer(@User() user: UserDto, @Param('playerSeq') player: number) {
@@ -38,6 +40,10 @@ export default class GameController {
   /**
    * 게임 초대를 수락합니다. alarm 정보를 수정하고 방을 생성합니다.
    */
+  @ApiOperation({ summary: '초대 수락', description: '받은 게임 요청을 수학합니다.' })
+  @ApiResponse({ status: 200, description: '초대 성공' })
+  @ApiResponse({ status: 404, description: 'player의 seq가 유효하지 않은 경우' })
+  @UseGuards(CheckLogin)
   @Put('accept/:alarmSeq')
   async acceptInvite(@Param('alarmSeq') alarmSeq: number) {
     return this.gameService.handleAcceptInvite(alarmSeq);
@@ -46,8 +52,12 @@ export default class GameController {
   // TODO(jinbekim)
   // TODO(jinbekim)
   // TODO(jinbekim)
-  @Put()
-  async rejectInvite() {
-    return this.alarmService.deleteAlarm();
+  @ApiOperation({ summary: '초대 거절', description: '받은 게임 요청을 거절합니다.' })
+  @ApiResponse({ status: 200, description: '초대 거절' })
+  @ApiResponse({ status: 403, description: '거절에 실패할 경우.' })
+  @UseGuards(CheckLogin)
+  @Put('reject/:alarmSeq')
+  async rejectInvite(@Param('alarmSeq') alarmSeq: number, @User() user: UserDto) {
+    return this.alarmService.deleteAlarm(alarmSeq, user.userSeq);
   }
 }
