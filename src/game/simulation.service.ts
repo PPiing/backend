@@ -159,11 +159,16 @@ export class SimulationService {
   ) {
     this.logger.debug('TEST!!!! TEST!! moved paddle');
     const { metaData, inGameData } = this.games.get(roomId);
-    if (!metaData || !inGameData) return;
+    if (!metaData || !inGameData) {
+      this.logger.debug('no metadata || no ingamedata');
+      return;
+    }
     if (metaData.playerBlue.userId.toString() === userId) {
+      this.logger.debug('blue player changed velocity toward', direction);
       inGameData.paddleBlue.velocity.y = direction;
     }
     if (metaData.playerRed.userId.toString() === userId) {
+      this.logger.debug('red player changed velocity toward', direction);
       inGameData.paddleRed.velocity.y = direction;
     }
   }
