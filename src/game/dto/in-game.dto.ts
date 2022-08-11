@@ -44,7 +44,7 @@ export class InGameData {
     },
     velocity: {
       x: 0,
-      y: 1,
+      y: 0,
     },
   };
 
@@ -55,7 +55,7 @@ export class InGameData {
     },
     velocity: {
       x: 0,
-      y: 1,
+      y: 0,
     },
   };
 

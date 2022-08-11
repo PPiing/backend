@@ -27,7 +27,7 @@ export class SpecData {
   paddle: Paddle = {
     width: 10, // base width * option.scale (default: 1), 0.5, 1.5;
     height: 100,
-    speed: 10,
+    speed: 1,
   };
 
   ball: Ball = {
