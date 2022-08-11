@@ -108,8 +108,8 @@ export class SimulationService {
     tmp.ruleData = new RuleDto();
     tmp.metaData = new MetaData(
       client.id,
-      client.request.session,
-      client.request.session,
+      client.request.session.passport.user,
+      client.request.session.passport.user,
       tmp.ruleData.isRankGame,
     );
     this.games.set(client.id, tmp);
