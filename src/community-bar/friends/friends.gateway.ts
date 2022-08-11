@@ -4,6 +4,7 @@ import {
   OnGatewayConnection, OnGatewayDisconnect, WebSocketGateway, WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { SessionMiddleware } from 'src/session-middleware';
 import { FriendsService } from './friends.service';
 
 @WebSocketGateway({ namespace: 'friends' })
@@ -14,10 +15,23 @@ export class FriendsGateway implements OnGatewayConnection, OnGatewayDisconnect 
   private server: Server;
 
   constructor(
+    private sessionMiddleware: SessionMiddleware,
     private frinedsService: FriendsService,
   ) {}
 
+  afterInit(server: any) {
+    const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next);
+    server.use(wrap(this.sessionMiddleware.expressSession));
+    server.use(wrap(this.sessionMiddleware.passportInit));
+    server.use(wrap(this.sessionMiddleware.passportSession));
+  }
+
   async handleConnection(client: any) {
+    const isLogin = client.request.isAuthenticated();
+    if (!isLogin) {
+      client.disconnect();
+      return;
+    }
     const { userSeq } = client.request.user;
     await this.frinedsService.onlineUserAdd(client, userSeq);
   }
