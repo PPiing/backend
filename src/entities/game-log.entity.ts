@@ -17,10 +17,12 @@ export default class GameLog {
 
   @ManyToOne(() => User)
   @JoinColumn()
+  @Column()
     blueUserSeq: number;
 
   @ManyToOne(() => User)
   @JoinColumn()
+  @Column()
     redUserSeq: number;
 
   @Column()
@@ -30,6 +32,7 @@ export default class GameLog {
     redUserName: string;
 
   @ManyToOne(() => User)
+  @Column()
     winnerSeq: number;
 
   @Column({ default: 0 })

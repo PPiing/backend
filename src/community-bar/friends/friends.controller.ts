@@ -11,6 +11,7 @@ import { UserProfileService } from 'src/profile/user-profile.service';
 import { UserService } from 'src/user/user.service';
 import AlarmCode from 'src/enums/mastercode/alarm-code.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { AlarmService } from 'src/alarm/alarm.service';
 import { FriendsService } from './friends.service';
 import { GetFriendsDto } from './dto/get-friends.dto';
 
@@ -25,6 +26,7 @@ export class FriendsController {
     private readonly userProfileService: UserProfileService,
     private readonly userService: UserService,
     private readonly eventEitter : EventEmitter2,
+    private readonly alarmService: AlarmService,
   ) {}
 
   /**
