@@ -7,6 +7,7 @@ import { FriendsService } from './friends.service';
 import { FriendsController } from './friends.controller';
 import { FriendsRepository } from './repository/friends.repository';
 import { FriendsGateway } from './friends.gateway';
+import { AppModule } from 'src/app.module';
 
 @Module({
   imports: [

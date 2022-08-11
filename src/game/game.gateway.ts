@@ -156,9 +156,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   @UseGuards(SocketGuard)
   @SubscribeMessage('game:paddle')
-  handlePaddleTestControl(client: any, data: { direction: PaddleDirective }) {
-    this.logger.debug(`user ${client.request.user.userSeq} moved paddle ${data}`);
-    this.gameService.handleTestPaddle(client.id, client.id, data.direction);
+  handlePaddleTestControl(client: any, data: number) {
+    this.gameService.handleTestPaddle(client.id, client.id, data);
   }
 
   @SubscribeMessage('test:render')
