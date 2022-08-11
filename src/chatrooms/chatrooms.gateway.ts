@@ -7,6 +7,7 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import PartcAuth from 'src/enums/mastercode/partc-auth.enum';
@@ -59,7 +60,7 @@ export class ChatroomsGateway implements OnGatewayInit, OnGatewayConnection, OnG
     const isLogin = client.request.isAuthenticated();
     if (!isLogin) {
       client.disconnect();
-      throw new Error('Auth Error');
+      throw new WsException('Auth Error');
     }
     const { userSeq } = client.request.user;
     const userID = userSeq;
