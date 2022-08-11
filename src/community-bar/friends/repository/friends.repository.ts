@@ -46,8 +46,8 @@ export class FriendsRepository extends Repository<Friends> {
     }
     friend.status = RelationStatus.FRST10;
     const newFriend = new Friends();
-    newFriend.followerSeq = target;
-    newFriend.followeeSeq = userSeq;
+    newFriend.followerSeq = userSeq;
+    newFriend.followeeSeq = target;
     newFriend.isBlocked = false;
     newFriend.status = RelationStatus.FRST10;
 
