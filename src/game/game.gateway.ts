@@ -106,6 +106,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @OnEvent('game:ready')
   handleMatch(gameData: GameData) {
     this.logger.debug('game:ready');
+    console.log(gameData);
     const { ruleData, metaData, metaData: { playerBlue, playerRed } } = gameData;
     const players = [
       playerBlue?.userSeq?.toString(),
@@ -120,6 +121,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     });
     /** join in gameRoom */
     this.server.in(players).socketsJoin(metaData.roomId);
+  }
+
+  @OnEvent('game:testready')
+  testhandleMatch(gameData: GameData) {
+    this.logger.debug('game:ready');
+    console.log(gameData);
+    const { ruleData, metaData, metaData: { playerBlue, playerRed } } = gameData;
+
+    /** emit match data */
+    this.server.to(metaData.roomId).emit('game:ready', {
+      ruleData,
+      blueUser: metaData?.playerBlue?.nickName,
+      redUser: metaData?.playerRed?.nickName,
+    });
   }
 
   /**
