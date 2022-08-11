@@ -5,19 +5,18 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import UserStatus from 'src/enums/mastercode/user-status.enum';
+import { SessionMiddleware } from 'src/session-middleware';
 import { StatusService } from './status.service';
 
 @WebSocketGateway({
-  cors: {
-    origin: '*',
-  },
-  namespace: '',
+  namespace: 'status',
 })
 
 export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(StatusGateway.name);
 
   constructor(
+    private sessionMiddleware: SessionMiddleware,
     private readonly statusService: StatusService,
   ) { }
 
@@ -25,19 +24,40 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
     server: Server;
 
   /**
+   * 소켓에도 세션을 적용하기 위한 미들웨어 적용
+   *
+   * @param server 소켓 서버측 객체
+   */
+  afterInit(server: any) {
+    const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next);
+    server.use(wrap(this.sessionMiddleware.expressSession));
+    server.use(wrap(this.sessionMiddleware.passportInit));
+    server.use(wrap(this.sessionMiddleware.passportSession));
+  }
+
+  /**
    * 처음 socket이 연결되었을 때
    * NOTE : 연결 시 유저의 정보를 전달해주어야함 (userSeq)
    *
    * @param client 연결된 client socket
    */
-  async handleConnection(client: Socket) {
+  async handleConnection(client: any) {
     this.logger.debug(`Client connected: ${client.id}`);
 
-    // 서버에 client의 정보와 현재 상태를 master code 기반으로 저장
-    const userSeq = Number(client.handshake.query.userSeq);
-    if (userSeq === undefined) { // 유저정보가 없을 경우
-      this.logger.error(`Client connected: ${client.id}`);
+    const isLogin = client.request.isAuthenticated();
+    if (!isLogin) {
+      client.disconnect();
+      return;
     }
+
+    const { userSeq } = client.request.user;
+    await this.statusService.onlineUserAdd(client, userSeq);
+
+    // 서버에 client의 정보와 현재 상태를 master code 기반으로 저장
+    // const userSeq = Number(client.handshake.query.userSeq);
+    // if (userSeq === undefined) { // 유저정보가 없을 경우
+    //   this.logger.error(`Client connected: ${client.id}`);
+    // }
 
     // NOTE: 마소터코드로 보낼 것인가?
     const friendsList: string[] = await this.statusService.getFriends(userSeq);
@@ -55,10 +75,13 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
    *
    * @param client 연결을 종료한 client socket
    */
-  async handleDisconnect(client: Socket) {
+  async handleDisconnect(client: any) {
     this.logger.debug(`Client disconnected: ${client.id}`);
 
-    const userSeq: number = await this.statusService.getUserSeq(client);
+    // const userSeq: number = await this.statusService.getUserSeq(client);
+    const { userSeq } = client.request.user;
+    await this.statusService.onlineUserRemove(client, userSeq);
+
     const friendsList: string[] = await this.statusService.getFriends(userSeq);
     client.to(friendsList).emit('status_update', {
       userSeq,

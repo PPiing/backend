@@ -18,6 +18,41 @@ export class StatusService {
   ) { }
 
   /**
+   * 사용자 접속 시 캐시에 userSeq, 소켓 ID를 저장합니다.
+   *
+   * @param userSocket 잡속한 사용자 소켓 ID
+   * @param userSeq 접속 사용자 시퀀스
+   */
+  async onlineUserAdd(userSocket: Socket, userSeq: number): Promise<void> {
+    const key = `StatusService-userID-${userSeq}`;
+    const value: undefined | Array<string> = await this.cacheManager.get(key);
+    if (value === undefined) {
+      await this.cacheManager.set(key, [userSocket.id]);
+    } else {
+      await this.cacheManager.set(key, [...value, userSocket.id]);
+    }
+  }
+
+  /**
+   * 사용자 접속이 끊기면 캐시에서 사용자의 리스트를 제거합니다.
+   *
+   * @param userSocket 접속한 사용자 소켓 ID
+   * @param userSeq 접속이 끊긴 사용자 시퀀스
+   */
+  async onlineUserRemove(userSocket: Socket, userSeq: number): Promise<void> {
+    const key = `StatusService-userID-${userSeq}`;
+    const value: undefined | Array<string> = await this.cacheManager.get(key);
+    if (value) {
+      const newValue = value.filter((v) => v !== userSocket.id);
+      if (newValue.length > 0) {
+        await this.cacheManager.set(key, newValue);
+      } else {
+        await this.cacheManager.del(key);
+      }
+    }
+  }
+
+  /**
    * 처음 접속했을 때
    * client의 정보와 현재의 상태를 online으로 저장한다.
    *
