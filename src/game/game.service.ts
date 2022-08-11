@@ -146,7 +146,7 @@ export class GameService {
    * @param userId 유저 아이디
    * @param cmd 패들 움직임 명령
    */
-  handleTestPaddle(roomId: string, userId: string, cmd: PaddleDirective) {
+  handleTestPaddle(roomId: string, userId: string, cmd: number) {
     this.logger.debug(`handleTestPaddle(roomId: ${roomId}, userId: ${userId})`);
     this.simulator.handleTestPaddle(roomId, userId, cmd);
   }

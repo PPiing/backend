@@ -33,8 +33,6 @@ export const calculatePaddleDisplacement = (game: GameData): PaddleDisplacement 
     displacement.dRed -= finalRedTop - ((halfArenaHeight) * -1);
   }
   if (finalRedBtm > (halfArenaHeight)) displacement.dRed -= finalRedBtm - (halfArenaHeight);
-  console.log(finalBlueBtm, finalBlueTop);
-  console.log(finalRedBtm, finalRedTop);
   return displacement;
 };
 

@@ -9,6 +9,6 @@ import { GameData } from '../dto/game-data';
  */
 export default function readyToStart(gameData: GameData) {
   const { inGameData: { frame } } = gameData;
-  if (frame > 800) return true;
+  if (frame > 500) return true;
   return false;
 }
