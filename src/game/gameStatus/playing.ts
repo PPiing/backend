@@ -11,7 +11,6 @@ export default function handlePlaying(gameData: GameData) {
   /** calculatePaddleDisplacement and add it to the position */
 
   const { dBlue, dRed }: PaddleDisplacement = calculatePaddleDisplacement(gameData);
-  console.log('dblue, dred', dBlue, dRed);
   inGameData.paddleBlue.position.y += dBlue;
   inGameData.paddleRed.position.y += dRed;
 
