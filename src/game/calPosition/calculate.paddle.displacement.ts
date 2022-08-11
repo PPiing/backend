@@ -26,6 +26,7 @@ export const calculatePaddleDisplacement = (game: GameData) => {
   const finalRedBtm = paddleRed.position.y + halfPaddleHeight + dRed;
   if (finalRedTop < (ARENA.height / 2) * -1) dRed = finalRedTop - ((ARENA.height / 2) * -1);
   if (finalRedBtm > (ARENA.height / 2)) dRed = finalRedBtm - (ARENA.height / 2);
+
   return {
     dBlue, dRed,
   };
