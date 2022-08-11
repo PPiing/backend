@@ -114,7 +114,7 @@ export class SimulationService {
     );
     this.games.set(client.id, tmp);
     this.addInterval(tmp.metaData.roomId, tmp, 17);
-    this.eventRunner.emit('game:ready', tmp);
+    this.eventRunner.emit('game:testready', tmp);
   }
 
   /**
