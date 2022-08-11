@@ -1,7 +1,11 @@
 import { Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import {
-  OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, WebSocketGateway, WebSocketServer, WsException,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
+  WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { SessionMiddleware } from 'src/session-middleware';
@@ -35,7 +39,7 @@ export class FriendsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     const isLogin = client.request.isAuthenticated();
     if (!isLogin) {
       client.disconnect();
-      return ;
+      return;
     }
     const { userSeq } = client.request.user;
     await this.frinedsService.onlineUserAdd(client, userSeq);
