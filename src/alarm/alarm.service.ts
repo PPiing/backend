@@ -98,6 +98,7 @@ export class AlarmService {
     alarmCode: AlarmCode,
   ) : Promise<void> {
     await this.alarmRepository.createAlarm(senderSeq, receiverSeq, alarmType, alarmCode);
+    this.eventRunner.emit('alarm:refresh');
   }
 
   /**
