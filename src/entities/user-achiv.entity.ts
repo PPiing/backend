@@ -1,5 +1,5 @@
 import {
-  Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn,
+  Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Column,
 } from 'typeorm';
 import Achiv from './achiv.entity';
 import User from './user.entity';
@@ -11,9 +11,11 @@ export default class UserAchiv {
 
   @ManyToOne(() => User, (user) => user.userSeq)
   @JoinColumn({ name: 'userSeq' })
+  @Column()
     userSeq: number; // 유저 엔티티
 
   @ManyToOne(() => Achiv, (achiv) => achiv.achivSeq)
   @JoinColumn({ name: 'achivSeq' })
+  @Column()
     achivSeq: number; // 업적 엔티티
 }
