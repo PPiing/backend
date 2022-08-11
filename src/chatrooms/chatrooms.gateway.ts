@@ -60,7 +60,7 @@ export class ChatroomsGateway implements OnGatewayInit, OnGatewayConnection, OnG
     const isLogin = client.request.isAuthenticated();
     if (!isLogin) {
       client.disconnect();
-      throw new WsException('Auth Error');
+      return ;
     }
     const { userSeq } = client.request.user;
     const userID = userSeq;

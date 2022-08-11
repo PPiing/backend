@@ -35,7 +35,7 @@ export class FriendsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     const isLogin = client.request.isAuthenticated();
     if (!isLogin) {
       client.disconnect();
-      throw new WsException('Auth Error');
+      return ;
     }
     const { userSeq } = client.request.user;
     await this.frinedsService.onlineUserAdd(client, userSeq);
