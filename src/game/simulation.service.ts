@@ -161,10 +161,10 @@ export class SimulationService {
     const { metaData, inGameData } = this.games.get(roomId);
     if (!metaData || !inGameData) return;
     if (metaData.playerBlue.userId.toString() === userId) {
-      inGameData.paddleBlue.velocity.x = direction;
+      inGameData.paddleBlue.velocity.y = direction;
     }
     if (metaData.playerRed.userId.toString() === userId) {
-      inGameData.paddleRed.velocity.x = direction;
+      inGameData.paddleRed.velocity.y = direction;
     }
   }
 }
