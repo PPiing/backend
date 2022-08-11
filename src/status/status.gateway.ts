@@ -53,12 +53,6 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { userSeq } = client.request.user;
     await this.statusService.onlineUserAdd(client, userSeq);
 
-    // 서버에 client의 정보와 현재 상태를 master code 기반으로 저장
-    // const userSeq = Number(client.handshake.query.userSeq);
-    // if (userSeq === undefined) { // 유저정보가 없을 경우
-    //   this.logger.error(`Client connected: ${client.id}`);
-    // }
-
     // NOTE: 마소터코드로 보낼 것인가?
     const friendsList: string[] = await this.statusService.getFriends(userSeq);
     client.to(friendsList).emit('status_update', {
@@ -78,7 +72,6 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleDisconnect(client: any) {
     this.logger.debug(`Client disconnected: ${client.id}`);
 
-    // const userSeq: number = await this.statusService.getUserSeq(client);
     const { userSeq } = client.request.user;
     await this.statusService.onlineUserRemove(client, userSeq);
 
