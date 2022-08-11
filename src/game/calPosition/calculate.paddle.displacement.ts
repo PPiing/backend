@@ -19,13 +19,13 @@ export const calculatePaddleDisplacement = (game: GameData) => {
 
   const finalBlueTop = paddleBlue.position.y - halfPaddleHeight + dBlue;
   const finalBlueBtm = paddleBlue.position.y + halfPaddleHeight + dBlue;
-  if (finalBlueTop < (ARENA.height / 2) * -1) dBlue -= finalBlueTop - ((ARENA.height / 2) * -1);
-  if (finalBlueBtm > (ARENA.height / 2)) dBlue -= finalBlueBtm - (ARENA.height / 2);
+  if (finalBlueTop < (ARENA.height / 2) * -1) dBlue = finalBlueTop - ((ARENA.height / 2) * -1);
+  if (finalBlueBtm > (ARENA.height / 2)) dBlue = finalBlueBtm - (ARENA.height / 2);
 
   const finalRedTop = paddleRed.position.y - halfPaddleHeight + dRed;
   const finalRedBtm = paddleRed.position.y + halfPaddleHeight + dRed;
-  if (finalRedTop < (ARENA.height / 2) * -1) dRed -= finalRedTop - ((ARENA.height / 2) * -1);
-  if (finalRedBtm > (ARENA.height / 2)) dRed -= finalRedBtm - (ARENA.height / 2);
+  if (finalRedTop < (ARENA.height / 2) * -1) dRed = finalRedTop - ((ARENA.height / 2) * -1);
+  if (finalRedBtm > (ARENA.height / 2)) dRed = finalRedBtm - (ARENA.height / 2);
 
   return {
     dBlue, dRed,

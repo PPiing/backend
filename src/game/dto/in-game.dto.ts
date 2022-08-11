@@ -71,12 +71,12 @@ export class InGameData {
   };
 
   get renderData(): RenderData {
-    this.ball.position.x = Math.round(this.ball.position.x);
-    this.ball.position.y = Math.round(this.ball.position.y);
-    this.paddleBlue.position.x = Math.round(this.paddleBlue.position.x);
-    this.paddleBlue.position.y = Math.round(this.paddleBlue.position.y);
-    this.paddleRed.position.x = Math.round(this.paddleRed.position.x);
-    this.paddleRed.position.y = Math.round(this.paddleRed.position.y);
+    Math.round(this.ball.position.x);
+    Math.round(this.ball.position.y);
+    Math.round(this.paddleBlue.position.x);
+    Math.round(this.paddleBlue.position.y);
+    Math.round(this.paddleRed.position.x);
+    Math.round(this.paddleRed.position.y);
 
     return {
       ball: this.ball.position,
