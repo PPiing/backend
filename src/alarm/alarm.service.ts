@@ -97,8 +97,18 @@ export class AlarmService {
     alarmType: AlarmType,
     alarmCode: AlarmCode,
   ) : Promise<void> {
-    // TODO: check sam type and same user alarm curruntly presence
-    await this.alarmRepository.createAlarm(senderSeq, receiverSeq, alarmType, alarmCode);
+    const presence = await this.alarmRepository.findOne({
+      where: {
+        senderSeq,
+        receiverSeq,
+        alarmType,
+        alarmCode,
+        read: false,
+      },
+    });
+    if (!presence) {
+      await this.alarmRepository.createAlarm(senderSeq, receiverSeq, alarmType, alarmCode);
+    }
     this.eventRunner.emit('alarm:refresh');
   }
 
