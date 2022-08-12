@@ -166,6 +166,11 @@ export class FriendsController {
     this.eventEitter.emit('friends:update', user.userSeq, target);
   }
 
+  /**
+   * 친구를 블락 합니다.
+   *
+   * @param target 블락할 유저
+   */
   @ApiOperation({ summary: '블락 요청', description: '요청 상대를 블락합니다.' })
   @ApiResponse({ status: 200, description: '블락 요청 성공' })
   @ApiResponse({ status: 400, description: '블락 요청 실패' })
@@ -188,6 +193,11 @@ export class FriendsController {
     await this.friendsService.blockFriend(user.userSeq, target);
   }
 
+   /**
+   * 블락된 친구를 해지 합니다.
+   *
+   * @param target 블락해지할 유저
+   */
   @ApiOperation({ summary: '블락 해지 요청', description: '요청 상대를 블락 해지합니다.' })
   @ApiResponse({ status: 200, description: '블락 해지 요청 성공' })
   @ApiResponse({ status: 400, description: '블락 해지 요청 실패' })

@@ -4,6 +4,7 @@ import RelationStatus from 'src/enums/mastercode/relation-status.enum';
 import { ProfileRelation } from 'src/enums/profile-relation.enum';
 import { EntityRepository, Repository } from 'typeorm';
 
+
 @EntityRepository(Friends)
 export class FriendsRepository extends Repository<Friends> {
   async findFriend(userSeq: number, target: number, status: RelationStatus)
@@ -30,6 +31,14 @@ export class FriendsRepository extends Repository<Friends> {
   }
 
   async requestFriend(userSeq: number, target: number) {
+    const check = await this.findFriend(userSeq, target, RelationStatus.FRST30);
+    if (check) {
+      throw new Error('해당 친구에게 차단당한 상태입니다');
+    }
+    const youCheck = await this.findFriend(target, userSeq, RelationStatus.FRST30);
+    if (youCheck) {
+      throw new Error('해당 친구를 차단된 상태입니다');
+    }
     const friend = new Friends();
     friend.followerSeq = userSeq;
     friend.followeeSeq = target;
@@ -117,10 +126,13 @@ export class FriendsRepository extends Repository<Friends> {
       newFriend.status = RelationStatus.FRST30;
 
       await this.save(newFriend);
-    } else {
+    } else { //내가 친구를 차단하면 친구에겐 내가 안보이게 됨(친구에서 나 차단아님)
       friend.isBlocked = true;
-
+      friend.status = RelationStatus.FRST30;
+      const another = await this.findFriend(userSeq, target, RelationStatus.FRST10);
+      another.status = RelationStatus.FRST40;
       await this.save(friend);
+      await this.save(another);
     }
   }
 
@@ -129,13 +141,15 @@ export class FriendsRepository extends Repository<Friends> {
       where: {
         followerSeq: userSeq,
         followeeSeq: target,
+        isBlocked: true,
+        status: RelationStatus.FRST30,
       },
     });
     if (friend === undefined) {
       throw new BadRequestException(`${userSeq} 와 ${target} 은 block 상태가 아닙니다.`);
     } else {
       friend.isBlocked = false;
-
+      friend.status = RelationStatus.FRST40;
       await this.save(friend);
     }
   }
