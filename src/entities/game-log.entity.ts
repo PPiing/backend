@@ -33,7 +33,7 @@ export default class GameLog {
 
   @ManyToOne(() => User)
   @Column()
-    winnerSeq: number;
+    winnerSeq?: number;
 
   @Column({ default: 0 })
     blueScore: number;

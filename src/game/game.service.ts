@@ -44,8 +44,8 @@ export class GameService {
     return this.games.get(roomId);
   }
 
-  async handleEnqueue(client: UserDto, ruleData: RuleDto) {
-    this.logger.debug(`user client: ${client.userId} and ruleData: ${ruleData}`);
+  async handleEnqueue(client: any, ruleData: RuleDto) {
+    this.logger.debug(`user client: ${client.request.user.userSeq} and ruleData: ${ruleData}`);
     const matchedPlayers = await this.gameQueue.enQueue(client, ruleData);
     this.logger.debug('enqueue reusult', matchedPlayers);
     /** if not matched return */
@@ -53,7 +53,7 @@ export class GameService {
     await this.createGame(matchedPlayers);
   }
 
-  handleDequeue(client: UserDto, ruleData: RuleDto) {
+  handleDequeue(client: any, ruleData: RuleDto) {
     this.logger.debug('handleDequeue', ruleData);
     return this.gameQueue.deQueue(client, ruleData);
   }
@@ -76,7 +76,7 @@ export class GameService {
   /**
    * 일반적인 큐 시스템을 이용해서 매칭 되었을 경우에 매치 후 방을 생성한다.
    */
-  async createGame(matchedPlayers: [UserDto, RuleDto][]) {
+  async createGame(matchedPlayers: [any, RuleDto][]) {
     this.logger.debug('createGame(matchedPlayers): creating');
 
     /** after Matching players */
@@ -87,14 +87,17 @@ export class GameService {
     /** save in session, 저장 잘 안되면 인자로 userdto말고 세션 통째로 가져와야함.
      * session에 roomid 저장
     */
-    bluePlayer.roomId = newRoomId;
-    redPlayer.roomId = newRoomId;
+    console.log('requeset', bluePlayer.request);
+    bluePlayer.request.session.passport.user.roomId = newRoomId;
+    redPlayer.request.session.passport.user.roomId = newRoomId;
+    await bluePlayer.request.session.save();
+    await redPlayer.request.session.save();
 
     /** metaData */
     newGame.metaData = new MetaData(
       newRoomId,
-      bluePlayer,
-      redPlayer,
+      bluePlayer.request.session.passport.user,
+      redPlayer.request.session.passport.user,
       blueRule.isRankGame,
     );
 
@@ -109,8 +112,8 @@ export class GameService {
     /** inGameData */
     newGame.inGameData = new InGameData();
     this.games.set(newGame.metaData.roomId, newGame);
-    this.users.set(bluePlayer.userSeq, newRoomId);
-    this.users.set(redPlayer.userSeq, newRoomId);
+    this.users.set(bluePlayer.request.session.passport.user.userSeq, newRoomId);
+    this.users.set(redPlayer.request.session.passport.user.userSeq, newRoomId);
 
     /** add gameData into simulator */
     await this.simulator.initBeforeStartGame(newGame);

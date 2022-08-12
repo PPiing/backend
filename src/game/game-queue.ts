@@ -1,16 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { UserDto } from 'src/user/dto/user.dto';
 import { RuleDto } from './dto/rule.dto';
 
 @Injectable()
 export class GameQueue {
   private readonly logger: Logger = new Logger('GameQueue');
 
-  private normalQueue: Array<[UserDto, RuleDto]> = [];
+  private normalQueue: Array<[any, RuleDto]> = [];
 
-  private ladderQueue: Array<[UserDto, RuleDto]> = [];
+  private ladderQueue: Array<[any, RuleDto]> = [];
 
-  enQueue(client: UserDto, enqueueData: RuleDto) {
+  enQueue(client: any, enqueueData: RuleDto) {
     this.logger.debug(client);
     console.log(client, enqueueData);
     const { isRankGame } = enqueueData;
@@ -21,7 +20,7 @@ export class GameQueue {
     return this.addToNormalQueue(client, enqueueData);
   }
 
-  deQueue(client:UserDto, dequeueData: RuleDto) {
+  deQueue(client:any, dequeueData: RuleDto) {
     this.logger.debug(client);
     const { isRankGame } = dequeueData;
 
@@ -31,40 +30,40 @@ export class GameQueue {
     return this.removeFromNormalQueue(client, dequeueData);
   }
 
-  private async addToNormalQueue(client: UserDto, enqueueData: RuleDto) {
+  private async addToNormalQueue(client: any, enqueueData: RuleDto) {
     this.logger.debug('addto Nomal', client, 'queue', this.normalQueue);
     const index = this.normalQueue.indexOf([client, enqueueData]);
     if (index === -1) {
       this.normalQueue.push([client, enqueueData]);
     }
     if (this.normalQueue.length >= 2) {
-      const players: [UserDto, RuleDto][] = this.normalQueue.splice(0, 2);
+      const players: [any, RuleDto][] = this.normalQueue.splice(0, 2);
       console.log(players);
       return players;
     }
     return false;
   }
 
-  private async addToLadderQueue(client: UserDto, enqueueData: RuleDto) {
+  private async addToLadderQueue(client: any, enqueueData: RuleDto) {
     this.logger.debug('addto Ladder', client, 'queue', this.ladderQueue);
     const index = this.ladderQueue.indexOf([client, enqueueData]);
     if (index === -1) {
       this.ladderQueue.push([client, enqueueData]);
     }
     if (this.ladderQueue.length >= 2) {
-      const players: [UserDto, RuleDto][] = this.ladderQueue.splice(0, 2);
+      const players: [any, RuleDto][] = this.ladderQueue.splice(0, 2);
       return players;
     }
     return false;
   }
 
-  removeFromNormalQueue(client: UserDto, dequeueData: RuleDto) {
+  removeFromNormalQueue(client: any, dequeueData: RuleDto) {
     const index = this.normalQueue.indexOf([client, dequeueData]);
     if (index > -1) this.normalQueue.splice(index, 1);
     else this.logger.error(`${client.userId} is not in normalQueue queue`);
   }
 
-  removeFromLadderQueue(client: UserDto, dequeueData: RuleDto) {
+  removeFromLadderQueue(client: any, dequeueData: RuleDto) {
     const index = this.ladderQueue.indexOf([client, dequeueData]);
     if (index > -1) this.ladderQueue.splice(index, 1);
     else this.logger.error(`${client.userId} is not in ladderQueue queue`);

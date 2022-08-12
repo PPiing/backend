@@ -58,7 +58,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const { userSeq, roomId } = client.request.user;
     this.logger.debug(`user ${userSeq} connected`);
     //* * persennel room */
-    client.join(userSeq);
+    client.join(userSeq.toString());
 
     const presence = this.gameService.checkPresenceOf(roomId);
     if (presence) {
@@ -91,7 +91,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const { userSeq } = client.request.user;
 
     this.logger.debug(`user ${userSeq} enqueued`);
-    return this.gameService.handleEnqueue(client.request.session.passport.user, ruleData);
+    return this.gameService.handleEnqueue(client, ruleData);
   }
 
   @UseGuards(SocketGuard)
@@ -100,7 +100,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const { userSeq } = client.request.user;
 
     this.logger.debug(`user ${userSeq} request dequeued`);
-    return this.gameService.handleDequeue(client.request.user, ruleData);
+    return this.gameService.handleDequeue(client, ruleData);
   }
 
   @OnEvent('game:ready')
@@ -108,20 +108,19 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.logger.debug('game:ready');
     console.log(gameData);
     const { ruleData, metaData, metaData: { playerBlue, playerRed } } = gameData;
-    console.log(metaData);
     const players = [
       playerBlue?.userSeq?.toString(),
       playerRed?.userSeq?.toString(),
     ];
 
+    /** join in gameRoom */
+    this.server.in(players).socketsJoin(metaData.roomId);
     /** emit match data */
-    this.server.to(players).emit('game:ready', {
+    this.server.to(metaData.roomId).emit('game:ready', {
       ruleData,
       blueUser: metaData?.playerBlue?.nickName,
       redUser: metaData?.playerRed?.nickName,
     });
-    /** join in gameRoom */
-    this.server.in(players).socketsJoin(metaData.roomId);
   }
 
   @OnEvent('game:testready')
@@ -155,12 +154,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   @UseGuards(SocketGuard)
   @SubscribeMessage('game:paddle')
-  handlePaddleControl(client: any, data: { direction: PaddleDirective }) {
+  handlePaddleControl(client: any, data: number) {
     this.logger.debug(`user ${client.request.user.userSeq} moved paddle ${data}`);
     this.gameService.handlePaddle(
-      client.request.user.roomId,
+      client.request.session.passport.user.roomId,
       client.request.user.userSeq,
-      data.direction,
+      data,
     );
   }
 
