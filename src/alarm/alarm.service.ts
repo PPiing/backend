@@ -112,6 +112,23 @@ export class AlarmService {
     this.eventRunner.emit('alarm:refresh');
   }
 
+  async findAlarm(
+    senderSeq: number,
+    receiverSeq: number,
+    alarmType: AlarmType,
+    alarmCode: AlarmCode,
+  ): Promise<number> {
+    const presence = await this.alarmRepository.findOne({
+      where: {
+        senderSeq,
+        receiverSeq,
+        alarmType,
+        alarmCode,
+      },
+    });
+    return presence.alarmSeq;
+  }
+
   /**
    * 특정 유저가 수신한 일반 알람을 가져옵니다. 읽음 처리 된 알람은 가져오지 않습니다.
    *
@@ -169,6 +186,7 @@ export class AlarmService {
    * 알람을 읽음 처리합니다.
    *
    * @param alarmSeq 알람 ID
+   * @param who 읽은 사람.
    */
   async readAlarm(alarmSeq: number, who: number): Promise<void> {
     const result = await this.alarmRepository.readAlarm(alarmSeq, who);

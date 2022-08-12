@@ -99,7 +99,7 @@ export default class AlarmRepository extends Repository<Alarm> {
    * 특정 알람을 읽음 처리 합니다.
    *
    * @param alarmSeq
-   * @param who
+   * @param who 읽은사람.
    * @returns
    */
   async readAlarm(alarmSeq: number, who: number): Promise<boolean> {
