@@ -82,14 +82,14 @@ export class AuthController {
     description: '메일로부터 송부받은 코드를 이용하여 2FA 인증을 진행합니다. 진행 성공 여부는 true/false로 리턴합니다.',
   })
   @Get('twofactor/code')
-  @UseGuards(CheckLogin)
+  // @UseGuards(CheckLogin)
   async checkFactorCode(
     @User() user: UserDto,
       @Query('code', ParseIntPipe) code: number,
   ): Promise<boolean> {
-    if (!this.authService.checkLogin(user)) {
-      return false;
-    }
+    // if (!this.authService.checkLogin(user)) {
+    //   return false;
+    // }
     const validChk = this.authService.isValidAuthCodeFromEmail(user, code);
     return validChk;
   }
