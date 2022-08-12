@@ -4,12 +4,12 @@ export default () => ({
   database: {
     host: process.env.DATABASE_HOST || 'localhost',
     port: parseInt(process.env.DATABASE_PORT, 10) || 5432,
-    username: process.env.DATABASE_USERNAME,
-    password: process.env.DATABASE_PASSWORD,
-    database: process.env.DATABASE_NAME,
+    username: process.env.DATABASE_USERNAME || 'user',
+    password: process.env.DATABASE_PASSWORD || 'example',
+    database: process.env.DATABASE_NAME || 'db',
   },
   auth: {
-    secret: process.env.AUTH_SECRET,
+    secret: process.env.AUTH_SECRET || 'secret',
     clientid: process.env.AUTH_CLIENTID,
     clientsecret: process.env.AUTH_CLIENTSECRET,
   },
