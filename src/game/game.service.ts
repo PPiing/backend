@@ -11,6 +11,7 @@ import { InGameData, PaddleDirective } from './dto/in-game.dto';
 import { SimulationService } from './simulation.service';
 import { GameQueue } from './game-queue';
 import { RuleDto } from './dto/rule.dto';
+import { GameLogService } from './game-log.service';
 
 @Injectable()
 export class GameService {
@@ -26,6 +27,7 @@ export class GameService {
     private eventRunner: EventEmitter2,
     private gameQueue: GameQueue,
     private simulator: SimulationService,
+    private gamelogService: GameLogService,
     private readonly userService: UserService,
     private readonly alarmService: AlarmService,
   ) {}
@@ -45,10 +47,10 @@ export class GameService {
   async handleEnqueue(client: UserDto, ruleData: RuleDto) {
     this.logger.debug(`user client: ${client.userId} and ruleData: ${ruleData}`);
     const matchedPlayers = await this.gameQueue.enQueue(client, ruleData);
-
+    this.logger.debug('enqueue reusult', matchedPlayers);
     /** if not matched return */
     if (matchedPlayers === false) return;
-    this.createGame(matchedPlayers);
+    await this.createGame(matchedPlayers);
   }
 
   handleDequeue(client: UserDto, ruleData: RuleDto) {
@@ -68,7 +70,7 @@ export class GameService {
     if (bluePlayer === undefined || redPlayer === undefined) { throw new NotFoundException('해당 유저가 존재하지 않습니다.'); }
     // TODO: user 접속중 확인하고 아니면 error 응답.
 
-    this.createGame([[bluePlayer, null], [redPlayer, null]]);
+    await this.createGame([[bluePlayer, null], [redPlayer, null]]);
   }
 
   /**
@@ -111,8 +113,8 @@ export class GameService {
     this.users.set(redPlayer.userSeq, newRoomId);
 
     /** add gameData into simulator */
-    this.simulator.initBeforeStartGame(newGame);
-    this.eventRunner.emit('game:ready', newGame.metaData);
+    await this.simulator.initBeforeStartGame(newGame);
+    this.eventRunner.emit('game:ready', newGame);
   }
 
   /** for Testing */

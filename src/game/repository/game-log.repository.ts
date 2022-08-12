@@ -2,7 +2,7 @@
 import { Logger } from '@nestjs/common';
 import GameLog from 'src/entities/game-log.entity';
 import { EntityRepository, Repository } from 'typeorm';
-import { GameData } from '../dto/game-data';
+import { GameData, InGameData, MetaData } from '../dto/game-data';
 import { GameRecordDto } from '../dto/game-record.dts';
 
 @EntityRepository(GameLog)
@@ -11,12 +11,12 @@ export class GameLogRepository extends Repository<GameLog> {
 
   async findRecentGameLog(userSeq: number, limit: number): Promise<GameLog[]> {
     this.logger.debug('findRecentGameLog');
-    let ret;
+    let ret: GameLog[];
     if (limit > 0) { // limit 지정해서 가져올 때
       ret = await this.find({
         where: [
-          { topUserSeq: userSeq },
-          { btmUserSeq: userSeq },
+          { blueUserSeq: userSeq },
+          { redUserSeq: userSeq },
         ],
         order: {
           createdAt: 'DESC',
@@ -26,8 +26,8 @@ export class GameLogRepository extends Repository<GameLog> {
     } else { // limit 제한 없이 가져올 때
       ret = await this.find({
         where: [
-          { topUserSeq: userSeq },
-          { btmUserSeq: userSeq },
+          { blueUserSeq: userSeq },
+          { redUserSeq: userSeq },
         ],
         order: {
           createdAt: 'DESC',
@@ -40,8 +40,8 @@ export class GameLogRepository extends Repository<GameLog> {
   async fundUserGameLog(userSeq: number): Promise<GameRecordDto> {
     const [allGames, count] = await this.findAndCount({
       where: [
-        { topUserSeq: userSeq },
-        { btmUserSeq: userSeq },
+        { blueUserSeq: userSeq },
+        { redUserSeq: userSeq },
       ],
     });
     const winGames = allGames.reduce((prev, wins) => {
@@ -56,8 +56,8 @@ export class GameLogRepository extends Repository<GameLog> {
     const newLog = this.create({
       roomId: metaData.roomId,
       isRankGame: metaData.isRankGame,
-      blueUserSeq: metaData.playerBlue.userId,
-      redUserSeq: metaData.playerRed.userId,
+      blueUserSeq: metaData.playerBlue.userSeq,
+      redUserSeq: metaData.playerRed.userSeq,
       blueUserName: metaData.playerBlue.nickName,
       redUserName: metaData.playerRed.nickName,
       paddleSize: ruleData.paddleSize,
@@ -68,7 +68,7 @@ export class GameLogRepository extends Repository<GameLog> {
     return savedLog.gameLogSeq;
   }
 
-  async saveUpdatedGame(metaData, inGameData) {
+  async saveUpdatedGame(metaData: MetaData, inGameData: InGameData) {
     const result = await this.update(metaData.gameLogSeq, {
       winnerSeq: inGameData.winnerSeq,
       blueScore: inGameData.scoreBlue,
