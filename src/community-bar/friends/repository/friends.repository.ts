@@ -4,7 +4,6 @@ import RelationStatus from 'src/enums/mastercode/relation-status.enum';
 import { ProfileRelation } from 'src/enums/profile-relation.enum';
 import { EntityRepository, Repository } from 'typeorm';
 
-
 @EntityRepository(Friends)
 export class FriendsRepository extends Repository<Friends> {
   async findFriend(userSeq: number, target: number, status: RelationStatus)
@@ -126,7 +125,8 @@ export class FriendsRepository extends Repository<Friends> {
       newFriend.status = RelationStatus.FRST30;
 
       await this.save(newFriend);
-    } else { //내가 친구를 차단하면 친구에겐 내가 안보이게 됨(친구에서 나 차단아님)
+    } else {
+      // 내가 친구를 차단하면 친구에겐 내가 안보이게 됨(친구에서 나 차단아님)
       friend.isBlocked = true;
       friend.status = RelationStatus.FRST30;
       const another = await this.findFriend(userSeq, target, RelationStatus.FRST10);

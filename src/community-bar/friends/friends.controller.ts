@@ -193,7 +193,7 @@ export class FriendsController {
     await this.friendsService.blockFriend(user.userSeq, target);
   }
 
-   /**
+  /**
    * 블락된 친구를 해지 합니다.
    *
    * @param target 블락해지할 유저
