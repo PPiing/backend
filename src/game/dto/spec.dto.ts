@@ -25,13 +25,13 @@ export class SpecData {
   };
 
   paddle: Paddle = {
-    width: 10, // base width * option.scale (default: 1), 0.5, 1.5;
+    width: 10,
     height: 100,
-    speed: 1,
+    speed: 2,
   };
 
   ball: Ball = {
-    radius: 5, // 반지름
-    speed: 1, // base speed * option.scale (default: 5), 4, 7;
+    radius: 5,
+    speed: 2,
   };
 }

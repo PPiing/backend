@@ -49,9 +49,6 @@ export default class GameController {
     return this.gameService.handleAcceptInvite(alarmSeq);
   }
 
-  // TODO(jinbekim)
-  // TODO(jinbekim)
-  // TODO(jinbekim)
   @ApiOperation({ summary: '초대 거절', description: '받은 게임 요청을 거절합니다.' })
   @ApiResponse({ status: 200, description: '초대 거절' })
   @ApiResponse({ status: 403, description: '거절에 실패할 경우.' })
