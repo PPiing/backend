@@ -133,8 +133,8 @@ export class ProfileController {
       throw new BadRequestException('유저 정보가 존재하지 않습니다.');
     }
 
-    const reg = /^[a-zA-Z0-9]+$/;
-    if (!reg.test(userData.nickName)) {
+    const regex = /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9|]+$/;
+    if (!regex.test(userData.nickName)) {
       throw new BadRequestException('올바르지 않은 닉네임 입니다.');
     }
 

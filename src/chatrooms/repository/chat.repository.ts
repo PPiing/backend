@@ -40,7 +40,7 @@ export default class ChatRepository extends Repository<Chat> {
         chatName,
       }
     });
-    if (result === null || result === undefined) {
+    if (result === null || result === undefined || result.length === 0) {
       return null;
     }
     return ({
