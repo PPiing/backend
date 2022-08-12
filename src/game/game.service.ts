@@ -67,8 +67,8 @@ export class GameService {
     const redPlayer = await this.userService.findByUserId(alarm.senderSeq);
     if (bluePlayer === undefined || redPlayer === undefined) { throw new NotFoundException('해당 유저가 존재하지 않습니다.'); }
     // TODO: user 접속중 확인하고 아니면 error 응답.
-    const rule = new RuleDto();
-    this.createGame([[bluePlayer, rule], [redPlayer, rule]]);
+
+    this.createGame([[bluePlayer, null], [redPlayer, null]]);
   }
 
   /**
@@ -97,9 +97,12 @@ export class GameService {
     );
 
     /** temporarily apply bluePlayer's rule */
-    newGame.ruleData.ballSpeed = blueRule.ballSpeed;
-    newGame.ruleData.matchScore = blueRule.ballSpeed;
-    newGame.ruleData.paddleSize = redRule.ballSpeed;
+    newGame.ruleData = new RuleDto();
+    if (blueRule && redRule) {
+      newGame.ruleData.ballSpeed = blueRule.ballSpeed;
+      newGame.ruleData.matchScore = blueRule.matchScore;
+      newGame.ruleData.paddleSize = redRule.paddleSize;
+    }
 
     /** inGameData */
     newGame.inGameData = new InGameData();
