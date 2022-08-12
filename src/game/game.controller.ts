@@ -46,7 +46,7 @@ export default class GameController {
   @UseGuards(CheckLogin)
   @Put('accept/:alarmSeq')
   async acceptInvite(@Param('alarmSeq') alarmSeq: number) {
-    return this.gameService.handleAcceptInvite(alarmSeq);
+    await this.gameService.handleAcceptInvite(alarmSeq);
   }
 
   @ApiOperation({ summary: '초대 거절', description: '받은 게임 요청을 거절합니다.' })
@@ -55,6 +55,6 @@ export default class GameController {
   @UseGuards(CheckLogin)
   @Put('reject/:alarmSeq')
   async rejectInvite(@Param('alarmSeq') alarmSeq: number, @User() user: UserDto) {
-    return this.alarmService.deleteAlarm(alarmSeq, user.userSeq);
+    await this.alarmService.deleteAlarm(alarmSeq, user.userSeq);
   }
 }
