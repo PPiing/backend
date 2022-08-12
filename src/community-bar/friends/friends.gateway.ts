@@ -50,6 +50,11 @@ export class FriendsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     await this.frinedsService.onlineUserRemove(client, userSeq);
   }
 
+  /**
+   *
+   * @param userSeq1
+   * @param userSeq2
+   */
   @OnEvent('friends:update')
   async onFriendsUpdate(userSeq1: number, userSeq2: number) {
     this.logger.debug('frineds udpate');

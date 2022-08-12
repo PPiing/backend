@@ -109,7 +109,7 @@ export class AlarmService {
     if (!presence) {
       await this.alarmRepository.createAlarm(senderSeq, receiverSeq, alarmType, alarmCode);
     }
-    this.eventRunner.emit('alarm:refresh');
+    this.eventRunner.emit('alarm:refresh', receiverSeq);
   }
 
   async findAlarm(
@@ -199,6 +199,7 @@ export class AlarmService {
    * 알람을 삭제 처리합니다.
    *
    * @param alarmSeq 알람 ID
+   * @param who 삭제 요청한 사람, userSeq
    */
   async deleteAlarm(alarmSeq: number, who: number): Promise<void> {
     const result = await this.alarmRepository.deleteAlarm(alarmSeq, who);

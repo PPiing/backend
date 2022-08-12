@@ -92,7 +92,7 @@ export class AlarmGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
   @OnEvent('alarm:refresh')
   async triggerRefreshAlarm(who: number) {
-    this.server.emit('alarm:confirm', who);
+    this.server.to(who.toString()).emit('alarm:confirm');
     // this.server.emit('alarm:normal', who);
     // this.server.emit('alarm:refresh', who);
   }
