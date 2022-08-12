@@ -11,7 +11,6 @@ import { GameQueue } from './game-queue';
 import { SimulationService } from './simulation.service';
 import { GameLogController } from './game-log.controller';
 import { GameLogService } from './game-log.service';
-import { MockGameLogRepository } from './repository/mock/mock.game-log.repository';
 import GameController from './game.controller';
 
 @Module({
@@ -26,10 +25,6 @@ import GameController from './game.controller';
     GameService,
     GameGateway,
     GameQueue,
-    {
-      provide: getRepositoryToken(GameLogRepository),
-      useClass: MockGameLogRepository,
-    },
     SimulationService,
     GameLogService,
   ],

@@ -12,6 +12,7 @@ export class GameQueue {
 
   enQueue(client: UserDto, enqueueData: RuleDto) {
     this.logger.debug(client);
+    console.log(client, enqueueData);
     const { isRankGame } = enqueueData;
 
     if (isRankGame === true) {
@@ -31,18 +32,21 @@ export class GameQueue {
   }
 
   private async addToNormalQueue(client: UserDto, enqueueData: RuleDto) {
+    this.logger.debug('addto Nomal', client, 'queue', this.normalQueue);
     const index = this.normalQueue.indexOf([client, enqueueData]);
     if (index === -1) {
       this.normalQueue.push([client, enqueueData]);
     }
     if (this.normalQueue.length >= 2) {
       const players: [UserDto, RuleDto][] = this.normalQueue.splice(0, 2);
+      console.log(players);
       return players;
     }
     return false;
   }
 
   private async addToLadderQueue(client: UserDto, enqueueData: RuleDto) {
+    this.logger.debug('addto Ladder', client, 'queue', this.ladderQueue);
     const index = this.ladderQueue.indexOf([client, enqueueData]);
     if (index === -1) {
       this.ladderQueue.push([client, enqueueData]);
