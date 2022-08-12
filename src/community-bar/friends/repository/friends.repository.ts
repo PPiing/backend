@@ -70,9 +70,15 @@ export class FriendsRepository extends Repository<Friends> {
     if (!friend) {
       throw new BadRequestException('친구가 없습니다.');
     }
-    friend.status = RelationStatus.FRST50;
+    const me = await this.findFriend(target, userSeq, RelationStatus.FRST10);
+    if (!me) {
+      throw new BadRequestException('나에게 친구가 없습니다.');
+    }
+    friend.status = RelationStatus.FRST40;
+    me.status = RelationStatus.FRST40;
 
     await this.save(friend);
+    await this.save(me);
   }
 
   async getRelation(userSeq: number, target: number) : Promise<ProfileRelation | undefined> {

@@ -106,6 +106,7 @@ export class FriendsController {
     if (!check) {
       throw new Error('유저 정보가 존재하지 않습니다.');
     }
+    console.log("@@@@@@@@@@@@@@@@@@@@as @@@@@@@@@@@@@@@@@@@@@2");
 
     await this.friendsService.acceptFriend(user.userSeq, target);
     this.eventEitter.emit('friends:update', user.userSeq, target);

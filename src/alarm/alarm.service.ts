@@ -125,6 +125,8 @@ export class AlarmService {
         receiverSeq,
         alarmType,
         alarmCode,
+        read: false,
+        delete: false,
       },
     });
     return presence.alarmSeq;

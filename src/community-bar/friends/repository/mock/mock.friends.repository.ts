@@ -78,7 +78,12 @@ export default class MockFriendsRepository {
     if (!friend) {
       throw new Error('친구가 아닙니다.');
     }
-    friend.status = RelationStatus.FRST50;
+    const me = await this.findFriend(target, userSeq, RelationStatus.FRST10);
+    if (!me) {
+      throw new Error('내 친구가 아닙니다.');
+    }
+    friend.status = RelationStatus.FRST40;
+    me.status = RelationStatus.FRST40;
   }
 
   async getRelation(userSeq: number, target: number) : Promise<ProfileRelation | undefined> {
