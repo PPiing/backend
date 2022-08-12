@@ -77,6 +77,11 @@ export class AlarmController {
     return this.alarmService.getAllConfirms(user.userSeq);
   }
 
+  /**
+   *
+   * @param user 읽은사람.
+   * @param id 알람시퀀스
+   */
   @ApiOperation({
     summary: '알람 읽음처리',
     description: '알람을 읽음 처리합니다.',

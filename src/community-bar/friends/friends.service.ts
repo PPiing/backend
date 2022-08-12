@@ -3,6 +3,9 @@ import {
 } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Socket } from 'socket.io';
+import { AlarmService } from 'src/alarm/alarm.service';
+import AlarmCode from 'src/enums/mastercode/alarm-code.enum';
+import AlarmType from 'src/enums/mastercode/alarm-type.enum';
 import { ProfileRelation } from 'src/enums/profile-relation.enum';
 import { FriendsRepository } from './repository/friends.repository';
 
@@ -12,6 +15,7 @@ export class FriendsService {
 
   constructor(
     private readonly friendsRepository: FriendsRepository,
+    private readonly alarmService: AlarmService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -91,12 +95,19 @@ export class FriendsService {
   /**
    * 친구 요청을 수락합니다.
    *
-   * @param userSeq
-   * @param target
+   * @param userSeq 요청한 사람.
+   * @param target 수락한 사람
    */
   async acceptFriend(userSeq: number, target: number) {
     this.logger.log(`친구 요청 수락 요청: ${userSeq} -> ${target}`);
     await this.friendsRepository.acceptFriend(userSeq, target);
+    const alarm = await this.alarmService.findAlarm(
+      target,
+      userSeq,
+      AlarmType.ALTP20,
+      AlarmCode.ALAM20,
+    );
+    await this.alarmService.readAlarm(alarm, target);
   }
 
   /**
@@ -108,6 +119,13 @@ export class FriendsService {
   async rejectFriend(userSeq: number, target: number) {
     this.logger.log(`친구 요청 거절 요청: ${userSeq} -> ${target}`);
     await this.friendsRepository.rejectFriend(userSeq, target);
+    const alarm = await this.alarmService.findAlarm(
+      target,
+      userSeq,
+      AlarmType.ALTP20,
+      AlarmCode.ALAM20,
+    );
+    await this.alarmService.readAlarm(alarm, target);
   }
 
   /**
