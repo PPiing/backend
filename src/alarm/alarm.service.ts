@@ -3,6 +3,7 @@ import {
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cache } from 'cache-manager';
+import { ColdObservable } from 'rxjs/internal/testing/ColdObservable';
 import { Socket } from 'socket.io';
 import Alarm from 'src/entities/alarm.entity';
 import AlarmCode from 'src/enums/mastercode/alarm-code.enum';
