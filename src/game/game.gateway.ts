@@ -147,21 +147,21 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.server.to(roomId).emit('game:start');
   }
 
-  // /**
-  //  * 자신의 패들의 움직임 방향을 바꾼다.
-  //  * @param client 유저 소켓
-  //  * @param data paddle의 움직임 방향
-  //  */
-  // @UseGuards(SocketGuard)
-  // @SubscribeMessage('game:paddle')
-  // handlePaddleControl(client: any, data: { direction: PaddleDirective }) {
-  //   this.logger.debug(`user ${client.request.user.userSeq} moved paddle ${data}`);
-  //   this.gameService.handlePaddle(
-  //     client.request.user.roomId,
-  //     client.request.user.userSeq,
-  //     data.direction,
-  //   );
-  // }
+  /**
+   * 자신의 패들의 움직임 방향을 바꾼다.
+   * @param client 유저 소켓
+   * @param data paddle의 움직임 방향
+   */
+  @UseGuards(SocketGuard)
+  @SubscribeMessage('game:paddle')
+  handlePaddleControl(client: any, data: { direction: PaddleDirective }) {
+    this.logger.debug(`user ${client.request.user.userSeq} moved paddle ${data}`);
+    this.gameService.handlePaddle(
+      client.request.user.roomId,
+      client.request.user.userSeq,
+      data.direction,
+    );
+  }
 
   /**
    *  TTTTTTTTEEEEEEEESSSSSSSSTTTTTt
@@ -170,7 +170,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param data paddle의 움직임 방향
    */
   @UseGuards(SocketGuard)
-  @SubscribeMessage('game:paddle')
+  @SubscribeMessage('test:paddle')
   handlePaddleTestControl(client: any, data: number) {
     this.gameService.handleTestPaddle(client.id, client.id, data);
   }

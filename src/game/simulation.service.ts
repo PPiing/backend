@@ -85,10 +85,6 @@ export class SimulationService {
    */
   async initBeforeStartGame(game: GameData) {
     this.logger.debug(`startGame: ${game.metaData}`);
-    /* add game in simulation game queue */
-    this.games.set(game.metaData.roomId, game);
-    this.addInterval(game.metaData.roomId, game, 17);
-
     const { metaData } = game;
     const logSeq = await this.gameLogService.saveInitGame(game);
     if (logSeq) {
@@ -97,6 +93,10 @@ export class SimulationService {
     } else {
       this.logger.debug('failure to save game b4 start');
     }
+
+    /* add game in simulation game queue */
+    this.games.set(game.metaData.roomId, game);
+    this.addInterval(game.metaData.roomId, game, 17);
   }
 
   /** NOTE: will be deleted */
@@ -143,10 +143,10 @@ export class SimulationService {
   ) {
     const { metaData, inGameData } = this.games.get(roomId);
     if (!metaData || !inGameData) return;
-    if (metaData.playerBlue.userId === userId) {
+    if (metaData.playerBlue.userSeq === userId) {
       inGameData.paddleBlue.velocity.y = direction;
     }
-    if (metaData.playerRed.userId === userId) {
+    if (metaData.playerRed.userSeq === userId) {
       inGameData.paddleRed.velocity.y = direction;
     }
   }
