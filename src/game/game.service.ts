@@ -89,7 +89,9 @@ export class GameService {
     */
     console.log('requeset', bluePlayer.request);
     bluePlayer.request.session.passport.user.roomId = newRoomId;
+    bluePlayer.request.user.roomId = newRoomId;
     redPlayer.request.session.passport.user.roomId = newRoomId;
+    redPlayer.request.user.roomId = newRoomId;
     await bluePlayer.request.session.save();
     await redPlayer.request.session.save();
 

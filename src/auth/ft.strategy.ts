@@ -25,7 +25,7 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
   }
 
   async validate(req, at, rt, profile, cb) {
-    const userInstance:UserDto = await this.userService.findOrCreateByUserId(
+    const userInstance: UserDto = await this.userService.findOrCreateByUserId(
       profile.userId,
       profile.email,
       profile.login,

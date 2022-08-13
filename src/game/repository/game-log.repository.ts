@@ -64,6 +64,7 @@ export class GameLogRepository extends Repository<GameLog> {
       ballSpeed: ruleData.ballSpeed,
       matchScore: ruleData.matchScore,
     });
+    console.log('savegame', newLog);
     const savedLog = await this.save(newLog);
     return savedLog.gameLogSeq;
   }
