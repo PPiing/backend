@@ -31,9 +31,10 @@ export class GameQueue {
   }
 
   private async addToNormalQueue(client: any, enqueueData: RuleDto) {
-    this.logger.debug('addto Nomal', client, 'queue', this.normalQueue);
-    const index = this.normalQueue.indexOf([client, enqueueData]);
-    if (index === -1) {
+    this.logger.debug('try to add to normal queue');
+    const dup = this.normalQueue.find((tuple) => tuple[0] === client && tuple[1] === enqueueData);
+    if (!dup) {
+      this.logger.debug('addto Nomal', client, 'queue', this.normalQueue);
       this.normalQueue.push([client, enqueueData]);
     }
     if (this.normalQueue.length >= 2) {
@@ -45,9 +46,10 @@ export class GameQueue {
   }
 
   private async addToLadderQueue(client: any, enqueueData: RuleDto) {
-    this.logger.debug('addto Ladder', client, 'queue', this.ladderQueue);
-    const index = this.ladderQueue.indexOf([client, enqueueData]);
-    if (index === -1) {
+    this.logger.debug('try to add to ladder queue');
+    const dup = this.ladderQueue.find((tuple) => tuple[0] === client && tuple[1] === enqueueData);
+    if (!dup) {
+      this.logger.debug('addto Ladder', client, 'queue', this.ladderQueue);
       this.ladderQueue.push([client, enqueueData]);
     }
     if (this.ladderQueue.length >= 2) {
