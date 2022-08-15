@@ -1,9 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { SchedulerRegistry } from '@nestjs/schedule';
-import { GameData, MetaData } from './dto/game-data';
-import { GameStatus, InGameData, PaddleDirective } from './dto/in-game.dto';
-import { RuleDto } from './dto/rule.dto';
+import { GameData } from './dto/game-data';
+import { GameStatus, PaddleDirective } from './dto/in-game.dto';
 import { RoundResult } from './checkStatus/check.end-of-round';
 import { GameResult } from './checkStatus/check.end-of-game';
 import { GameLogService } from './game-log.service';
@@ -27,6 +26,7 @@ export class SimulationService {
     const callback = () => {
       const { inGameData, metaData } = gameData;
       inGameData.frame += 1;
+      if (inGameData.frame > 10000) inGameData.status = GameStatus.End;
       switch (inGameData.status) {
         case GameStatus.Ready: {
           const isReady: boolean = readyToStart(gameData);
@@ -100,24 +100,6 @@ export class SimulationService {
     this.addInterval(metaData.roomId, game, 17);
   }
 
-  /** NOTE: will be deleted */
-  initBeforeStartTestGame(client: any) {
-    this.logger.debug('TEST!!! TEST!!! startGame:');
-    /* add game in simulation game queue */
-    const tmp = new GameData();
-    tmp.inGameData = new InGameData();
-    tmp.ruleData = new RuleDto();
-    tmp.metaData = new MetaData(
-      client.id,
-      client.request.session.passport.user,
-      client.request.session.passport.user,
-      tmp.ruleData.isRankGame,
-    );
-    this.games.set(client.id, tmp);
-    this.addInterval(tmp.metaData.roomId, tmp, 17);
-    this.eventRunner.emit('game:testready', tmp);
-  }
-
   /**
   * 게임 종료 후에 메모리상에 있는 게임을 레파지토리로 저장한다.
   * @param roomId 방 아이디
@@ -152,22 +134,5 @@ export class SimulationService {
     if (metaData.playerRed.userSeq === userId) {
       inGameData.paddleRed.velocity.y = direction;
     }
-  }
-
-  /** NOTE: will be deleted */
-  handleTestPaddle(
-    roomId: string,
-    userId: string,
-    direction: number,
-  ) {
-    this.logger.debug('TEST!!!! TEST!! moved paddle');
-    const { metaData, inGameData } = this.games.get(roomId);
-    if (!metaData || !inGameData) {
-      this.logger.debug('no metadata || no ingamedata');
-      return;
-    }
-    this.logger.debug('blue player changed velocity toward', direction);
-    inGameData.paddleBlue.velocity.y = direction;
-    inGameData.paddleRed.velocity.y = direction;
   }
 }
