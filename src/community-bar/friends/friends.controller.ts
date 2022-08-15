@@ -219,4 +219,27 @@ export class FriendsController {
 
     await this.friendsService.unblockFriend(user.userSeq, target);
   }
+
+  /**
+   * 블란된 유저 리스트를 가져옵니다.
+   */
+  @ApiOperation({ summary: '유저 리스트 받아오기', description: '자신이 차단한 유저의 목록을 가져옵니다ㅑ.' })
+  @ApiResponse({ status: 200, type: [Number], description: '차단 유저 리스트 가져오기 성공' })
+  @ApiResponse({ status: 400, description: '차단 유저 리스트 가져오기 실패' })
+  @UseGuards(CheckLogin)
+  @Get('/blocklist')
+  async getBlockList(
+  @User(new ValidationPipe({ validateCustomDecorators: true })) user: UserDto,
+  ) {
+    this.logger.log(`${user.userSeq} 의 블락 리스트를 가져옵니다.`);
+
+    const check = await this.userProfileService.checkUser(user.userSeq);
+    if (!check) {
+      throw new Error('유저 정보가 존재하지 않습니다.');
+    }
+
+    const blockList = await this.friendsService.getBlockList(user.userSeq);
+
+    return blockList;
+  }
 }

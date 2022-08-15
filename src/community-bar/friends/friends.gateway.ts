@@ -59,11 +59,13 @@ export class FriendsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   async onFriendsUpdate(userSeq1: number, userSeq2: number) {
     this.logger.debug('frineds udpate');
     const target1 = await this.frinedsService.getOnlineClients(userSeq1);
+    console.log('skim test(target 1): ', target1);
     if (target1.length > 0) {
       this.server.to(target1).emit('friends:update');
     }
 
     const target2 = await this.frinedsService.getOnlineClients(userSeq2);
+    console.log('skim test(target 2): ', target2);
     if (target2.length > 0) {
       this.server.to(target2).emit('friends:update');
     }

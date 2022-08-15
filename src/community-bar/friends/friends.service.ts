@@ -61,7 +61,7 @@ export class FriendsService {
    * @return 사용자 소켓 IDs
    */
   async getOnlineClients(userSeq: number): Promise<Array<string>> {
-    const key = `AlarmService-userID-${userSeq}`;
+    const key = `FriendService-userID-${userSeq}`;
     const value: undefined | Array<string> = await this.cacheManager.get(key);
     if (value === undefined) {
       return [];
@@ -168,5 +168,17 @@ export class FriendsService {
     this.logger.log(`${userSeq}가 ${target}의 차단을 해지합니다`);
 
     await this.friendsRepository.unblockedFriend(userSeq, target);
+  }
+
+  /**
+   * 블락 리스트를 가져옵니다.
+   *
+   * @param target
+   */
+  async getBlockList(target: number): Promise<number[]> {
+    this.logger.log(`${target} 의 블락 리스트를 가져옵니다.`);
+
+    const blockList = await this.friendsRepository.getBlockList(target);
+    return blockList;
   }
 }
