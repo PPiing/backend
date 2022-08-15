@@ -30,7 +30,7 @@ export class UpdateUserDto {
 
   @ApiProperty({
     description: '유저 프로필 사진',
-    example: './img/defaultProfile.jpg',
+    example: './img/DefaultProfile.png',
   })
   @IsString()
   @IsNotEmpty()

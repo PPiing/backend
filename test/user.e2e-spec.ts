@@ -122,7 +122,7 @@ describe('User E2E Test', () => {
           nickName: 'newnickname',
           email: '123@gmail.com',
           secAuthStatus: false,
-          avatarImgUri: './img/defaultProfile.jpg',
+          avatarImgUri: './img/DefaultProfile.png',
         };
 
         // when

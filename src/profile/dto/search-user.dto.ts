@@ -23,7 +23,7 @@ export class SearchUserDto {
 
   @ApiProperty({
     description: '유저 이미지',
-    example: './img/defaultProfile.jpg',
+    example: './img/DefaultProfile.png',
   })
     userImage: string;
 }
