@@ -239,6 +239,7 @@ export class FriendsController {
     }
 
     const blockList = await this.friendsService.getBlockList(user.userSeq);
+    this.eventEitter.emit('friends:update', user.userSeq);
 
     return blockList;
   }
