@@ -68,4 +68,17 @@ export class FriendsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       this.server.to(target2).emit('friends:update');
     }
   }
+
+  /**
+   *
+   * @param userSeq
+   */
+  @OnEvent('block:update')
+  async onBlockUpdate(userSeq: number) {
+    this.logger.debug('block udpate');
+    const target = await this.frinedsService.getOnlineClients(userSeq);
+    if (target.length > 0) {
+      this.server.to(target).emit('friends:update');
+    }
+  }
 }

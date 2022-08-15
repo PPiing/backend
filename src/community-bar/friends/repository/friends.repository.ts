@@ -153,4 +153,16 @@ export class FriendsRepository extends Repository<Friends> {
       await this.save(friend);
     }
   }
+
+  async getBlockList(target: number): Promise<number[]> {
+    const friendsList = await this.find({
+      where: {
+        followerSeq: target,
+        isBlocked: true,
+        status: RelationStatus.FRST30,
+      },
+    });
+    const blocklist = friendsList.map((user) => user.followeeSeq);
+    return blocklist;
+  }
 }
