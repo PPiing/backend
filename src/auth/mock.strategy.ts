@@ -20,7 +20,7 @@ export class MyMockStrategy extends PassportStrategy(MockStrategy, '42') {
       login,
     );
     if (userInstance.secAuthStatus === false) {
-      userInstance.is_login = 'Y';
+      userInstance.isLogin = 'Y';
     }
     cb(null, userInstance);
   }

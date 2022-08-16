@@ -31,7 +31,7 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
       profile.login,
     );
     if (userInstance.secAuthStatus === false) {
-      userInstance.is_login = 'Y';
+      userInstance.isLogin = 'Y';
     }
     cb(null, userInstance);
   }

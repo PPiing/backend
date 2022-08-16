@@ -19,7 +19,7 @@ export class AuthService {
   }
 
   checkLogin(user: UserDto | undefined): boolean {
-    if (user && user.is_login !== 'Y') {
+    if (user && user.isLogin !== 'Y') {
       return true;
     }
     return false;
@@ -35,7 +35,7 @@ export class AuthService {
 
   setIsLogin(user: UserDto, flag): void {
     // eslint-disable-next-line no-param-reassign
-    user.is_login = flag;
+    user.isLogin = flag;
   }
 
   async sendAuthCodeToEmail(user: UserDto): Promise<void> {
@@ -47,7 +47,7 @@ export class AuthService {
       // NOTE: 전송 후 리다이렉션하여 이메일 전송했다는 문구 띄우기
       this.mailService.example(user.email, String(factorCode));
     } else {
-      // NOTE: 이차인증을 수행하지 경우로, 바로 is_login을 'Y'로 설정합니다.
+      // NOTE: 이차인증을 수행하지 경우로, 바로 isLogin을 'Y'로 설정합니다.
       this.setIsLogin(user, 'Y');
     }
   }
@@ -55,7 +55,7 @@ export class AuthService {
   async isValidAuthCodeFromEmail(user: UserDto, code: number): Promise<boolean> {
     const authCode = await this.cacheManager.get(`session-${user.userSeq}`);
     if (code === authCode) {
-      // NOTE: 이차인증을 성공하는 경우로, 드디어 is_login을 'Y'로 설정합니다.
+      // NOTE: 이차인증을 성공하는 경우로, 드디어 isLogin을 'Y'로 설정합니다.
       this.logger.log('코드를 제대로 입력하였습니다.');
       this.setIsLogin(user, 'Y');
       return true;
