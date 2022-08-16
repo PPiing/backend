@@ -52,7 +52,7 @@ export class AuthController {
   @Get('login/firstlogin')
   @UseGuards(CheckLogin)
   async firstlogin(
-  @User() user: UserDto,
+    @User() user: UserDto,
   ): Promise<boolean> {
     return (user.firstLogin);
   }

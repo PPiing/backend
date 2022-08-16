@@ -63,7 +63,7 @@ export class UserService {
   async findOrCreateByUserId(userId: number, email: string, name: string): Promise<UserDto> {
     let userInstance = await this.userRepository.findByOAuthId(userId);
     let firstLogin = false;
-    let isLogin = 'N'
+    let isLogin = 'N';
     if (userInstance === undefined) {
       userInstance = await this.userRepository.createUser(userId, email, name);
       firstLogin = true;
@@ -81,8 +81,8 @@ export class UserService {
       status: userInstance.status,
       deleteStatus: userInstance.deleteStatus,
       createdAt: userInstance.createdAt,
-      isLogin: isLogin,
-      firstLogin: firstLogin,
+      isLogin,
+      firstLogin,
     };
   }
 
