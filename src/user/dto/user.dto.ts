@@ -19,7 +19,9 @@ export class UserDto {
 
   createdAt: Date;
 
-  is_login: string;
+  isLogin: string;
 
   roomId?: string;
+
+  firstLogin: boolean;
 }

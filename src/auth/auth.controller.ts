@@ -1,7 +1,7 @@
 import {
   Controller, Get, Redirect, Req, Res, UseGuards, Query, ParseIntPipe, Logger,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CheckLogin } from 'src/guards/check-login.guard';
 import { FtGuard } from 'src/guards/ft.guard';
 import { UserDto } from 'src/user/dto/user.dto';
@@ -41,6 +41,20 @@ export class AuthController {
       return;
     }
     res.redirect('../../../auth/redirect');
+  }
+
+  @ApiOperation({
+    summary: '첫 로그인 여부',
+    description: '첫 로그인 여부를 리턴합니다.',
+  })
+  @ApiResponse({ status: 200, description: '로그인 여부 리턴' })
+  @ApiResponse({ status: 401, description: '로그인 필요' })
+  @Get('login/firstlogin')
+  @UseGuards(CheckLogin)
+  async firstlogin(
+  @User() user: UserDto,
+  ): Promise<boolean> {
+    return (user.firstLogin);
   }
 
   @ApiOperation({

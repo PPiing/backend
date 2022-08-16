@@ -31,7 +31,8 @@ export class UserService {
         status: user.status,
         deleteStatus: user.deleteStatus,
         createdAt: user.createdAt,
-        is_login: 'N',
+        isLogin: 'N',
+        firstLogin: false,
       };
       return userDto;
     }
@@ -61,8 +62,14 @@ export class UserService {
    */
   async findOrCreateByUserId(userId: number, email: string, name: string): Promise<UserDto> {
     let userInstance = await this.userRepository.findByOAuthId(userId);
+    let firstLogin = false;
+    let isLogin = 'N'
     if (userInstance === undefined) {
       userInstance = await this.userRepository.createUser(userId, email, name);
+      firstLogin = true;
+    }
+    if (userInstance.secAuthStatus === false) {
+      isLogin = 'Y';
     }
     return {
       userSeq: userInstance.userSeq,
@@ -74,7 +81,8 @@ export class UserService {
       status: userInstance.status,
       deleteStatus: userInstance.deleteStatus,
       createdAt: userInstance.createdAt,
-      is_login: 'N',
+      isLogin: isLogin,
+      firstLogin: firstLogin,
     };
   }
 
@@ -105,7 +113,8 @@ export class UserService {
         status: user.status,
         deleteStatus: user.deleteStatus,
         createdAt: user.createdAt,
-        is_login: 'N',
+        isLogin: 'N',
+        firstLogin: false,
       };
     }
     return undefined;

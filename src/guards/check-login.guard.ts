@@ -9,7 +9,7 @@ export class CheckLogin implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     if (context.switchToHttp().getRequest().isAuthenticated()) {
-      if (context.switchToHttp().getRequest().session.passport.user.is_login === 'Y') {
+      if (context.switchToHttp().getRequest().session.passport.user.isLogin === 'Y') {
         return true;
       }
     }
