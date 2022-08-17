@@ -91,7 +91,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   async handleEnqueue(client: any, ruleData: RuleDto) {
     const { userSeq } = client.request.user;
 
-    this.logger.debug(`user ${userSeq} enqueued`);
+    console.log(`user ${userSeq} enqueued with rule:`);
+    console.log(ruleData);
     return this.gameService.handleEnqueue(client, ruleData);
   }
 

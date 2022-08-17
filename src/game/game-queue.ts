@@ -62,7 +62,7 @@ export class GameQueue {
       (tuple) => tuple[0].request.user.userSeq === client.request.user.userSeq,
     );
     if (!dup) this.normalQueue.splice(dup, 1);
-    else this.logger.error(`${client.userId} is not in normalQueue queue`);
+    else this.logger.error(`${client.request.user.userSeq} is not in normalQueue queue`);
   }
 
   removeFromLadderQueue(client: any, dequeueData: RuleDto) {
@@ -70,6 +70,6 @@ export class GameQueue {
       (tuple) => tuple[0].request.user.userSeq === client.request.user.userSeq,
     );
     if (!dup) this.ladderQueue.splice(dup, 1);
-    else this.logger.error(`${client.userId} is not in ladderQueue queue`);
+    else this.logger.error(`${client.request.user.userSeq} is not in ladderQueue queue`);
   }
 }

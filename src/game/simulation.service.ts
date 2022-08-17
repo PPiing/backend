@@ -56,11 +56,11 @@ export class SimulationService {
           if (gameResult === GameResult.playing) inGameData.status = GameStatus.Playing;
           if (gameResult === GameResult.redWin) {
             inGameData.status = GameStatus.End;
-            inGameData.winnerSeq = metaData.playerRed.userId;
+            inGameData.winnerSeq = metaData.playerRed.userSeq;
           }
           if (gameResult === GameResult.blueWin) {
             inGameData.status = GameStatus.End;
-            inGameData.winnerSeq = metaData.playerBlue.userId;
+            inGameData.winnerSeq = metaData.playerBlue.userSeq;
           }
           break;
         }
@@ -106,7 +106,6 @@ export class SimulationService {
   */
   async saveAfterEndGame(roomId: string) {
     this.logger.debug('saveAfterEndGame', roomId);
-    /** gamedata map을 유지할 필요가 있나? */
     this.schedulerRegistry.deleteInterval(roomId);
     const gameData = this.games.get(roomId);
     const result = await this.gameLogService.saveFinishedGame(gameData);

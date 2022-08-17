@@ -75,7 +75,7 @@ export class GameLogRepository extends Repository<GameLog> {
       blueScore: inGameData.scoreBlue,
       redScore: inGameData.scoreRed,
     });
-    this.logger.debug(result);
+    this.logger.debug('saveUpdatedGame', result);
     return result;
   }
 }

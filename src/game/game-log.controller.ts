@@ -21,9 +21,10 @@ export class GameLogController {
    * @returns 해당 게임로그
    */
   @Get(':seq')
-  findGameLogBySeq(@Param('seq') seq:number): Promise<GameLog> {
+  async findGameLogBySeq(@Param('seq') seq:number): Promise<GameLog> {
     this.logger.debug('/game-log/:seq', seq);
-    return this.gameLogService.findGameLogBySeq(seq);
+    const ret = await this.gameLogService.findGameLogBySeq(seq);
+    return ret;
   }
 
   /**
@@ -34,11 +35,12 @@ export class GameLogController {
    * @returns 해당 유저의 최근 게임로그
    */
   @Get('recent/user/:userSeq')
-  findRecentGameLog(
+  async findRecentGameLog(
     @Param('userSeq') userSeq: number,
       @Query('limit') limit: number,
   ): Promise<GameLog[]> {
-    return this.gameLogService.findRecentGameLog(userSeq, limit);
+    const ret = await this.gameLogService.findRecentGameLog(userSeq, limit);
+    return ret;
   }
 
   // NOTE: cannot
@@ -48,8 +50,9 @@ export class GameLogController {
   }
 
   @Get('user/:userSeq')
-  findUserGameLog(@Param('userSeq') userSeq: number) : Promise<{ total: number, win: number }> {
-    return this.gameLogService.findUserGameLog(userSeq);
+  async findUserGameLog(@Param('userSeq') userSeq: number) : Promise<{ total: number, win: number }> {
+    const ret = await this.gameLogService.findUserGameLog(userSeq);
+    return ret;
   }
 
   // NOTE: rank (mmr) 점수는 Rank 모듈에서?
