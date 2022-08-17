@@ -92,7 +92,12 @@ export class AlarmGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
   @OnEvent('alarm:refresh')
   async triggerRefreshAlarm(who: number) {
-    this.server.to(who.toString()).emit('alarm:confirm');
+    this.logger.debug(`emit alarm:confirm to ${who.toString()}`);
+    const clients = await this.alarmService.getOnlineClients(who);
+    if (clients.length > 0) {
+      this.server.to(clients).emit('alarm:confirm');
+    }
+
     // this.server.emit('alarm:normal', who);
     // this.server.emit('alarm:refresh', who);
   }
