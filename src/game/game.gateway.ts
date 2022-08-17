@@ -224,14 +224,17 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @OnEvent('game:end')
   async handleGameEnd(gameData: GameData) {
     const { metaData, metaData: { roomId } } = gameData;
-    this.logger.debug(`game ${roomId} ended with data: ${gameData}`);
+    this.logger.debug(`game ${roomId} ended`);
+    this.logger.debug('call gameservice endgame', roomId);
     await this.gameService.endGame(roomId);
     /** remove roomid from session */
     metaData.playerBlue.roomId = null;
     metaData.playerRed.roomId = null;
+    this.logger.debug('emit game:end event to', roomId);
     this.server.to(roomId).emit('game:end', gameData);
 
     /** remove player from socketroom */
+    this.logger.debug('socket leave', roomId);
     this.server.in(roomId).socketsLeave(roomId);
   }
 }

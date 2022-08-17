@@ -136,6 +136,7 @@ export class GameService {
   /** 게임을 종료 시킨다. */
   async endGame(roomId: string) {
     this.logger.debug(`ended games roomId: ${roomId}`);
+    console.log('games', this.games);
     const {
       metaData: { playerBlue, playerRed, isRankGame },
       inGameData: { winnerSeq },
@@ -145,9 +146,11 @@ export class GameService {
     this.users.delete(playerBlue.userSeq);
     if (isRankGame) {
       if (winnerSeq && winnerSeq === playerBlue.userSeq) {
+        this.logger.debug(playerRed.userSeq, 'red is win and record rank');
         await this.userRankService.saveLoseUser(playerRed.userSeq);
         await this.userRankService.saveWinUser(playerBlue.userSeq);
       } else if (winnerSeq && winnerSeq === playerRed.userSeq) {
+        this.logger.debug(playerBlue.userSeq, ' blue is win and record rank');
         await this.userRankService.saveLoseUser(playerBlue.userSeq);
         await this.userRankService.saveWinUser(playerRed.userSeq);
       } else {
