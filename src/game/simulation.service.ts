@@ -70,6 +70,10 @@ export class SimulationService {
           this.eventRunner.emit('game:end', { metaData, inGameData });
           this.eventRunner.emit('event:gameEnd', metaData.playerBlue);
           this.eventRunner.emit('event:gameEnd', metaData.playerRed);
+          inGameData.status = GameStatus.Ending;
+          break;
+        }
+        case GameStatus.Ending: {
           break;
         }
         default: {

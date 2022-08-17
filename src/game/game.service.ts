@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto';
 import { UserDto } from 'src/user/dto/user.dto';
 import { UserService } from 'src/user/user.service';
 import { AlarmService } from 'src/alarm/alarm.service';
+import { UserRankService } from 'src/profile/user-rank.service';
 import {
   GameData, MetaData,
 } from './dto/game-data';
@@ -30,6 +31,7 @@ export class GameService {
     private gamelogService: GameLogService,
     private readonly userService: UserService,
     private readonly alarmService: AlarmService,
+    private readonly userRankService: UserRankService,
   ) {}
 
   /** roomId를 통해 현재 이 방이 진행중 인지 확인한다. */
@@ -134,10 +136,27 @@ export class GameService {
   /** 게임을 종료 시킨다. */
   async endGame(roomId: string) {
     this.logger.debug(`ended games roomId: ${roomId}`);
-    const { playerBlue, playerRed } = this.games.get(roomId).metaData;
+    console.log('games', this.games);
+    const {
+      metaData: { playerBlue, playerRed, isRankGame },
+      inGameData: { winnerSeq },
+    } = this.games.get(roomId);
     this.games.delete(roomId);
-    this.users.delete(playerRed.userId);
-    this.users.delete(playerBlue.userId);
+    this.users.delete(playerRed.userSeq);
+    this.users.delete(playerBlue.userSeq);
+    if (isRankGame) {
+      if (winnerSeq && winnerSeq === playerBlue.userSeq) {
+        this.logger.debug(playerRed.userSeq, 'red is win and record rank');
+        await this.userRankService.saveLoseUser(playerRed.userSeq);
+        await this.userRankService.saveWinUser(playerBlue.userSeq);
+      } else if (winnerSeq && winnerSeq === playerRed.userSeq) {
+        this.logger.debug(playerBlue.userSeq, ' blue is win and record rank');
+        await this.userRankService.saveLoseUser(playerBlue.userSeq);
+        await this.userRankService.saveWinUser(playerRed.userSeq);
+      } else {
+        this.logger.error('end game is going something wrong');
+      }
+    }
     await this.simulator.saveAfterEndGame(roomId);
   }
 

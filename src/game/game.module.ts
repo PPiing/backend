@@ -4,6 +4,7 @@ import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { AppModule } from 'src/app.module';
 import { AlarmModule } from 'src/alarm/alarm.module';
 import { UserModule } from 'src/user/user.module';
+import { ProfileModule } from 'src/profile/profile.module';
 import { GameGateway } from './game.gateway';
 import { GameService } from './game.service';
 import { GameLogRepository } from './repository/game-log.repository';
@@ -20,6 +21,7 @@ import GameController from './game.controller';
     TypeOrmModule.forFeature([GameLogRepository]),
     UserModule,
     AlarmModule,
+    ProfileModule,
   ],
   providers: [
     GameService,
