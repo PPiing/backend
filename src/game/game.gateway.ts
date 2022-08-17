@@ -7,7 +7,7 @@ import {
 import { Server } from 'socket.io';
 import { SocketGuard } from 'src/guards/socket.guard';
 import { SessionMiddleware } from 'src/session-middleware';
-import { RenderData, GameData,} from './dto/game-data';
+import { RenderData, GameData } from './dto/game-data';
 import { ScoreData } from './dto/in-game.dto';
 import { RuleDto } from './dto/rule.dto';
 import { GameService } from './game.service';
