@@ -13,6 +13,7 @@ import configuration from './configs/configuration';
 import { GameModule } from './game/game.module.e2e-spec';
 import { ProfileModule } from './profile/profile.module.e2e-spec';
 import { SessionMiddleware } from './session-middleware';
+import { StatusModule } from './status/status.module';
 import { UserModule } from './user/user.module.e2e-spec';
 
 @Module({
@@ -30,6 +31,7 @@ import { UserModule } from './user/user.module.e2e-spec';
     FriendsModule,
     AlarmModule,
     ProfileModule,
+    StatusModule,
   ],
   controllers: [AppController],
   providers: [AppService, SessionMiddleware],

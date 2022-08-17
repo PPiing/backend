@@ -7,9 +7,7 @@ import {
 import { Server } from 'socket.io';
 import { SocketGuard } from 'src/guards/socket.guard';
 import { SessionMiddleware } from 'src/session-middleware';
-import {
-  PaddleDirective, RenderData, GameData,
-} from './dto/game-data';
+import { RenderData, GameData } from './dto/game-data';
 import { ScoreData } from './dto/in-game.dto';
 import { RuleDto } from './dto/rule.dto';
 import { GameService } from './game.service';
@@ -108,7 +106,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @OnEvent('game:ready')
   handleMatch(gameData: GameData) {
     this.logger.debug('game:ready');
-    console.log(gameData);
     const { ruleData, metaData, metaData: { playerBlue, playerRed } } = gameData;
     const players = [
       playerBlue?.userSeq?.toString(),

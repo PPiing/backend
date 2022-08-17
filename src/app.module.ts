@@ -18,6 +18,7 @@ import { SessionMiddleware } from './session-middleware';
 import { AlarmModule } from './alarm/alarm.module';
 import { UploadModule } from './upload/upload.module';
 import { MailModule } from './mail/mail.module';
+import { StatusModule } from './status/status.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { MailModule } from './mail/mail.module';
     GameModule,
     AuthModule,
     ChatroomsModule,
+    StatusModule,
     CommunityBarModule,
     AlarmModule,
     ProfileModule,
