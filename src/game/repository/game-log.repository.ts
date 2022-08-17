@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import { Logger } from '@nestjs/common';
 import GameLog from 'src/entities/game-log.entity';
 import { EntityRepository, Repository } from 'typeorm';
@@ -64,7 +63,6 @@ export class GameLogRepository extends Repository<GameLog> {
       ballSpeed: ruleData.ballSpeed,
       matchScore: ruleData.matchScore,
     });
-    console.log('savegame', newLog);
     const savedLog = await this.save(newLog);
     return savedLog.gameLogSeq;
   }

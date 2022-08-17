@@ -100,7 +100,6 @@ export class SimulationService {
 
     /* add game in simulation game queue */
     this.games.set(metaData.roomId, game);
-    console.log('game set ', metaData.roomId, game);
     this.addInterval(metaData.roomId, game, 17);
   }
 
@@ -129,7 +128,6 @@ export class SimulationService {
     direction: PaddleDirective,
   ) {
     const game = this.games.get(roomId);
-    console.log('game', game);
     const { metaData, inGameData } = game;
     if (!metaData || !inGameData) return;
     if (metaData.playerBlue.userSeq === userId) {

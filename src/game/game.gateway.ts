@@ -105,7 +105,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @OnEvent('game:ready')
   handleMatch(gameData: GameData) {
     this.logger.debug('game:ready');
-    console.log(gameData);
     const { ruleData, metaData, metaData: { playerBlue, playerRed } } = gameData;
     const players = [
       playerBlue?.userSeq?.toString(),
