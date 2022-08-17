@@ -601,14 +601,16 @@ export default class ChatroomsController {
     for (let index = 0; index < userLists.length; index += 1) {
       maps.set(userIdLists[index], userLists[index]);
     }
-    return messages.map((message) => ({
-      msgSeq: message.msgSeq,
-      chatSeq: message.chatSeq,
-      userSeq: message.userSeq,
-      msg: message.msg,
-      createAt: message.createAt,
-      nickname: maps.get(message.userSeq).nickName,
-    }));
+    return messages
+      .sort((a, b) => (a.msgSeq < b.msgSeq ? 1 : -1))
+      .map((message) => ({
+        msgSeq: message.msgSeq,
+        chatSeq: message.chatSeq,
+        userSeq: message.userSeq,
+        msg: message.msg,
+        createAt: message.createAt,
+        nickname: maps.get(message.userSeq).nickName,
+      }));
   }
 
   /**
