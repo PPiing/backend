@@ -603,6 +603,18 @@ export default class ChatroomsService implements OnModuleInit {
     return find !== undefined;
   }
 
+  async bannedUserList(chatSeq: number): Promise<number[]> {
+    const parti = await this.chatParticipantRepository.getChatParticipantsByRoomid(chatSeq);
+    const bannedCheckList = await Promise.all(parti.map((p) => this.isBanned(p.userSeq, chatSeq)));
+    const result = [];
+    for (let index = 0; index < parti.length; index += 1) {
+      if (bannedCheckList[index]) {
+        result.push(parti[index].userSeq);
+      }
+    }
+    return result;
+  }
+
   /**
    * 밴당한 유저를 해제합니다.
    *

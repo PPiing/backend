@@ -371,6 +371,28 @@ export default class ChatroomsController {
   }
 
   /**
+   * 특정 방에 벤당한 유저 리스트를 불러옵니다.
+   *
+   * @param roomId 방 ID
+   */
+  @ApiOperation({ summary: '방에서 밴당한 사람 확인', description: '특정 방에 벤당한 유저 리스트를 불러옵니다.' })
+  @ApiResponse({ status: 200, description: '밴 성공' })
+  @ApiResponse({ status: 400, description: '존재하지 않는 방' })
+  @ApiParam({
+    name: 'roomId', type: Number, example: 1, description: '방 ID',
+  })
+  @Get('ban/:roomId')
+  async bannedUserList(
+    @Param('roomId', ParseIntPipe) roomId: number,
+      @User() user: UserDto,
+  ): Promise<number[]> {
+    const { userSeq } = user;
+    this.logger.debug(`bannedUserList: ${roomId}`);
+    await this.chatroomsService.checkRooms([roomId]);
+    return this.chatroomsService.bannedUserList(roomId);
+  }
+
+  /**
    * 밴된 사용자를 밴 해제합니다.
    * 밴 해제하는 사용자가 권한이 없거나 자기 자신을 밴 해제하거나 존재하지 않는 사용자면 에러가 발생합니다.
    *
