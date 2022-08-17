@@ -609,7 +609,7 @@ export default class ChatroomsController {
         userSeq: message.userSeq,
         msg: message.msg,
         createAt: message.createAt,
-        nickname: maps.get(message.userSeq).nickName,
+        nickname: maps.get(message.userSeq) !== undefined ? maps.get(message.userSeq).nickName : 'SYSTEM',
       }));
   }
 

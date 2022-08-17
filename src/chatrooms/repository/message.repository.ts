@@ -37,10 +37,11 @@ export default class MessageRepository extends Repository<Message> {
     .where('message.chatSeq = :chatSeq', {
       chatSeq,
     })
-    .andWhere('message.chatSeq < :messageId', {
+    .andWhere('message.msgSeq < :messageId', {
       messageId,
     })
-    .limit(limit);
+    .limit(limit)
+    .orderBy("message.msgSeq", "DESC");
     if (blockedUsers.length > 0) {
       query.andWhere('message.userSeq NOT IN (:blockedUsers)', {
         blockedUsers,
@@ -62,6 +63,11 @@ export default class MessageRepository extends Repository<Message> {
    * @returns 메시지 ID (PK)
    */
   async getLastChatIndex(): Promise<number> {
-    return await this.createQueryBuilder('message').getCount();
+    const result = await this.findOne({
+      order: {
+        msgSeq: 'DESC',
+      }
+    });
+    return result.msgSeq;
   }
 }
