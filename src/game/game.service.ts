@@ -69,7 +69,8 @@ export class GameService {
     const redPlayer = await this.userService.findByUserId(alarm.senderSeq);
     if (bluePlayer === undefined || redPlayer === undefined) { throw new NotFoundException('해당 유저가 존재하지 않습니다.'); }
     // TODO: user 접속중 확인하고 아니면 error 응답.
-
+    const sender = await this.alarmService.getOnlineClients(alarm.senderSeq);
+    if (Array.isArray(sender) && sender.length === 0) throw new NotFoundException('해당 유저가 존재하지 않습니다.');
     await this.createGame([[bluePlayer, null], [redPlayer, null]]);
   }
 
@@ -87,19 +88,26 @@ export class GameService {
     /** save in session, 저장 잘 안되면 인자로 userdto말고 세션 통째로 가져와야함.
      * session에 roomid 저장
     */
-    console.log('requeset', bluePlayer.request);
-    bluePlayer.request.session.passport.user.roomId = newRoomId;
-    bluePlayer.request.user.roomId = newRoomId;
-    redPlayer.request.session.passport.user.roomId = newRoomId;
-    redPlayer.request.user.roomId = newRoomId;
-    await bluePlayer.request.session.save();
-    await redPlayer.request.session.save();
-
+    let blue:UserDto; let
+      red:UserDto;
+    if (bluePlayer.request) {
+      bluePlayer.request.session.passport.user.roomId = newRoomId;
+      bluePlayer.request.user.roomId = newRoomId;
+      redPlayer.request.session.passport.user.roomId = newRoomId;
+      redPlayer.request.user.roomId = newRoomId;
+      blue = bluePlayer.request.user;
+      red = redPlayer.request.user;
+      await bluePlayer.request.session.save();
+      await redPlayer.request.session.save();
+    } else {
+      blue = bluePlayer;
+      red = redPlayer;
+    }
     /** metaData */
     newGame.metaData = new MetaData(
       newRoomId,
-      bluePlayer.request.session.passport.user,
-      redPlayer.request.session.passport.user,
+      blue,
+      red,
       blueRule.isRankGame,
     );
 
@@ -114,18 +122,12 @@ export class GameService {
     /** inGameData */
     newGame.inGameData = new InGameData();
     this.games.set(newGame.metaData.roomId, newGame);
-    this.users.set(bluePlayer.request.session.passport.user.userSeq, newRoomId);
-    this.users.set(redPlayer.request.session.passport.user.userSeq, newRoomId);
+    this.users.set(blue.userSeq, newRoomId);
+    this.users.set(red.userSeq, newRoomId);
 
     /** add gameData into simulator */
     await this.simulator.initBeforeStartGame(newGame);
     this.eventRunner.emit('game:ready', newGame);
-  }
-
-  /** for Testing */
-  createTestGame(client: any) {
-    this.logger.debug('createTestGame', client);
-    this.simulator.initBeforeStartTestGame(client);
   }
 
   /** 게임을 종료 시킨다. */
@@ -135,7 +137,7 @@ export class GameService {
     this.games.delete(roomId);
     this.users.delete(playerRed.userId);
     this.users.delete(playerBlue.userId);
-    this.simulator.saveAfterEndGame(roomId);
+    await this.simulator.saveAfterEndGame(roomId);
   }
 
   /**
@@ -147,17 +149,5 @@ export class GameService {
   handlePaddle(roomId: string, userId: number, cmd: PaddleDirective) {
     this.logger.debug(`handlePaddle called with roomId ${roomId} userId ${userId}, ${cmd}`);
     this.simulator.handlePaddle(roomId, userId, cmd);
-  }
-
-  /**
-   * TESETESTSETSETSETSETSETSETSETSE
-   * 자신의 패들 방향을 바꾼다.
-   * @param roomId 방 아이디
-   * @param userId 유저 아이디
-   * @param cmd 패들 움직임 명령
-   */
-  handleTestPaddle(roomId: string, userId: string, cmd: number) {
-    this.logger.debug(`handleTestPaddle(roomId: ${roomId}, userId: ${userId})`);
-    this.simulator.handleTestPaddle(roomId, userId, cmd);
   }
 }

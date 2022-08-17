@@ -74,10 +74,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   async handleDisconnect(client: any) {
     const { userSeq, roomId } = client.request.user;
-    this.logger.debug(`user ${userSeq} disconnected`);
     const matchingSocket = await this.server.in(userSeq.toString()).allSockets();
     const isDisconnected = matchingSocket.size === 0;
 
+    // TODO check matching socket
+    this.logger.debug(`user ${userSeq} disconnected sockets: ${matchingSocket}`);
     if (isDisconnected) {
       if (roomId !== null) {
         client.to(roomId).emit('player:leave', userSeq);
@@ -123,20 +124,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     });
   }
 
-  @OnEvent('game:testready')
-  testhandleMatch(gameData: GameData) {
-    this.logger.debug('game:ready');
-    console.log(gameData);
-    const { ruleData, metaData, metaData: { playerBlue, playerRed } } = gameData;
-
-    /** emit match data */
-    this.server.to(metaData.roomId).emit('game:ready', {
-      ruleData,
-      blueUser: metaData?.playerBlue?.nickName,
-      redUser: metaData?.playerRed?.nickName,
-    });
-  }
-
   /**
    * 게임 시작전 ready 이벤트
    * @param roomId 방 아이디
@@ -161,24 +148,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       client.request.user.userSeq,
       data,
     );
-  }
-
-  /**
-   *  TTTTTTTTEEEEEEEESSSSSSSSTTTTTt
-   * 자신의 패들의 움직임 방향을 바꾼다.
-   * @param client 유저 소켓
-   * @param data paddle의 움직임 방향
-   */
-  @UseGuards(SocketGuard)
-  @SubscribeMessage('test:paddle')
-  handlePaddleTestControl(client: any, data: number) {
-    this.gameService.handleTestPaddle(client.id, client.id, data);
-  }
-
-  @SubscribeMessage('test:render')
-  forTestPurpose(client: any) {
-    this.logger.debug(`test:render ${client}`);
-    this.gameService.createTestGame(client);
   }
 
   /**
@@ -252,10 +221,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param roomId 게임의 roomId
    */
   @OnEvent('game:end')
-  handleGameEnd(gameData: GameData) {
+  async handleGameEnd(gameData: GameData) {
     const { metaData, metaData: { roomId } } = gameData;
     this.logger.debug(`game ${roomId} ended with data: ${gameData}`);
-    this.gameService.endGame(roomId);
+    await this.gameService.endGame(roomId);
     /** remove roomid from session */
     metaData.playerBlue.roomId = null;
     metaData.playerRed.roomId = null;
