@@ -43,4 +43,12 @@ export class UserRankService {
 
     return result;
   }
+
+  async saveWinUser(userSeq: number) {
+    await this.rankRepository.saveWinUser(userSeq);
+  }
+
+  async saveLoseUser(userSeq: number) {
+    await this.rankRepository.saveLoseUser(userSeq);
+  }
 }

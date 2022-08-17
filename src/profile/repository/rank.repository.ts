@@ -24,4 +24,20 @@ export class RankRepository extends Repository<Rank> {
     }
     return target[0];
   }
+
+  async saveWinUser(userSeq: number) {
+    const target: RankDto = await this.getRank(userSeq);
+    if (target) {
+      target.rankScore += 10;
+      await this.save(target);
+    }
+  }
+
+  async saveLoseUser(userSeq:number) {
+    const target: RankDto = await this.getRank(userSeq);
+    if (target) {
+      target.rankScore -= 10;
+      await this.save(target);
+    }
+  }
 }

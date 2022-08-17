@@ -32,6 +32,6 @@ import { UserRankService } from './user-rank.service';
     UserGameService,
     UserRankService,
   ],
-  exports: [UserProfileService],
+  exports: [UserProfileService, UserRankService],
 })
 export class ProfileModule {}
