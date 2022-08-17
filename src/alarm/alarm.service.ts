@@ -107,6 +107,7 @@ export class AlarmService {
         read: false,
       },
     });
+
     if (!presence) {
       await this.alarmRepository.createAlarm(senderSeq, receiverSeq, alarmType, alarmCode);
     }
