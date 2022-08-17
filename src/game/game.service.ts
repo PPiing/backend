@@ -109,6 +109,7 @@ export class GameService {
       newGame.ruleData.ballSpeed = blueRule.ballSpeed;
       newGame.ruleData.matchScore = blueRule.matchScore;
       newGame.ruleData.paddleSize = redRule.paddleSize;
+      newGame.ruleData.isRankGame = redRule.isRankGame;
     }
 
     /** metaData */
@@ -116,7 +117,7 @@ export class GameService {
       newRoomId,
       blue,
       red,
-      blueRule.isRankGame,
+      newGame.ruleData.isRankGame,
     );
 
     /** inGameData */
