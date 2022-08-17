@@ -103,13 +103,6 @@ export class GameService {
       blue = bluePlayer;
       red = redPlayer;
     }
-    /** metaData */
-    newGame.metaData = new MetaData(
-      newRoomId,
-      blue,
-      red,
-      blueRule.isRankGame,
-    );
 
     /** temporarily apply bluePlayer's rule */
     newGame.ruleData = new RuleDto();
@@ -118,6 +111,14 @@ export class GameService {
       newGame.ruleData.matchScore = blueRule.matchScore;
       newGame.ruleData.paddleSize = redRule.paddleSize;
     }
+
+    /** metaData */
+    newGame.metaData = new MetaData(
+      newRoomId,
+      blue,
+      red,
+      blueRule.isRankGame,
+    );
 
     /** inGameData */
     newGame.inGameData = new InGameData();
