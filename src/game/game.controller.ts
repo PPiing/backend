@@ -45,7 +45,8 @@ export default class GameController {
   @ApiResponse({ status: 404, description: 'player의 seq가 유효하지 않은 경우' })
   @UseGuards(CheckLogin)
   @Put('accept/:alarmSeq')
-  async acceptInvite(@Param('alarmSeq') alarmSeq: number) {
+  async acceptInvite(@Param('alarmSeq') alarmSeq: number, @User() user: UserDto) {
+    await this.alarmService.readAlarm(alarmSeq, user.userSeq);
     await this.gameService.handleAcceptInvite(alarmSeq);
   }
 
