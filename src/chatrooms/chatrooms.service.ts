@@ -860,7 +860,7 @@ export default class ChatroomsService implements OnModuleInit {
       chatSeq: chatroom.chatSeq,
       chatName: chatroom.chatName,
       chatType: chatroom.chatType,
-      isPassword: chatroom.password && chatroom.password.length > 0,
+      isPassword: chatroom.password.length > 0,
       participants,
     };
   }

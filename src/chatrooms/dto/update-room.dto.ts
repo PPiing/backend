@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import ChatType from 'src/enums/mastercode/chat-type.enum';
 
 export class UpdateRoomDto {
@@ -20,9 +20,9 @@ export class UpdateRoomDto {
   })
     chatType: ChatType;
 
-  @ApiProperty({
-    description: '채팅방 비밀번호',
+  @ApiPropertyOptional({
+    description: '채팅방 비밀번호 (비밀번호를 추가하거나 변경할 경우에만 입력)',
     example: 'pass1234',
   })
-    password: string;
+    password?: string;
 }

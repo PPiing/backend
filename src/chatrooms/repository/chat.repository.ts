@@ -116,7 +116,7 @@ export default class ChatRepository extends Repository<Chat> {
 
     target.chatName = roomInfo.chatName;
     target.chatType = roomInfo.chatType;
-    if (roomInfo.chatType === 'CHTP40') {
+    if (roomInfo.chatType === 'CHTP40' && roomInfo.password) {
       target.password = roomInfo.password;
     }
 
