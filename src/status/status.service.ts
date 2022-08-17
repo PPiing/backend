@@ -4,15 +4,15 @@ import {
 import { Cache } from 'cache-manager';
 import { Socket } from 'socket.io';
 import UserStatus from 'src/enums/mastercode/user-status.enum';
-import FriendsRepository from './friends.repository';
-import StatusRepository from './status.repository';
+import FriendsRepository from './repository/friends.repository';
+import UserStatusRepository from './repository/user-status.repository';
 
 @Injectable()
 export class StatusService {
   private readonly logger = new Logger(StatusService.name);
 
   constructor(
-    private statusRepository: StatusRepository,
+    private statusRepository: UserStatusRepository,
     private friendRepository: FriendsRepository,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
@@ -24,6 +24,8 @@ export class StatusService {
    * @param userSeq 접속 사용자 시퀀스
    */
   async onlineUserAdd(userSocket: Socket, userSeq: number): Promise<void> {
+    this.logger.debug(`online User Add: ${userSeq}`);
+
     const key = `StatusService-userID-${userSeq}`;
     const value: undefined | Array<string> = await this.cacheManager.get(key);
     if (value === undefined) {
@@ -40,6 +42,8 @@ export class StatusService {
    * @param userSeq 접속이 끊긴 사용자 시퀀스
    */
   async onlineUserRemove(userSocket: Socket, userSeq: number): Promise<void> {
+    this.logger.debug(`online User Remove: ${userSeq}`);
+
     const key = `StatusService-userID-${userSeq}`;
     const value: undefined | Array<string> = await this.cacheManager.get(key);
     if (value) {
@@ -59,9 +63,11 @@ export class StatusService {
    * @param client 접속된 client socket
    */
   async saveClient(client: Socket, userSeq: number) {
+    this.logger.debug(`save Client: ${userSeq}`);
+
     this.cacheManager.set(client.id, userSeq, { ttl: 0 });
     this.cacheManager.set(String(userSeq), client.id, { ttl: 0 });
-    await this.statusRepository.updateStatus(userSeq, UserStatus.USST10);
+    await this.statusRepository.updateUserStatus(userSeq, UserStatus.USST10);
   }
 
   /**
@@ -71,6 +77,8 @@ export class StatusService {
    * @param client 접속된 client socket
    */
   async removeClient(client: Socket) {
+    this.logger.debug(`remove Client: ${client}`);
+
     // userSeq 저장
     const userSeq: number = await this.cacheManager.get(client.id);
 
@@ -78,7 +86,7 @@ export class StatusService {
     this.cacheManager.del(client.id);
     this.cacheManager.del(String(userSeq));
 
-    await this.statusRepository.updateStatus(userSeq, UserStatus.USST20);
+    await this.statusRepository.updateUserStatus(userSeq, UserStatus.USST20);
   }
 
   /**
@@ -88,11 +96,13 @@ export class StatusService {
    * @param status 상태 (enum으로 변경 예정)
    */
   async updateStatus(client: Socket, status: UserStatus) {
+    this.logger.debug(`update Status: ${client} , ${status}`);
+
     // cache에 저장되어 있는 정보 UPDATE
     const userSeq: number = await this.cacheManager.get(client.id);
 
     // await repository의 updateStatus 호출
-    await this.statusRepository.updateStatus(userSeq, status);
+    await this.statusRepository.updateUserStatus(userSeq, status);
   }
 
   /**
@@ -112,6 +122,8 @@ export class StatusService {
    * @returns 해당 유저의 친구 목록
    */
   async getFriends(userSeq: number): Promise<string[]> {
+    this.logger.debug(`get Friends: ${userSeq}`);
+
     const friends: number[] = await this.friendRepository.findFriends(userSeq);
     const friendsList: string[] = [];
     friends.forEach(async (friend) => {

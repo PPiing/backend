@@ -1,6 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppModule } from 'src/app.module';
 import { AlarmModule } from 'src/alarm/alarm.module';
 import { UserModule } from 'src/user/user.module';

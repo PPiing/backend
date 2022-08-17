@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import {
-  OnGatewayConnection, OnGatewayDisconnect, WebSocketGateway, WebSocketServer,
+  OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, WebSocketGateway, WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import UserStatus from 'src/enums/mastercode/user-status.enum';
@@ -12,16 +12,13 @@ import { StatusService } from './status.service';
   namespace: 'status',
 })
 
-export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(StatusGateway.name);
 
   constructor(
     private sessionMiddleware: SessionMiddleware,
     private readonly statusService: StatusService,
   ) { }
-
-  @WebSocketServer()
-    server: Server;
 
   /**
    * 소켓에도 세션을 적용하기 위한 미들웨어 적용
@@ -34,6 +31,9 @@ export class StatusGateway implements OnGatewayConnection, OnGatewayDisconnect {
     server.use(wrap(this.sessionMiddleware.passportInit));
     server.use(wrap(this.sessionMiddleware.passportSession));
   }
+
+  @WebSocketServer()
+    server: Server;
 
   /**
    * 처음 socket이 연결되었을 때
