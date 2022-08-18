@@ -97,7 +97,6 @@ export class AlarmService {
     alarmType: AlarmType,
     alarmCode: AlarmCode,
   ) : Promise<void> {
-
     const presence = await this.alarmRepository.findOne({
       where: {
         senderSeq,

@@ -128,17 +128,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   @UseGuards(SocketGuard)
   @SubscribeMessage('game:ready')
-  async handleGameReady(client: any, gameData: {roomId: string}) {
+  async handleGameReady(client: any, gameData: { roomId: string }) {
+    // eslint-disable-next-line no-param-reassign
     client.request.user.roomId = gameData.roomId;
+    // eslint-disable-next-line no-param-reassign
     client.request.session.passport.user.roomId = gameData.roomId;
     await client.request.session.save();
   }
+
   /**
    * 게임 시작전 ready 이벤트
    * @param roomId 방 아이디
    */
   @OnEvent('game:start')
-  handleGamestart(roomId: string) {
+  handleGameStart(roomId: string) {
     this.logger.debug(`game:start, ${roomId}`);
     this.server.to(roomId).emit('game:start');
   }
