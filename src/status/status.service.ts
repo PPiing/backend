@@ -97,10 +97,6 @@ export class StatusService {
    */
   async updateStatus(userSeq: number, status: UserStatus) {
     this.logger.debug(`update Status: ${userSeq} , ${status}`);
-
-    // cache에 저장되어 있는 정보 UPDATE
-    // const userSeq: number = await this.cacheManager.get(client.id);
-
     // await repository의 updateStatus 호출
     await this.statusRepository.updateUserStatus(userSeq, status);
   }
@@ -119,7 +115,7 @@ export class StatusService {
   /**
    *
    * @param userSeq 유저의 seq
-   * @returns 해당 유저의 친구 목록
+   * @returns 해당 유저와 유저의 친구 목록
    */
   async getFriends(userSeq: number): Promise<string[]> {
     this.logger.debug(`get Friends: ${userSeq}`);
@@ -130,6 +126,7 @@ export class StatusService {
       const friendId: string = await this.cacheManager.get(String(friend));
       friendsList.push(friendId);
     });
+    friendsList.push(await this.cacheManager.get(String(userSeq)));
 
     return friendsList;
   }
