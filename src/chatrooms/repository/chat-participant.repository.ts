@@ -164,7 +164,7 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
     if (result === null || result === undefined) {
       return false;
     }
-    this.delete(result);
+    this.remove(result);
     return true;
   }
 }
