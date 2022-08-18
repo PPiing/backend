@@ -92,17 +92,17 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
    * @param client 연결된 client socket
    */
   @OnEvent('event:gameStart')
-  async onGameStart(client: Socket, userSeq: number) {
-    this.logger.debug(`Client start game: ${client.id}`);
+  async onGameStart(userSeq: number) {
+    this.logger.debug(`Client start game: ${userSeq}`);
 
     const friendsList: string[] = await this.statusService.getFriends(userSeq);
-    client.to(friendsList).emit('status_update', {
+    this.server.to(friendsList).emit('status_update', {
       userSeq,
       status: UserStatus.USST10,
     });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
-    this.statusService.updateStatus(client, UserStatus.USST30);
+    this.statusService.updateStatus(userSeq, UserStatus.USST30);
   }
 
   /**
@@ -112,16 +112,16 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
    * @param client 연결된 client socket
    */
   @OnEvent('event:gameEnd')
-  async onGameFinish(client: Socket, userSeq: number) {
-    this.logger.debug(`Client finish game: ${client.id}`);
+  async onGameFinish(userSeq: number) {
+    this.logger.debug(`Client finish game: ${userSeq}`);
 
     const friendsList: string[] = await this.statusService.getFriends(userSeq);
-    client.to(friendsList).emit('status_update', {
+    this.server.to(friendsList).emit('status_update', {
       userSeq,
       status: UserStatus.USST10,
     });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
-    this.statusService.updateStatus(client, UserStatus.USST10);
+    this.statusService.updateStatus(userSeq, UserStatus.USST10);
   }
 }
