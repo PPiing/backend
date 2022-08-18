@@ -116,6 +116,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.server.in(players).socketsJoin(metaData.roomId);
     /** emit match data */
     this.server.to(metaData.roomId).emit('game:ready', {
+      roomId: metaData.roomId,
       ruleData,
       blueUser: metaData?.playerBlue?.nickName,
       redUser: metaData?.playerRed?.nickName,
@@ -123,11 +124,24 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   /**
+   * 유저가 게임레디가 되면 roomId를 세션에 저장해 준다.
+   */
+  @UseGuards(SocketGuard)
+  @SubscribeMessage('game:ready')
+  async handleGameReady(client: any, gameData: { roomId: string }) {
+    // eslint-disable-next-line no-param-reassign
+    client.request.user.roomId = gameData.roomId;
+    // eslint-disable-next-line no-param-reassign
+    client.request.session.passport.user.roomId = gameData.roomId;
+    await client.request.session.save();
+  }
+
+  /**
    * 게임 시작전 ready 이벤트
    * @param roomId 방 아이디
    */
   @OnEvent('game:start')
-  handleGamestart(roomId: string) {
+  handleGameStart(roomId: string) {
     this.logger.debug(`game:start, ${roomId}`);
     this.server.to(roomId).emit('game:start');
   }

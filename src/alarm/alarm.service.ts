@@ -106,7 +106,7 @@ export class AlarmService {
         read: false,
       },
     });
-
+    // TODO: check online status of receiver & sender
     if (!presence) {
       await this.alarmRepository.createAlarm(senderSeq, receiverSeq, alarmType, alarmCode);
     }

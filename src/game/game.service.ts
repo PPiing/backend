@@ -70,8 +70,10 @@ export class GameService {
     const bluePlayer = await this.userService.findByUserId(alarm.receiverSeq);
     const redPlayer = await this.userService.findByUserId(alarm.senderSeq);
     if (bluePlayer === undefined || redPlayer === undefined) { throw new NotFoundException('해당 유저가 존재하지 않습니다.'); }
-    const sender = await this.alarmService.getOnlineClients(alarm.senderSeq);
-    if (Array.isArray(sender) && sender.length === 0) throw new NotFoundException('해당 유저가 존재하지 않습니다.');
+    // TODO: check if sender is not in game state.
+    // const sender = await this.alarmService.getOnlineClients(alarm.senderSeq);
+    // if (Array.isArray(sender) && sender.length === 0)
+    //  throw new NotFoundException('해당 유저가 존재하지 않습니다.');
     await this.createGame([[bluePlayer, null], [redPlayer, null]]);
   }
 
