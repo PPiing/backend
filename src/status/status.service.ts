@@ -95,11 +95,11 @@ export class StatusService {
    * @param client 접속된 client socket
    * @param status 상태 (enum으로 변경 예정)
    */
-  async updateStatus(client: Socket, status: UserStatus) {
-    this.logger.debug(`update Status: ${client} , ${status}`);
+  async updateStatus(userSeq: number, status: UserStatus) {
+    this.logger.debug(`update Status: ${userSeq} , ${status}`);
 
     // cache에 저장되어 있는 정보 UPDATE
-    const userSeq: number = await this.cacheManager.get(client.id);
+    // const userSeq: number = await this.cacheManager.get(client.id);
 
     // await repository의 updateStatus 호출
     await this.statusRepository.updateUserStatus(userSeq, status);
