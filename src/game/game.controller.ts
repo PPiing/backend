@@ -1,5 +1,5 @@
 import {
-  Controller, HttpCode, Param, Post, Put, UseGuards,
+  Controller, HttpCode, Param, Post, Put, Req, UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { AlarmService } from 'src/alarm/alarm.service';
@@ -34,7 +34,7 @@ export default class GameController {
   @Post('invite/:playerSeq')
   @HttpCode(204)
   async invitePlayer(@User() user: UserDto, @Param('playerSeq') player: number) {
-    return this.alarmService.addAlarm(user.userSeq, player, AlarmType.ALTP20, AlarmCode.ALAM21);
+    await this.alarmService.addAlarm(user.userSeq, player, AlarmType.ALTP20, AlarmCode.ALAM21);
   }
 
   /**

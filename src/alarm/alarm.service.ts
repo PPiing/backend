@@ -97,6 +97,7 @@ export class AlarmService {
     alarmType: AlarmType,
     alarmCode: AlarmCode,
   ) : Promise<void> {
+
     const presence = await this.alarmRepository.findOne({
       where: {
         senderSeq,
@@ -106,7 +107,7 @@ export class AlarmService {
         read: false,
       },
     });
-
+    // TODO: check online status of receiver & sender
     if (!presence) {
       await this.alarmRepository.createAlarm(senderSeq, receiverSeq, alarmType, alarmCode);
     }
