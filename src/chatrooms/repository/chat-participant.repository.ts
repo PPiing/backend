@@ -32,6 +32,7 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
     const results = await this.find({
       where: {
         chatSeq: roomid,
+        leavedAt: null,
       }
     });
     return results.map(result => ({
@@ -54,6 +55,7 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
     const results = await this.find({
       where: {
         partcSeq: userid,
+        leavedAt: null,
       }
     });
     return results.map(result => ({
@@ -76,6 +78,7 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
     const results = await this.find({
       where: {
         userSeq: id,
+        leavedAt: null,
       }
     });
     return results.map(result => result.chatSeq);
@@ -96,6 +99,7 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
       where: {
         chatSeq: chatSeq,
         userSeq: userId,
+        leavedAt: null,
       }
     });
     if (result === null || result === undefined) {
@@ -140,6 +144,7 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
       where: {
         chatSeq: chatSeq,
         userSeq: user,
+        leavedAt: null,
       }
     });
     if (result !== null && result !== undefined) {
@@ -164,7 +169,8 @@ export default class ChatParticipantRepository extends Repository<ChatParticipan
     if (result === null || result === undefined) {
       return false;
     }
-    this.remove(result);
+    result.leavedAt = new Date();
+    this.save(result);
     return true;
   }
 }
