@@ -22,6 +22,10 @@ export class SimulationService {
     private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
 
+  findCurrentGame() {
+    return this.games;
+  }
+
   addInterval(roomId: string, gameData:GameData, milliseconds: number) {
     const callback = () => {
       const { inGameData, metaData } = gameData;
