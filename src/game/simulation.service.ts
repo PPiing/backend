@@ -136,9 +136,15 @@ export class SimulationService {
   ) {
     this.logger.debug(`handle paddle roomId: ${roomId}`);
     const game = this.games.get(roomId);
-    if (!game) return this.logger.debug(`${userId} try to handle paddle without roomId`);
+    if (!game) {
+      this.logger.debug(`${userId} try to handle paddle without roomId`);
+      return;
+    }
     const { metaData, inGameData } = game;
-    if (!metaData || !inGameData) return this.logger.debug('game has no meta and ingame');
+    if (!metaData || !inGameData) {
+      this.logger.debug('game has no meta and ingame');
+      return;
+    }
     if (metaData.playerBlue.userSeq === userId) {
       inGameData.paddleBlue.velocity.y = direction;
     }
