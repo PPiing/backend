@@ -22,7 +22,7 @@ export class SimulationService {
     private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
 
-  findCurrentGame() {
+  findCurrentGame(): Map<string, GameData> {
     return this.games;
   }
 

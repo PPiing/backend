@@ -61,7 +61,7 @@ export default class GameController {
   @ApiResponse({ status: 200, description: '정상 작동' })
   @ApiResponse({ status: 400, description: '비정상 작동' })
   @Get('current')
-  async findGameList() {
+  findGameList(): Map<string, GameData> {
     return this.gameService.findCurrentGame();
   }
 

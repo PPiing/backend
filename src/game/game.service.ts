@@ -44,7 +44,7 @@ export class GameService {
     return this.games.get(roomId);
   }
 
-  findCurrentGame() {
+  findCurrentGame(): Map<string, GameData> {
     return this.simulator.findCurrentGame();
   }
 
