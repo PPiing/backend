@@ -129,6 +129,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @UseGuards(SocketGuard)
   @SubscribeMessage('game:ready')
   async handleGameReady(client: any, gameData: { roomId: string }) {
+    this.logger.debug('receive game:ready event from frontend', gameData.roomId);
     // eslint-disable-next-line no-param-reassign
     client.request.user.roomId = gameData.roomId;
     // eslint-disable-next-line no-param-reassign

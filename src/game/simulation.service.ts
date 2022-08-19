@@ -22,6 +22,10 @@ export class SimulationService {
     private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
 
+  findCurrentGame() {
+    return this.games;
+  }
+
   addInterval(roomId: string, gameData:GameData, milliseconds: number) {
     const callback = () => {
       const { inGameData, metaData } = gameData;
@@ -35,8 +39,8 @@ export class SimulationService {
           if (isReady === true) inGameData.status = GameStatus.Playing;
           if (inGameData.status === GameStatus.Playing) {
             this.eventRunner.emit('game:start', roomId);
-            this.eventRunner.emit('event:gameStart', metaData.playerBlue);
-            this.eventRunner.emit('event:gameStart', metaData.playerRed);
+            this.eventRunner.emit('event:gameStart', metaData.playerBlue.userSeq);
+            this.eventRunner.emit('event:gameStart', metaData.playerRed.userSeq);
           }
           break;
         }
@@ -68,8 +72,8 @@ export class SimulationService {
         }
         case GameStatus.End: {
           this.eventRunner.emit('game:end', { metaData, inGameData });
-          this.eventRunner.emit('event:gameEnd', metaData.playerBlue);
-          this.eventRunner.emit('event:gameEnd', metaData.playerRed);
+          this.eventRunner.emit('event:gameEnd', metaData.playerBlue.userSeq);
+          this.eventRunner.emit('event:gameEnd', metaData.playerRed.userSeq);
           inGameData.status = GameStatus.Ending;
           break;
         }
@@ -130,9 +134,17 @@ export class SimulationService {
     userId: number,
     direction: PaddleDirective,
   ) {
+    this.logger.debug(`handle paddle roomId: ${roomId}`);
     const game = this.games.get(roomId);
+    if (!game) {
+      this.logger.debug(`${userId} try to handle paddle without roomId`);
+      return;
+    }
     const { metaData, inGameData } = game;
-    if (!metaData || !inGameData) return;
+    if (!metaData || !inGameData) {
+      this.logger.debug('game has no meta and ingame');
+      return;
+    }
     if (metaData.playerBlue.userSeq === userId) {
       inGameData.paddleBlue.velocity.y = direction;
     }

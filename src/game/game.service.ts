@@ -12,7 +12,6 @@ import { InGameData, PaddleDirective } from './dto/in-game.dto';
 import { SimulationService } from './simulation.service';
 import { GameQueue } from './game-queue';
 import { RuleDto } from './dto/rule.dto';
-import { GameLogService } from './game-log.service';
 
 @Injectable()
 export class GameService {
@@ -28,7 +27,6 @@ export class GameService {
     private eventRunner: EventEmitter2,
     private gameQueue: GameQueue,
     private simulator: SimulationService,
-    private gamelogService: GameLogService,
     private readonly userService: UserService,
     private readonly alarmService: AlarmService,
     private readonly userRankService: UserRankService,
@@ -41,9 +39,13 @@ export class GameService {
   }
 
   /** userSeq를 통해 현재 진행중인 게임을 찾는다. */
-  findCurrentGame(userSeq: number): GameData | undefined {
+  findCurrentGameByUserSeq(userSeq: number): GameData | undefined {
     const roomId = this.users.get(userSeq);
     return this.games.get(roomId);
+  }
+
+  findCurrentGame() {
+    return this.simulator.findCurrentGame();
   }
 
   async handleEnqueue(client: any, ruleData: RuleDto) {

@@ -108,7 +108,7 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const friendsList: string[] = await this.statusService.getFriends(userSeq);
     this.server.to(friendsList).emit('status_update', {
       userSeq,
-      status: UserStatus.USST10,
+      status: UserStatus.USST30,
     });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
@@ -130,7 +130,6 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       userSeq,
       status: UserStatus.USST10,
     });
-
     // 서버에 저장되어 있는 자신의 상태를 업데이트
     await this.statusService.updateStatus(userSeq, UserStatus.USST10);
   }
