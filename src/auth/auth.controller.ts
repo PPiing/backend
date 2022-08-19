@@ -5,10 +5,9 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CheckLogin } from 'src/guards/check-login.guard';
 import { FtGuard } from 'src/guards/ft.guard';
 import { UserDto } from 'src/user/dto/user.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AuthService } from './auth.service';
 import { User } from './user.decorator';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-
 
 @ApiTags('인가/인증 관련')
 @Controller('auth')
