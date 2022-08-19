@@ -18,6 +18,6 @@ export default class UserStatusRepository extends Repository<User> {
       return;
     }
     result.status = status;
-    this.save(result);
+    await this.save(result);
   }
 }

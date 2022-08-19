@@ -7,6 +7,8 @@ import { FtGuard } from 'src/guards/ft.guard';
 import { UserDto } from 'src/user/dto/user.dto';
 import { AuthService } from './auth.service';
 import { User } from './user.decorator';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
 
 @ApiTags('인가/인증 관련')
 @Controller('auth')
@@ -15,6 +17,7 @@ export class AuthController {
 
   constructor(
     private readonly authService: AuthService,
+    private eventRunner: EventEmitter2,
   ) {}
 
   @ApiOperation({
@@ -69,6 +72,7 @@ export class AuthController {
     @Req() req: any,
   ) {
     this.authService.setIsLogin(user, 'N');
+    this.eventRunner.emit('status:logout', user.userSeq);
     req.logout((err) => {
       if (err) {
         this.logger.error(err);

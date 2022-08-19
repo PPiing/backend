@@ -61,7 +61,7 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
-    this.statusService.saveClient(client, userSeq);
+    await this.statusService.saveClient(client, userSeq);
   }
 
   /**
@@ -74,15 +74,25 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     const { userSeq } = client.request.user;
     await this.statusService.onlineUserRemove(client, userSeq);
+  }
+
+  /**
+   * 로그아웃
+   *
+   * @param client 연결된 client socket
+   */
+  @OnEvent('status:logout')
+  async onLogout(userSeq: number) {
+    this.logger.debug(`Client logout: ${userSeq}`);
 
     const friendsList: string[] = await this.statusService.getFriends(userSeq);
-    client.to(friendsList).emit('status_update', {
+    this.server.to(friendsList).emit('status_update', {
       userSeq,
       status: UserStatus.USST20,
     });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
-    this.statusService.removeClient(client);
+    await this.statusService.logoutUser(userSeq);
   }
 
   /**
@@ -91,7 +101,7 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
    *
    * @param client 연결된 client socket
    */
-  @OnEvent('event:gameStart')
+  @OnEvent('status:gameStart')
   async onGameStart(userSeq: number) {
     this.logger.debug(`Client start game: ${userSeq}`);
 
@@ -102,7 +112,7 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
-    this.statusService.updateStatus(userSeq, UserStatus.USST30);
+    await this.statusService.updateStatus(userSeq, UserStatus.USST30);
   }
 
   /**
@@ -111,7 +121,7 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
    *
    * @param client 연결된 client socket
    */
-  @OnEvent('event:gameEnd')
+  @OnEvent('status:gameEnd')
   async onGameFinish(userSeq: number) {
     this.logger.debug(`Client finish game: ${userSeq}`);
 
@@ -122,6 +132,6 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
-    this.statusService.updateStatus(userSeq, UserStatus.USST10);
+    await this.statusService.updateStatus(userSeq, UserStatus.USST10);
   }
 }
