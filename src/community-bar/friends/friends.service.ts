@@ -125,7 +125,7 @@ export class FriendsService {
       AlarmType.ALTP20,
       AlarmCode.ALAM20,
     );
-    await this.alarmService.readAlarm(alarm, target);
+    await this.alarmService.readAlarm(alarm, userSeq);
   }
 
   /**
