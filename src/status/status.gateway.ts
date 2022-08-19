@@ -81,7 +81,7 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
    *
    * @param client 연결된 client socket
    */
-  @OnEvent('status:logout')
+  @OnEvent('event:logout')
   async onLogout(userSeq: number) {
     this.logger.debug(`Client logout: ${userSeq}`);
 
@@ -101,7 +101,7 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
    *
    * @param client 연결된 client socket
    */
-  @OnEvent('status:gameStart')
+  @OnEvent('event:gameStart')
   async onGameStart(userSeq: number) {
     this.logger.debug(`Client start game: ${userSeq}`);
 
@@ -121,7 +121,7 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
    *
    * @param client 연결된 client socket
    */
-  @OnEvent('status:gameEnd')
+  @OnEvent('event:gameEnd')
   async onGameFinish(userSeq: number) {
     this.logger.debug(`Client finish game: ${userSeq}`);
 

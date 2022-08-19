@@ -72,7 +72,7 @@ export class AuthController {
     @Req() req: any,
   ) {
     this.authService.setIsLogin(user, 'N');
-    this.eventRunner.emit('status:logout', user.userSeq);
+    this.eventRunner.emit('event:logout', user.userSeq);
     req.logout((err) => {
       if (err) {
         this.logger.error(err);
