@@ -71,20 +71,13 @@ export class StatusService {
   }
 
   /**
-   * 접속을 죵료하였을 때
-   * client의 정보와 현재의 상태를 offline으로 저장한다.
+   * 접속을 종료하였을 때
+   * database 내 client의 현재의 상태를 offline으로 저장한다.
    *
    * @param client 접속된 client socket
    */
-  async removeClient(client: Socket) {
-    this.logger.debug(`remove Client: ${client}`);
-
-    // userSeq 저장
-    const userSeq: number = await this.cacheManager.get(client.id);
-
-    // cache에서 삭제
-    this.cacheManager.del(client.id);
-    this.cacheManager.del(String(userSeq));
+  async logoutUser(userSeq: number) {
+    this.logger.debug(`remove Client: ${userSeq}`);
 
     await this.statusRepository.updateUserStatus(userSeq, UserStatus.USST20);
   }

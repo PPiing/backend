@@ -5,6 +5,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CheckLogin } from 'src/guards/check-login.guard';
 import { FtGuard } from 'src/guards/ft.guard';
 import { UserDto } from 'src/user/dto/user.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AuthService } from './auth.service';
 import { User } from './user.decorator';
 
@@ -15,6 +16,7 @@ export class AuthController {
 
   constructor(
     private readonly authService: AuthService,
+    private eventRunner: EventEmitter2,
   ) {}
 
   @ApiOperation({
@@ -69,6 +71,7 @@ export class AuthController {
     @Req() req: any,
   ) {
     this.authService.setIsLogin(user, 'N');
+    this.eventRunner.emit('event:logout', user.userSeq);
     req.logout((err) => {
       if (err) {
         this.logger.error(err);

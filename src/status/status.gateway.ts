@@ -74,15 +74,25 @@ export class StatusGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     const { userSeq } = client.request.user;
     await this.statusService.onlineUserRemove(client, userSeq);
+  }
+
+  /**
+   * 로그아웃
+   *
+   * @param client 연결된 client socket
+   */
+  @OnEvent('event:logout')
+  async onLogout(userSeq: number) {
+    this.logger.debug(`Client logout: ${userSeq}`);
 
     const friendsList: string[] = await this.statusService.getFriends(userSeq);
-    client.to(friendsList).emit('status_update', {
+    this.server.to(friendsList).emit('status_update', {
       userSeq,
       status: UserStatus.USST20,
     });
 
     // 서버에 저장되어 있는 자신의 상태를 업데이트
-    await this.statusService.removeClient(client);
+    await this.statusService.logoutUser(userSeq);
   }
 
   /**
