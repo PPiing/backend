@@ -11,13 +11,11 @@ export default class UserStatusRepository extends Repository<User> {
    * @param status
    */
   async updateUserStatus(userSeq: number, status: UserStatus): Promise<void> {
-    const result = await this.findOne({
-      userSeq,
-    });
+    const result = await this.findOne(userSeq);
     if (result === null || result === undefined) {
       return;
     }
     result.status = status;
-    this.save(result);
+    await this.save(result);
   }
 }

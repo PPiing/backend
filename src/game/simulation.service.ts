@@ -39,8 +39,8 @@ export class SimulationService {
           if (isReady === true) inGameData.status = GameStatus.Playing;
           if (inGameData.status === GameStatus.Playing) {
             this.eventRunner.emit('game:start', roomId);
-            this.eventRunner.emit('event:gameStart', metaData.playerBlue);
-            this.eventRunner.emit('event:gameStart', metaData.playerRed);
+            this.eventRunner.emit('event:gameStart', metaData.playerBlue.userSeq);
+            this.eventRunner.emit('event:gameStart', metaData.playerRed.userSeq);
           }
           break;
         }
@@ -72,8 +72,8 @@ export class SimulationService {
         }
         case GameStatus.End: {
           this.eventRunner.emit('game:end', { metaData, inGameData });
-          this.eventRunner.emit('event:gameEnd', metaData.playerBlue);
-          this.eventRunner.emit('event:gameEnd', metaData.playerRed);
+          this.eventRunner.emit('event:gameEnd', metaData.playerBlue.userSeq);
+          this.eventRunner.emit('event:gameEnd', metaData.playerRed.userSeq);
           inGameData.status = GameStatus.Ending;
           break;
         }

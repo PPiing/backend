@@ -18,6 +18,23 @@ export class FriendsRepository extends Repository<Friends> {
     return friend;
   }
 
+  /**
+   * 모든 친구의 userSeq 배열 값을 반환합니다.
+   *
+   * @param userSeq
+   * @returns userSeq 배열
+   */
+  async findFriends(userSeq: number): Promise<number[]> {
+    const friendsList = await this.find({
+      where: {
+        followerSeq: userSeq,
+        isBlocked: false,
+        status: RelationStatus.FRST10,
+      },
+    });
+    return friendsList.map((friend) => friend.followeeSeq);
+  }
+
   async getFriends(userSeq: number): Promise<number[]> {
     const friends = await this.find({
       where: {
