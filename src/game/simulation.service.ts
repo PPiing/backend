@@ -23,7 +23,12 @@ export class SimulationService {
   ) {}
 
   findCurrentGame() {
-    return this.games;
+    const ret: GameData[] = [];
+    this.games.forEach((value, key, map) => {
+      ret.push(value);
+    });
+    console.log('🚀 ~ file: simulation.service.ts ~ line 27 ~ SimulationService ~ findCurrentGame ~ ret', ret);
+    return ret;
   }
 
   addInterval(roomId: string, gameData:GameData, milliseconds: number) {
