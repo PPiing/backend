@@ -36,6 +36,23 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
     this.save(newChatEvent);
   }
 
+  async getBannedList(where: number): Promise<ChatEventResultDto[]> {
+    const results = await this.find({
+      where: {
+        chatSeq: where,
+      }
+    });
+    return results.map(result => ({
+      eventSeq: result.eventSeq,
+      eventType: result.eventType,
+      fromWho: result.fromWho,
+      toWho: result.toWho,
+      chatSeq: result.chatSeq,
+      createdAt: result.createdAt,
+      expiredAt: result.expiredAt,
+    }));
+  }
+
   /**
    * 채팅 이벤트를 조회합니다. 어느 방에서 누가 당했는지를 조건으로 조회하며 무효처리된 이벤트는 조회하지 않습니다.
    *

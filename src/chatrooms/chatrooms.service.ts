@@ -604,12 +604,11 @@ export default class ChatroomsService implements OnModuleInit {
   }
 
   async bannedUserList(chatSeq: number): Promise<number[]> {
-    const parti = await this.chatParticipantRepository.getChatParticipantsByRoomid(chatSeq);
-    const bannedCheckList = await Promise.all(parti.map((p) => this.isBanned(p.userSeq, chatSeq)));
+    const banned = await this.chatEventRepository.getBannedList(chatSeq);
     const result = [];
-    for (let index = 0; index < parti.length; index += 1) {
-      if (bannedCheckList[index]) {
-        result.push(parti[index].userSeq);
+    for (let index = 0; index < banned.length; index += 1) {
+      if (banned[index].eventType === EventType.EVST20) {
+        result.push(banned[index].toWho);
       }
     }
     return result;
