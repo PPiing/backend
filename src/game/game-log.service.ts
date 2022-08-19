@@ -32,7 +32,9 @@ export class GameLogService {
 
   async saveFinishedGame(game: GameData) {
     const { metaData, inGameData } = game;
-    if (metaData?.gameLogSeq && inGameData?.status === GameStatus.End) {
+    this.logger.debug('saveFinishedGame');
+    if (metaData?.gameLogSeq && (
+      inGameData?.status === GameStatus.End || inGameData?.status === GameStatus.Ending)) {
       const result = await this.gameLogRepository.saveUpdatedGame(metaData, inGameData);
       return result;
     }

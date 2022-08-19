@@ -68,6 +68,7 @@ export class GameLogRepository extends Repository<GameLog> {
   }
 
   async saveUpdatedGame(metaData: MetaData, inGameData: InGameData) {
+    this.logger.debug('saveUpdatedGame', inGameData);
     const result = await this.update(metaData.gameLogSeq, {
       winnerSeq: inGameData.winnerSeq,
       blueScore: inGameData.scoreBlue,
