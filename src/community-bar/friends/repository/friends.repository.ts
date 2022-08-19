@@ -146,7 +146,7 @@ export class FriendsRepository extends Repository<Friends> {
     } else {
       // 내가 친구를 차단하면 친구에겐 내가 안보이게 됨(친구에서 나 차단아님)
       friend.isBlocked = true;
-      friend.status = RelationStatus.FRST30;
+      // friend.status = RelationStatus.FRST30;
       // const another = await this.findFriend(userSeq, target, RelationStatus.FRST10);
       // another.status = RelationStatus.FRST40;
       await this.save(friend);
@@ -160,7 +160,7 @@ export class FriendsRepository extends Repository<Friends> {
         followerSeq: userSeq,
         followeeSeq: target,
         isBlocked: true,
-        status: RelationStatus.FRST30,
+        // status: RelationStatus.FRST30,
       },
     });
     if (friend === undefined) {
@@ -186,11 +186,10 @@ export class FriendsRepository extends Repository<Friends> {
       where: {
         followerSeq: target,
         isBlocked: true,
-        status: RelationStatus.FRST30,
+        // status: RelationStatus.FRST30,
       },
     });
     const blocklist = friendsList.map((user) => user.followeeSeq);
-    console.log('skim test: ', blocklist);
     return blocklist;
   }
 }
