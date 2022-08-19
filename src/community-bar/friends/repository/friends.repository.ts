@@ -28,7 +28,6 @@ export class FriendsRepository extends Repository<Friends> {
     const friendsList = await this.find({
       where: {
         followerSeq: userSeq,
-        isBlocked: false,
         status: RelationStatus.FRST10,
       },
     });
@@ -40,21 +39,20 @@ export class FriendsRepository extends Repository<Friends> {
       where: {
         followerSeq: userSeq,
         status: RelationStatus.FRST10,
-        isBlocked: false,
       },
     });
     return friends.map((friend) => friend.followeeSeq);
   }
 
   async requestFriend(userSeq: number, target: number) {
-    const check = await this.findFriend(userSeq, target, RelationStatus.FRST30);
-    if (check) {
-      throw new Error('해당 친구에게 차단당한 상태입니다');
-    }
-    const youCheck = await this.findFriend(target, userSeq, RelationStatus.FRST30);
-    if (youCheck) {
-      throw new Error('해당 친구를 차단된 상태입니다');
-    }
+    // const check = await this.findFriend(userSeq, target, RelationStatus.FRST30);
+    // if (check) {
+    //   throw new Error('해당 친구에게 차단당한 상태입니다');
+    // }
+    // const youCheck = await this.findFriend(target, userSeq, RelationStatus.FRST30);
+    // if (youCheck) {
+    //   throw new Error('해당 친구를 차단된 상태입니다');
+    // }
     const friend = new Friends();
     friend.followerSeq = userSeq;
     friend.followeeSeq = target;
@@ -85,9 +83,9 @@ export class FriendsRepository extends Repository<Friends> {
     if (!friend) {
       throw new BadRequestException('친구 요청이 없습니다.');
     }
-    friend.status = RelationStatus.FRST20;
-
-    await this.save(friend);
+    // friend.status = RelationStatus.FRST20;
+    await this.delete(friend);
+    // await this.save(friend);
   }
 
   async removeFriend(userSeq: number, target: number) {
@@ -95,15 +93,18 @@ export class FriendsRepository extends Repository<Friends> {
     if (!friend) {
       throw new BadRequestException('친구가 없습니다.');
     }
+    await this.delete(friend);
+
     const me = await this.findFriend(target, userSeq, RelationStatus.FRST10);
     if (!me) {
       throw new BadRequestException('나에게 친구가 없습니다.');
     }
-    friend.status = RelationStatus.FRST40;
-    me.status = RelationStatus.FRST40;
+    await this.delete(me);
+    // friend.status = RelationStatus.FRST40;
+    // me.status = RelationStatus.FRST40;
 
-    await this.save(friend);
-    await this.save(me);
+    // await this.save(friend);
+    // await this.save(me);
   }
 
   async getRelation(userSeq: number, target: number) : Promise<ProfileRelation | undefined> {
@@ -146,10 +147,10 @@ export class FriendsRepository extends Repository<Friends> {
       // 내가 친구를 차단하면 친구에겐 내가 안보이게 됨(친구에서 나 차단아님)
       friend.isBlocked = true;
       friend.status = RelationStatus.FRST30;
-      const another = await this.findFriend(userSeq, target, RelationStatus.FRST10);
-      another.status = RelationStatus.FRST40;
+      // const another = await this.findFriend(userSeq, target, RelationStatus.FRST10);
+      // another.status = RelationStatus.FRST40;
       await this.save(friend);
-      await this.save(another);
+      // await this.save(another);
     }
   }
 
@@ -165,9 +166,18 @@ export class FriendsRepository extends Repository<Friends> {
     if (friend === undefined) {
       throw new BadRequestException(`${userSeq} 와 ${target} 은 block 상태가 아닙니다.`);
     } else {
-      friend.isBlocked = false;
-      friend.status = RelationStatus.FRST40;
-      await this.save(friend);
+      const another = await this.findOne({
+        where: {
+          followerSeq: target,
+          followeeSeq: userSeq,
+        },
+      });
+      if (another) {
+        await this.delete(another);
+        // await this.save(another);
+      }
+      await this.delete(friend);
+      // await this.save(friend);
     }
   }
 
@@ -180,6 +190,7 @@ export class FriendsRepository extends Repository<Friends> {
       },
     });
     const blocklist = friendsList.map((user) => user.followeeSeq);
+    console.log('skim test: ', blocklist);
     return blocklist;
   }
 }
