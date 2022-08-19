@@ -1,5 +1,5 @@
 import {
-  Controller, HttpCode, Param, Post, Put, Req, UseGuards,
+  Controller, Get, HttpCode, Param, Post, Put, Req, UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { AlarmService } from 'src/alarm/alarm.service';
@@ -8,17 +8,15 @@ import AlarmCode from 'src/enums/mastercode/alarm-code.enum';
 import AlarmType from 'src/enums/mastercode/alarm-type.enum';
 import { CheckLogin } from 'src/guards/check-login.guard';
 import { UserDto } from 'src/user/dto/user.dto';
+import { GameData } from './dto/game-data';
 import { GameService } from './game.service';
 
 @Controller('game')
 export default class GameController {
-// TODO(jinbekim)
   constructor(
     private readonly gameService: GameService,
     private readonly alarmService: AlarmService,
-  ) {
-
-  }
+  ) {}
 
   /**
    * 같이 게임할 유저의 시퀀스를 전달 받고, 해당 유저와 클라이언트의 정보로 알람을 생성함
@@ -57,5 +55,21 @@ export default class GameController {
   @Put('reject/:alarmSeq')
   async rejectInvite(@Param('alarmSeq') alarmSeq: number, @User() user: UserDto) {
     await this.alarmService.deleteAlarm(alarmSeq, user.userSeq);
+  }
+
+  @ApiOperation({ summary: '진행중인 게임 리스트', description: '현재 진행중인 게임 리스트를 반환합니다.' })
+  @ApiResponse({ status: 200, description: '정상 작동' })
+  @ApiResponse({ status: 400, description: '비정상 작동' })
+  @Get('current')
+  async findGameList() {
+    return this.gameService.findCurrentGame();
+  }
+
+  @ApiOperation({ summary: '유저시퀀스로 진행중인 게임데이터 요청', description: '현재 진행중인 게임 데이터를 반환합니다.' })
+  @ApiResponse({ status: 200, description: '정상 작동' })
+  @ApiResponse({ status: 400, description: '비정상 작동' })
+  @Get('current/user/:userSeq')
+  findCurrentGameByUserSeq(@Param('userSeq') userSeq: number): GameData {
+    return this.gameService.findCurrentGameByUserSeq(userSeq);
   }
 }

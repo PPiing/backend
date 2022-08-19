@@ -2,7 +2,6 @@ import {
   Controller, Get, Logger, Param, Query,
 } from '@nestjs/common';
 import GameLog from 'src/entities/game-log.entity';
-import { GameData } from './dto/game-data';
 import { GameLogService } from './game-log.service';
 import { GameService } from './game.service';
 
@@ -43,17 +42,9 @@ export class GameLogController {
     return ret;
   }
 
-  // NOTE: cannot
-  @Get('current/user/:userSeq')
-  findCurrentGame(@Param('userSeq') userSeq: number): GameData {
-    return this.gameService.findCurrentGame(userSeq);
-  }
-
   @Get('user/:userSeq')
   async findUserGameLog(@Param('userSeq') userSeq: number) : Promise<{ total: number, win: number }> {
     const ret = await this.gameLogService.findUserGameLog(userSeq);
     return ret;
   }
-
-  // NOTE: rank (mmr) 점수는 Rank 모듈에서?
 }
