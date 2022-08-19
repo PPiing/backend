@@ -3,8 +3,8 @@ import {
 } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Socket } from 'socket.io';
+import { FriendsRepository } from 'src/community-bar/friends/repository/friends.repository';
 import UserStatus from 'src/enums/mastercode/user-status.enum';
-import FriendsRepository from './repository/friends.repository';
 import UserStatusRepository from './repository/user-status.repository';
 
 @Injectable()
@@ -97,6 +97,7 @@ export class StatusService {
    */
   async updateStatus(userSeq: number, status: UserStatus) {
     this.logger.debug(`update Status: ${userSeq} , ${status}`);
+    console.log('🚀 ~ file: status.service.ts ~ line 100 ~ StatusService ~ updateStatus ~ userSeq', userSeq);
     // await repository의 updateStatus 호출
     await this.statusRepository.updateUserStatus(userSeq, status);
   }

@@ -12,7 +12,7 @@ export default class Friends {
   @Column({ default: false })
     isBlocked: boolean;
 
-  @Column()
+  @Column({ default: RelationStatus.FRST20 })
     status: RelationStatus;
 
   @ManyToOne(() => User, (user) => user.userSeq)

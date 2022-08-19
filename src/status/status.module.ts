@@ -1,9 +1,9 @@
 import { CacheModule, Module, forwardRef } from '@nestjs/common';
 import { AppModule } from 'src/app.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { FriendsRepository } from 'src/community-bar/friends/repository/friends.repository';
 import { StatusService } from './status.service';
 import { StatusGateway } from './status.gateway';
-import FriendsRepository from './repository/friends.repository';
 import UserStatusRepository from './repository/user-status.repository';
 
 @Module({
