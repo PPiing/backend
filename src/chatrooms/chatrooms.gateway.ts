@@ -120,11 +120,11 @@ export class ChatroomsGateway implements OnGatewayInit, OnGatewayConnection, OnG
     if (rooms.has(message.at.toString()) && name !== undefined) {
       if (muted === 0) {
         const seq = await this.chatroomsService.newChat(name, message.at, message.content);
-        const exceptUsers = await this.chatroomsService.getBlockedSocketIdList(
-          name,
-          message.at,
-          this.server,
-        );
+        // const exceptUsers = await this.chatroomsService.getBlockedSocketIdList(
+        //   name,
+        //   message.at,
+        //   this.server,
+        // );
         const data = {
           chatSeq: message.at,
           userIDs: [name],
@@ -132,7 +132,7 @@ export class ChatroomsGateway implements OnGatewayInit, OnGatewayConnection, OnG
           id: seq,
           nickname: nickName,
         };
-        this.server.to(message.at.toString()).except(exceptUsers).emit('room:chat', data);
+        this.server.to(message.at.toString()).emit('room:chat', data);
       } else {
         const data: ISocketSend = {
           chatSeq: message.at,
