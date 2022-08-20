@@ -161,7 +161,8 @@ export default class ChatroomsService implements OnModuleInit {
     let filteredChats: Array<MessageDataDto> = [];
     const cache: undefined | Array<MessageDataDto> = await this.cacheManager.get('chat');
     if (cache === undefined) {
-      const blockedUsers = await this.friendsRepository.blockedUsers(reqUserSeq);
+      // const blockedUsers = await this.friendsRepository.blockedUsers(reqUserSeq);
+      const blockedUsers = [];
       filteredChats = await this.messageRepository.getMessages(
         chatSeq,
         newMsgSeq,
