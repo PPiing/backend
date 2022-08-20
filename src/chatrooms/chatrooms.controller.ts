@@ -359,7 +359,8 @@ export default class ChatroomsController {
     this.logger.debug(`banUser: ${target} -> ${roomId} -> ${userSeq}`);
     await this.chatroomsService.checkUsers([target, userSeq]);
     await this.chatroomsService.checkRooms([roomId]);
-    if (await this.chatroomsService.isMaster(roomId, userSeq) === false) {
+    if (await this.chatroomsService.isMaster(roomId, userSeq) === false &&
+        await this.chatroomsService.isManager(roomId, userSeq) === false) {
       throw new BadRequestException('권한이 없습니다.');
     }
     if (target === userSeq) {
@@ -419,7 +420,8 @@ export default class ChatroomsController {
     this.logger.debug(`unbanUser: ${target} -> ${roomId} -> ${userSeq}`);
     await this.chatroomsService.checkUsers([target, userSeq]);
     await this.chatroomsService.checkRooms([roomId]);
-    if (await this.chatroomsService.isMaster(roomId, userSeq) === false) {
+    if (await this.chatroomsService.isMaster(roomId, userSeq) === false &&
+        await this.chatroomsService.isManager(roomId, userSeq) === false) {
       throw new BadRequestException('권한이 없습니다.');
     }
     if (target === userSeq) {
