@@ -170,6 +170,7 @@ export class FriendsRepository extends Repository<Friends> {
         where: {
           followerSeq: target,
           followeeSeq: userSeq,
+          isBlocked: false,
         },
       });
       if (another) {
