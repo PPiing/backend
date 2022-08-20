@@ -43,7 +43,7 @@ export default class MessageRepository extends Repository<Message> {
     .limit(limit)
     .orderBy("message.msgSeq", "DESC");
     if (blockedUsers.length > 0) {
-      query.andWhere('message.userSeq NOT IN (:blockedUsers)', {
+      query.andWhere('message.userSeq NOT IN (:...blockedUsers)', {
         blockedUsers,
       });
     }
